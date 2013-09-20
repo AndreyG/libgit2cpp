@@ -2,8 +2,10 @@
 
 #include <string>
 #include <cassert>
+#include <memory>
 
 #include "commit.h"
+#include "revwalker.h"
 
 namespace git
 {
@@ -41,9 +43,11 @@ namespace git
             return git_revparse_single(&out, repo_, spec);
         }
 
-        int revwalk_new(git_revwalk *& out) const
+        std::shared_ptr<RevWalker> rev_walker() const
         {
-            return git_revwalk_new(&out, repo_);
+            git_revwalk * out;
+            git_revwalk_new(&out, repo_);
+            return std::make_shared<RevWalker>(out);
         }
         
         explicit Repository(std::string const & dir)

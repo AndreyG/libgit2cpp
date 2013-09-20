@@ -35,9 +35,9 @@ static void usage(const char *message, const char *arg)
 
 struct log_state 
 {
-	boost::optional<git::Repository> repo;
 	std::string repodir = ".";
-    git_revwalk *walker = nullptr;
+	boost::optional<git::Repository> repo;
+    std::shared_ptr<git::RevWalker>  walker;
     int hide = 0;
     int sorting = GIT_SORT_TIME;
 };
@@ -49,14 +49,14 @@ static void set_sorting(struct log_state *s, unsigned int sort_mode)
 	}
 
 	if (!s->walker)
-		s->repo->revwalk_new(s->walker);
+		s->walker = s->repo->rev_walker();
 
 	if (sort_mode == GIT_SORT_REVERSE)
 		s->sorting = s->sorting ^ GIT_SORT_REVERSE;
 	else
 		s->sorting = sort_mode | (s->sorting & GIT_SORT_REVERSE);
 
-	git_revwalk_sorting(s->walker, s->sorting);
+	s->walker->sort(s->sorting);
 }
 
 static void push_rev(struct log_state *s, git_object *obj, int hide)
@@ -64,19 +64,16 @@ static void push_rev(struct log_state *s, git_object *obj, int hide)
 	hide = s->hide ^ hide;
 
 	if (!s->walker) {
-		s->repo->revwalk_new(s->walker);
-		git_revwalk_sorting(s->walker, s->sorting);
+		s->walker = s->repo->rev_walker();
+		s->walker->sort(s->sorting);
 	}
 
 	if (!obj)
-		check(git_revwalk_push_head(s->walker),
-			"Could not find repository HEAD", NULL);
+		s->walker->push_head();
 	else if (hide)
-		check(git_revwalk_hide(s->walker, git_object_id(obj)),
-			"Reference does not refer to a commit", NULL);
+		s->walker->hide(git_object_id(obj));
 	else
-		check(git_revwalk_push(s->walker, git_object_id(obj)),
-			"Reference does not refer to a commit", NULL);
+		s->walker->push(git_object_id(obj));
 
 	git_object_free(obj);
 }
@@ -295,7 +292,6 @@ int parse_options   ( int argc, char *argv[]
 
 int main(int argc, char *argv[])
 {
-	int printed = 0, parents;
 	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
 	git_oid oid;
 
@@ -318,12 +314,14 @@ int main(int argc, char *argv[])
 	diffopts.pathspec.count   = argc - parsed_options_num;
     git::Pathspec ps(diffopts.pathspec);
 
-	printed = count = 0;
+	count = 0;
+    int printed = 0;
 
-	for (; !git_revwalk_next(&oid, s.walker); ) {
+	while (!s.walker->next(oid)) 
+    {
 		git::Commit commit = s.repo->commit_lookup(oid);
 
-		parents = commit.parents_num();
+		int parents = commit.parents_num();
 		if (parents < opt.min_parents)
 			continue;
 		if (opt.max_parents > 0 && parents > opt.max_parents)
@@ -370,7 +368,6 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	git_revwalk_free(s.walker);
 	git_threads_shutdown();
 
 	return 0;
