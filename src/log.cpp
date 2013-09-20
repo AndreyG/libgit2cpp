@@ -232,23 +232,15 @@ struct log_options {
 	char *committer;
 };
 
-int main(int argc, char *argv[])
+int parse_options   ( int argc, char *argv[]
+                    , log_state & s
+                    , log_options & opt
+                    , int count
+                    )
 {
-	int i, count = 0, printed = 0, parents;
-	char *a;
-	log_state s;
-	struct log_options opt;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_oid oid;
-
-	git_threads_init();
-
-	memset(&opt, 0, sizeof(opt));
-	opt.max_parents = -1;
- 	opt.limit = -1;
-
-	for (i = 1; i < argc; ++i) {
-		a = argv[i];
+    int i = 1;
+	for (; i < argc; ++i) {
+		char* a = argv[i];
 
 		if (a[0] != '-') {
 			if (!add_revision(&s, a))
@@ -298,11 +290,32 @@ int main(int argc, char *argv[])
 			usage("Unsupported argument", a);
 	}
 
+    return i;
+}
+
+int main(int argc, char *argv[])
+{
+	int printed = 0, parents;
+	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
+	git_oid oid;
+
+	git_threads_init();
+
+	log_options opt;
+	memset(&opt, 0, sizeof(opt));
+	opt.max_parents = -1;
+ 	opt.limit = -1;
+	
+    log_state s;
+
+    int count = 0;
+    int parsed_options_num = parse_options(argc, argv, s, opt, count);
+
 	if (!count)
 		add_revision(&s, NULL);
 
-	diffopts.pathspec.strings = &argv[i];
-	diffopts.pathspec.count   = argc - i;
+	diffopts.pathspec.strings = &argv[parsed_options_num];
+	diffopts.pathspec.count   = argc - parsed_options_num;
     git::Pathspec ps(diffopts.pathspec);
 
 	printed = count = 0;
@@ -326,7 +339,7 @@ int main(int argc, char *argv[])
 			} else if (parents == 1) {
 				unmatched = match_with_parent(commit, 0, diffopts) ? 0 : 1;
 			} else {
-				for (i = 0; i < parents; ++i) {
+				for (int i = 0; i < parents; ++i) {
 					if (match_with_parent(commit, i, diffopts))
 						unmatched--;
 				}
