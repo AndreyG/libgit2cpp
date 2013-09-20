@@ -36,9 +36,13 @@ namespace git
             assert(res == 0);
         }
 
-        int next(git_oid & oid) const
+        boost::optional<git_oid> next() const
         {
-            return git_revwalk_next(&oid, walker_);
+            git_oid oid;
+            if (git_revwalk_next(&oid, walker_) == 0)
+                return oid;
+            else
+                return boost::none;
         }
 
         RevWalker               (RevWalker const &) = delete;

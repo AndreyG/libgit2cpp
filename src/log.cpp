@@ -12,17 +12,6 @@ extern "C"
 #include "git/repo.h"
 #include "git/pathspec.h"
 
-static void check(int error, const char *message, const char *arg)
-{
-	if (!error)
-		return;
-	if (arg)
-		fprintf(stderr, "%s '%s' (%d)\n", message, arg, error);
-	else
-		fprintf(stderr, "%s (%d)\n", message, error);
-	exit(1);
-}
-
 static void usage(const char *message, const char *arg)
 {
 	if (message && arg)
@@ -292,11 +281,6 @@ int parse_options   ( int argc, char *argv[]
 
 int main(int argc, char *argv[])
 {
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_oid oid;
-
-	git_threads_init();
-
 	log_options opt;
 	memset(&opt, 0, sizeof(opt));
 	opt.max_parents = -1;
@@ -307,9 +291,12 @@ int main(int argc, char *argv[])
     int count = 0;
     int parsed_options_num = parse_options(argc, argv, s, opt, count);
 
+	git_threads_init();
+
 	if (!count)
 		add_revision(&s, NULL);
 
+	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
 	diffopts.pathspec.strings = &argv[parsed_options_num];
 	diffopts.pathspec.count   = argc - parsed_options_num;
     git::Pathspec ps(diffopts.pathspec);
@@ -317,9 +304,9 @@ int main(int argc, char *argv[])
 	count = 0;
     int printed = 0;
 
-	while (!s.walker->next(oid)) 
+	while (auto oid = s.walker->next())
     {
-		git::Commit commit = s.repo->commit_lookup(oid);
+		git::Commit commit = s.repo->commit_lookup(*oid);
 
 		int parents = commit.parents_num();
 		if (parents < opt.min_parents)
@@ -327,17 +314,23 @@ int main(int argc, char *argv[])
 		if (opt.max_parents > 0 && parents > opt.max_parents)
 			continue;
 
-		if (diffopts.pathspec.count > 0) {
+		if (diffopts.pathspec.count > 0) 
+        {
 			int unmatched = parents;
 
-			if (parents == 0) {
-				git::Tree tree = commit.tree();
-				if (tree.pathspec_match(GIT_PATHSPEC_NO_MATCH_ERROR, ps) != 0)
+			if (parents == 0) 
+            {
+				if (commit.tree().pathspec_match(GIT_PATHSPEC_NO_MATCH_ERROR, ps) != 0)
 					unmatched = 1;
-			} else if (parents == 1) {
+			} 
+            else if (parents == 1) 
+            {
 				unmatched = match_with_parent(commit, 0, diffopts) ? 0 : 1;
-			} else {
-				for (int i = 0; i < parents; ++i) {
+			} 
+            else 
+            {
+				for (int i = 0; i < parents; ++i) 
+                {
 					if (match_with_parent(commit, i, diffopts))
 						unmatched--;
 				}
@@ -355,12 +348,14 @@ int main(int argc, char *argv[])
 
 		print_commit(commit);
 
-		if (opt.show_diff) {
+		if (opt.show_diff) 
+        {
 			if (parents > 1)
 				continue;
             git::Tree b = commit.tree();
             git::Tree a;
-			if (parents == 1) {
+			if (parents == 1) 
+            {
                 a = commit.parent(0).tree();
 			}
 
