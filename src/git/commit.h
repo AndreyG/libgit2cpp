@@ -1,5 +1,10 @@
 #pragma once
 
+extern "C"
+{
+#include <git2/commit.h>
+}
+
 #include "tree.h"
 
 namespace git
@@ -9,14 +14,16 @@ namespace git
         Commit parent(size_t i) const
         {
             git_commit * parent;
-            assert(git_commit_parent(&parent, commit_, i) == 0);
+            auto op_res = git_commit_parent(&parent, commit_, i); 
+            assert(op_res == 0);
             return Commit(parent);
         }
 
         Tree tree() const
         {
             git_tree * tree;
-            assert(git_commit_tree(&tree, commit_) == 0);
+            auto op_res = git_commit_tree(&tree, commit_); 
+            assert(op_res == 0);
             return Tree(tree);
         }
 

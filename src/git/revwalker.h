@@ -1,5 +1,12 @@
 #pragma once
 
+#include <boost/optional.hpp>
+
+extern "C"
+{
+#include <git2/revwalk.h>
+}
+
 namespace git
 {
     struct RevWalker

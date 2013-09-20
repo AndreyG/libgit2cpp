@@ -4,9 +4,9 @@
 
 #include <boost/optional.hpp>
 
-extern "C" 
+extern "C"
 {
-    #include <git2.h>
+#include <git2/threads.h>
 }
 
 #include "git/repo.h"

@@ -1,5 +1,10 @@
 #pragma once
 
+extern "C"
+{
+#include <git2/diff.h>
+}
+
 namespace git
 {
     struct DiffList
@@ -11,7 +16,8 @@ namespace git
 
         void print_patch(git_diff_data_cb cb) const
         {
-            assert(git_diff_print_patch(diff_list_, cb, NULL) == 0);
+            auto res = git_diff_print_patch(diff_list_, cb, NULL);  
+            assert(res == 0);
         }
 
         explicit DiffList(git_diff_list * diff_list)

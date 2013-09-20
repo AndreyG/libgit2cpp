@@ -4,6 +4,12 @@
 #include <cassert>
 #include <memory>
 
+extern "C"
+{
+#include <git2/revparse.h>
+#include <git2/repository.h>
+}
+
 #include "commit.h"
 #include "revwalker.h"
 
@@ -28,10 +34,7 @@ namespace git
             return git_object_lookup(&object, repo_, &oid, type);
         }
 
-        int merge_base(git_oid & out, git_oid const * one, git_oid const * two) const
-        {
-            return git_merge_base(&out, repo_, one, two);
-        }
+        int merge_base(git_oid & out, git_oid const * one, git_oid const * two) const;
 
         int revparse(git_revspec & out, const char * spec) const
         {
@@ -49,10 +52,13 @@ namespace git
             git_revwalk_new(&out, repo_);
             return std::make_shared<RevWalker>(out);
         }
+
+        std::vector<std::string> branches() const;
         
         explicit Repository(std::string const & dir)
         {
-            assert(git_repository_open_ext(&repo_, dir.c_str(), 0, NULL) == 0);
+            auto res = git_repository_open_ext(&repo_, dir.c_str(), 0, NULL); 
+            assert(res == 0);
         }
 
         Repository              (Repository const &) = delete;
