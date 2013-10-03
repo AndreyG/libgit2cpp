@@ -1,5 +1,3 @@
-#include "repo.h"
-
 extern "C"
 {
 #include <git2/repository.h>
@@ -9,7 +7,8 @@ extern "C"
 #include <git2/errors.h>
 }
 
-#include "error.h"
+#include "git2cpp/repo.h"
+#include "git2cpp/error.h"
 
 namespace git
 {

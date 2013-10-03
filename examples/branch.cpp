@@ -1,4 +1,4 @@
-#include "git/repo.h"
+#include "git2cpp/repo.h"
 
 int main()
 {

@@ -3,8 +3,8 @@
 #include <string.h>
 #include <assert.h>
 
-#include "git/repo.h"
-#include "git/threads_initializer.h"
+#include "git2cpp/repo.h"
+#include "git2cpp/threads_initializer.h"
 
 enum print_options {
 	SKIP = 1,

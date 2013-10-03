@@ -4,9 +4,9 @@
 
 #include <boost/optional.hpp>
 
-#include "git/repo.h"
-#include "git/pathspec.h"
-#include "git/threads_initializer.h"
+#include "git2cpp/repo.h"
+#include "git2cpp/pathspec.h"
+#include "git2cpp/threads_initializer.h"
 
 static void usage(const char *message, const char *arg)
 {

@@ -1,5 +1,3 @@
-#include "index.h"
-
 #include <cassert>
 
 extern "C"
@@ -8,7 +6,8 @@ extern "C"
 #include <git2/index.h>
 }
 
-#include "error.h"
+#include "git2cpp/index.h"
+#include "git2cpp/error.h"
 
 namespace git
 {

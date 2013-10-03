@@ -5,8 +5,8 @@ extern "C"
 
 #include <cassert>
 
-#include "diff_list.h"
-#include "tree.h"
+#include "git2cpp/diff_list.h"
+#include "git2cpp/tree.h"
 
 namespace git
 {

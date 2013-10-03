@@ -1,4 +1,4 @@
-#include "threads_initializer.h"
+#include "git2cpp/threads_initializer.h"
 
 extern "C"
 {
