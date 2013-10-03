@@ -4,14 +4,15 @@
 #include <cassert>
 #include <memory>
 
+#include "commit.h"
+#include "revwalker.h"
+#include "index.h"
+
 extern "C"
 {
 #include <git2/revparse.h>
-#include <git2/repository.h>
+#include <git2/status.h>
 }
-
-#include "commit.h"
-#include "revwalker.h"
 
 namespace git
 {
@@ -36,15 +37,8 @@ namespace git
 
         int merge_base(git_oid & out, git_oid const * one, git_oid const * two) const;
 
-        int revparse(git_revspec & out, const char * spec) const
-        {
-            return git_revparse(&out, repo_, spec);
-        }
-
-        int revparse_single(git_object *& out, const char * spec) const
-        {
-            return git_revparse_single(&out, repo_, spec);
-        }
+        int revparse(git_revspec & out, const char * spec) const;
+        int revparse_single(git_object *& out, const char * spec) const;
 
         std::shared_ptr<RevWalker> rev_walker() const
         {
@@ -53,24 +47,21 @@ namespace git
             return std::make_shared<RevWalker>(out);
         }
 
+        git_status_t file_status(const char * filepath) const;
+
+        Index index() const;
+
         std::vector<std::string> branches() const;
         
-        explicit Repository(std::string const & dir)
-        {
-            auto res = git_repository_open_ext(&repo_, dir.c_str(), 0, NULL); 
-            assert(res == 0);
-        }
+        explicit Repository(std::string const & dir);
 
         Repository              (Repository const &) = delete;
         Repository& operator =  (Repository const &) = delete; 
 
-        ~Repository()
-        {
-            git_repository_free(repo_);
-        }
+        ~Repository();
 
     private:
-        git_repository * repo_;
+        struct git_repository * repo_;
     };
 }
 

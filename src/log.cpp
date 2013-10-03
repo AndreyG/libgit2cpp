@@ -69,7 +69,6 @@ static void push_rev(struct log_state *s, git_object *obj, int hide)
 
 static int add_revision(struct log_state *s, const char *revstr)
 {
-	git_revspec revs;
 	int hide = 0;
 
 	if (!s->repo) {
@@ -81,6 +80,7 @@ static int add_revision(struct log_state *s, const char *revstr)
 		return 0;
 	}
 
+	git_revspec revs;
 	if (*revstr == '^') {
 		revs.flags = GIT_REVPARSE_SINGLE;
 		hide = !hide;

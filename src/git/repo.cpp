@@ -2,10 +2,14 @@
 
 extern "C"
 {
+#include <git2/repository.h>
 #include <git2/branch.h>
 #include <git2/types.h>
 #include <git2/merge.h>
+#include <git2/errors.h>
 }
+
+#include "error.h"
 
 namespace git
 {
@@ -17,6 +21,48 @@ namespace git
             out->emplace_back(name);
             return 0;
         }
+    }
+
+    Repository::Repository(std::string const & dir)
+    {
+        auto res = git_repository_open_ext(&repo_, dir.c_str(), 0, NULL); 
+        assert(res == 0);
+    }
+
+    Repository::~Repository()
+    {
+        git_repository_free(repo_);
+    }
+
+    int Repository::revparse(git_revspec & out, const char * spec) const
+    {
+        return git_revparse(&out, repo_, spec);
+    }
+
+    int Repository::revparse_single(git_object *& out, const char * spec) const
+    {
+        return git_revparse_single(&out, repo_, spec);
+    }
+
+    Index Repository::index() const
+    {
+        return Index(repo_);
+    }
+
+    git_status_t Repository::file_status(const char * filepath) const
+    {
+        git_status_t res;
+        switch (git_status_file(reinterpret_cast<unsigned int *>(&res), repo_, filepath))
+        {
+        case GIT_ENOTFOUND:
+            throw file_not_found_error(filepath);
+        case GIT_EAMBIGUOUS:
+            throw ambiguous_path_error(filepath);
+        case -1:
+            throw unknown_file_status_error(filepath);
+        }
+
+        return res;
     }
 
     std::vector<std::string> Repository::branches() const
