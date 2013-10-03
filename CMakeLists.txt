@@ -9,6 +9,7 @@ set(lib_sources
     src/git/diff_list.cpp
     src/git/index.cpp
     src/git/repo.cpp
+    src/git/threads_initializer.cpp
 )
 
 add_library(libgit2cpp ${lib_sources})

@@ -4,6 +4,7 @@
 #include <assert.h>
 
 #include "git/repo.h"
+#include "git/threads_initializer.h"
 
 enum print_options {
 	SKIP = 1,
@@ -57,6 +58,8 @@ void print_usage(void)
 
 int main (int argc, char** argv)
 {
+    using namespace std::placeholders;
+
 	git_strarray array = {0};
 
 	int i = 1, options = 0;
@@ -93,21 +96,18 @@ int main (int argc, char** argv)
 		return 1;
 	}
 
-	git_threads_init();
-
 	init_array(&array, argc-i, argv+i);
+
+    git::ThreadsInitializer threads_initializer;
 
 	git::Repository repo(".");
 
-	git::Index index = repo.index();
-
     git::Index::matched_path_callback_t cb;
-    using namespace std::placeholders;
 	if (options&VERBOSE || options&SKIP) {
         cb = std::bind(&print_matched_cb, _1, _2, std::cref(repo), static_cast<print_options>(options)); 
 	}
 
-
+	git::Index index = repo.index();
 	if (options&UPDATE) {
 		index.update_all(array, cb);
 	} else {
@@ -115,8 +115,6 @@ int main (int argc, char** argv)
 	}
 
 	index.write();
-
-	git_threads_shutdown();
 
 	return 0;
 }

@@ -4,13 +4,9 @@
 
 #include <boost/optional.hpp>
 
-extern "C"
-{
-#include <git2/threads.h>
-}
-
 #include "git/repo.h"
 #include "git/pathspec.h"
+#include "git/threads_initializer.h"
 
 static void usage(const char *message, const char *arg)
 {
@@ -291,7 +287,7 @@ int main(int argc, char *argv[])
     int count = 0;
     int parsed_options_num = parse_options(argc, argv, s, opt, count);
 
-	git_threads_init();
+    git::ThreadsInitializer threads_initializer;
 
 	if (!count)
 		add_revision(&s, NULL);
@@ -362,8 +358,6 @@ int main(int argc, char *argv[])
 			git::diff(commit.owner(), a, b, diffopts).print_patch(print_diff);
 		}
 	}
-
-	git_threads_shutdown();
 
 	return 0;
 }
