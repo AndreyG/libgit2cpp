@@ -5,6 +5,14 @@
 
 namespace git
 {
+    struct repository_open_error : std::exception
+    {
+        virtual const char * what() const noexcept override 
+        {
+            return "Could not open repository";
+        }
+    };
+
     struct index_open_error : std::exception
     {
         virtual const char * what() const noexcept override 

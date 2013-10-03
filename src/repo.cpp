@@ -24,8 +24,8 @@ namespace git
 
     Repository::Repository(std::string const & dir)
     {
-        auto res = git_repository_open_ext(&repo_, dir.c_str(), 0, NULL); 
-        assert(res == 0);
+        if (git_repository_open_ext(&repo_, dir.c_str(), 0, NULL))
+            throw repository_open_error();
     }
 
     Repository::~Repository()
