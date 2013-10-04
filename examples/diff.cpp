@@ -42,18 +42,16 @@ const char *colors[] = {
 };
 
 static int printer(
-	const git_diff_delta *delta,
-	const git_diff_range *range,
+	const git_diff_delta *,
+	const git_diff_range *,
 	char usage,
 	const char *line,
-	size_t line_len,
-	void *data)
+	size_t,
+	int & last_color)
 {
-	int *last_color = reinterpret_cast<int *>(data), color = 0;
+	int color = 0;
 
-	(void)delta; (void)range; (void)line_len;
-
-	if (*last_color >= 0) {
+	if (last_color >= 0) {
 		switch (usage) {
 		case GIT_DIFF_LINE_ADDITION: color = 3; break;
 		case GIT_DIFF_LINE_DELETION: color = 2; break;
@@ -63,11 +61,11 @@ static int printer(
 		case GIT_DIFF_LINE_HUNK_HDR: color = 4; break;
 		default: color = 0;
 		}
-		if (color != *last_color) {
-			if (*last_color == 1 || color == 1)
+		if (color != last_color) {
+			if (last_color == 1 || color == 1)
 				fputs(colors[0], stdout);
 			fputs(colors[color], stdout);
-			*last_color = color;
+			last_color = color;
 		}
 	}
 
@@ -214,8 +212,6 @@ int main(int argc, char *argv[])
 			usage("Unknown arg", a);
 	}
 
-	/* open repo */
-
 	git::Repository repo(dir);
 
     git::Tree t1, t2;
@@ -234,7 +230,7 @@ int main(int argc, char *argv[])
 		fputs(colors[0], stdout);
 
     using namespace std::placeholders;
-    auto print_cb = std::bind(&printer, _1, _2, _3, _4, _5, &color);
+    auto print_cb = std::bind(&printer, _1, _2, _3, _4, _5, std::ref(color));
 
 	switch (format) {
 	case FORMAT_PATCH:
