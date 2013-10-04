@@ -4,6 +4,7 @@ extern "C"
 #include <git2/branch.h>
 #include <git2/types.h>
 #include <git2/merge.h>
+#include <git2/submodule.h>
 #include <git2/errors.h>
 }
 
@@ -32,6 +33,11 @@ namespace git
     Repository::~Repository()
     {
         git_repository_free(repo_);
+    }
+
+    bool Repository::is_bare() const
+    {
+        return git_repository_is_bare(repo_);
     }
 
     Commit Repository::commit_lookup(git_oid const * oid) const
@@ -103,6 +109,30 @@ namespace git
     int Repository::merge_base(git_oid & out, git_oid const * one, git_oid const * two) const
     {
         return git_merge_base(&out, repo_, one, two);
+    }
+
+    Reference Repository::head() const
+    {
+        git_reference * head;
+        auto error = git_repository_head(&head, repo_);
+        if (error == GIT_EUNBORNBRANCH)
+            throw non_existing_branch_error();
+        else if (error == GIT_ENOTFOUND)
+            throw missing_head_error();
+        else if (error)
+            throw unknown_get_current_branch_error();
+        else
+            return Reference(head);
+    }
+
+    Status Repository::status(git_status_options const & opts) const
+    {
+        return Status(repo_, opts);
+    }
+
+    int Repository::submodule_lookup(git_submodule *& sm, const char * name) const
+    {
+        return git_submodule_lookup(&sm, repo_, name);
     }
 
     Object revparse_single(Repository const & repo, const char * spec)

@@ -8,16 +8,16 @@
 #include "index.h"
 #include "odb.h"
 #include "revspec.h"
-
-extern "C"
-{
-#include <git2/status.h>
-}
+#include "status.h"
+#include "reference.h"
 
 struct git_repository;
 
 namespace git
 {
+    struct non_existing_branch_error    {};
+    struct missing_head_error           {};
+
     struct Repository
     {
         git_repository * ptr() { return repo_; }
@@ -36,7 +36,15 @@ namespace git
         Index   index() const;
         Odb     odb()   const;
 
+        Status status(git_status_options const &) const;
+
         std::vector<std::string> branches() const;
+
+        bool is_bare() const;
+
+        Reference head() const;
+
+        int submodule_lookup(git_submodule *&, const char * name) const;
         
         explicit Repository(std::string const & dir);
 

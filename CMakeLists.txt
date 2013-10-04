@@ -12,9 +12,11 @@ set(lib_sources
     src/object.cpp
     src/odb.cpp
     src/odb_object.cpp
+    src/reference.cpp
     src/repo.cpp
     src/revspec.cpp
     src/revwalker.cpp
+    src/status.cpp
     src/threads_initializer.cpp
 )
 
@@ -29,6 +31,7 @@ set(examples
     log
     rev-list
     showindex
+    status
 )
 
 foreach (example ${examples})

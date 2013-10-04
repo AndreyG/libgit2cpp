@@ -35,7 +35,7 @@ int main (int argc, char** argv)
 
 	for (size_t i = 0; i < ecount; ++i) 
     {
-		auto e = index.get(i);
+		auto e = index[i];
 
         char out[41];
         out[40] = '\0';

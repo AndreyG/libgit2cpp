@@ -204,5 +204,21 @@ namespace git
     private:
         std::string message_;
     };
+    
+    struct unknown_get_current_branch_error : std::exception
+    {
+        virtual const char * what() const noexcept override
+        {
+            return "failed to get current branch"; 
+        }
+    };
+
+    struct get_status_error : std::exception
+    {
+        virtual const char * what() const noexcept override
+        {
+            return "Could not get status"; 
+        }
+    };
 }
 

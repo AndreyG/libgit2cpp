@@ -41,7 +41,7 @@ namespace git
         return git_index_entrycount(index_);
     }
 
-    git_index_entry const * Index::get(size_t i) const
+    git_index_entry const * Index::operator[] (size_t i) const
     {
         return git_index_get_byindex(index_, i);
     }

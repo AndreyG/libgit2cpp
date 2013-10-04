@@ -17,7 +17,7 @@ namespace git
         ~Index();
 
         size_t entrycount() const;
-        git_index_entry const * get(size_t i) const;
+        git_index_entry const * operator[] (size_t i) const;
 
         typedef std::function<int (const char * path, const char * mathched_pathspec)> matched_path_callback_t;
         
