@@ -21,14 +21,15 @@ set(lib_sources
 add_library(git2cpp ${lib_sources})
 target_link_libraries(git2cpp git2)
 
-add_executable(add      examples/add.cpp)
-add_executable(log      examples/log.cpp)
-add_executable(branch   examples/branch.cpp)
-add_executable(cat-file examples/cat-file.cpp)
-add_executable(diff     examples/diff.cpp)
+set(examples
+    add
+    branch
+    cat-file
+    diff
+    log
+)
 
-target_link_libraries(add       git2cpp)
-target_link_libraries(log       git2cpp)
-target_link_libraries(branch    git2cpp)
-target_link_libraries(cat-file  git2cpp)
-target_link_libraries(diff      git2cpp)
+foreach (example ${examples})
+    add_executable(${example} examples/${example}.cpp)
+    target_link_libraries(${example} git2cpp)
+endforeach(example)
