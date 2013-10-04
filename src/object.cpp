@@ -47,5 +47,21 @@ namespace git
     DEFINE_METHOD_AS(tag,       TAG)
 
 #undef DEFINE_METHOD_AS
+
+    Tree Object::to_tree()
+    {
+        assert(type() == GIT_OBJ_TREE);
+        Tree res(reinterpret_cast<git_tree *>(obj_));
+        obj_ = nullptr;
+        return res;
+    }
+
+    Commit Object::to_commit()
+    {
+        assert(type() == GIT_OBJ_COMMIT);
+        Commit res(reinterpret_cast<git_commit *>(obj_));
+        obj_ = nullptr;
+        return res;
+    }
 }
 

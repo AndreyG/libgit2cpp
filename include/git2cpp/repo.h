@@ -11,14 +11,17 @@
 
 extern "C"
 {
-#include <git2/revparse.h>
 #include <git2/status.h>
 }
+
+struct git_repository;
 
 namespace git
 {
     struct Repository
     {
+        git_repository * ptr() { return repo_; }
+
         Commit commit_lookup(git_oid const * oid) const;
 
         int merge_base(git_oid & out, git_oid const * one, git_oid const * two) const;
@@ -43,7 +46,7 @@ namespace git
         ~Repository();
 
     private:
-        struct git_repository * repo_;
+        git_repository * repo_;
     };
 }
 

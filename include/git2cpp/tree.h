@@ -20,13 +20,13 @@ namespace git
             : Tree(nullptr)
         {}
 
-        Tree                (Tree && other)
+        Tree(Tree && other)
             : Tree(other.tree_)
         {
             other.tree_ = nullptr;
         }
 
-        Tree& operator =    (Tree && other)
+        Tree& operator =(Tree && other)
         {
             tree_ = other.tree_;
             other.tree_ = nullptr;
@@ -40,7 +40,16 @@ namespace git
             git_tree_free(tree_);
         }
 
-        friend DiffList diff(git_repository *, Tree const &, Tree const &, git_diff_options const & opts);
+        explicit operator bool() const { return tree_; }
+
+        friend DiffList diff            ( git_repository *
+                                        , Tree const &, Tree const &
+                                        , git_diff_options const & opts
+                                        );
+        friend DiffList diff_to_index   ( git_repository *
+                                        , Tree const &
+                                        , git_diff_options const & opts
+                                        );
 
     private:
         git_tree * tree_;

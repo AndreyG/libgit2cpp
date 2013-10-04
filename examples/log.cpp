@@ -180,15 +180,14 @@ static void print_commit(git::Commit const & commit)
 	printf("\n");
 }
 
-static int print_diff(
-	const git_diff_delta *delta,
-	const git_diff_range *range,
-	char usage,
+int print_diff(
+	const git_diff_delta *,
+	const git_diff_range *,
+	char ,
 	const char *line,
-	size_t line_len,
-	void *data)
+	size_t 
+	)
 {
-	(void)delta; (void)range; (void)usage; (void)line_len; (void)data;
 	fputs(line, stdout);
 	return 0;
 }

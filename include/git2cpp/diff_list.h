@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 extern "C"
 {
 #include <git2/diff.h>
@@ -14,10 +16,23 @@ namespace git
             return git_diff_num_deltas(diff_list_);
         }
 
-        void print_patch(git_diff_data_cb cb) const
+        typedef std::function<int   ( git_diff_delta const *
+                                    , git_diff_range const *
+                                    , char usage
+                                    , const char * line
+                                    , size_t line_len
+                                    ) > data_callback_t;
+
+        void print_patch    (data_callback_t cb) const;
+        void print_compact  (data_callback_t cb) const;
+        void print_raw      (data_callback_t cb) const;
+
+        void find_similar(git_diff_find_options & findopts)
         {
-            auto res = git_diff_print_patch(diff_list_, cb, NULL);  
+            git_diff_find_similar(diff_list_, &findopts);
         }
+
+        DiffList& merge(DiffList const & other);
 
         explicit DiffList(git_diff_list * diff_list)
             : diff_list_(diff_list)
@@ -40,6 +55,15 @@ namespace git
 
     struct Tree;
 
-    DiffList diff(git_repository * repo, Tree const & a, Tree const & b, git_diff_options const & opts);
+    DiffList diff           ( git_repository * repo
+                            , Tree const & a, Tree const & b
+                            , git_diff_options const & opts
+                            );
+    DiffList diff_to_index  ( git_repository * repo
+                            , Tree const & 
+                            , git_diff_options const & opts
+                            ); 
+
+    DiffList diff_index_to_workdir(git_repository * repo, git_diff_options const & opts);
 }
 
