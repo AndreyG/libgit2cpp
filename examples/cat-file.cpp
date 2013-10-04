@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
     git::ThreadsInitializer threads_initializer;
 
     git::Repository repo(dir);
-	git::Object obj = std::move(*repo.revparse_single(rev).single());
+	git::Object obj = revparse_single(repo, rev);
 
 	if (verbose) {
         std::cout 

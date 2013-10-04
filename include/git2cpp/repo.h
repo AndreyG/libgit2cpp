@@ -29,7 +29,7 @@ namespace git
         Revspec revparse        (const char * spec) const;
         Revspec revparse_single (const char * spec) const;
 
-        std::shared_ptr<struct RevWalker> rev_walker() const;
+        std::unique_ptr<struct RevWalker> rev_walker() const;
 
         git_status_t file_status(const char * filepath) const;
 
@@ -48,5 +48,7 @@ namespace git
     private:
         git_repository * repo_;
     };
+
+    Object revparse_single(Repository const & repo, const char * spec);
 }
 

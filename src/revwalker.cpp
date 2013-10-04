@@ -51,5 +51,14 @@ namespace git
         else
             return Commit();
     }
+
+    bool RevWalker::next(char * id_buffer) const
+    {
+        git_oid oid;
+        bool valid = (git_revwalk_next(&oid, walker_) == 0);
+        if (valid)
+            git_oid_fmt(id_buffer, &oid);
+        return valid;
+    }
 }
 

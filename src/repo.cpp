@@ -95,13 +95,18 @@ namespace git
         return res;
     }
 
-    std::shared_ptr<RevWalker> Repository::rev_walker() const
+    std::unique_ptr<RevWalker> Repository::rev_walker() const
     {
-        return std::make_shared<RevWalker>(repo_);
+        return std::unique_ptr<RevWalker>(new RevWalker(repo_));
     }
 
     int Repository::merge_base(git_oid & out, git_oid const * one, git_oid const * two) const
     {
         return git_merge_base(&out, repo_, one, two);
+    }
+
+    Object revparse_single(Repository const & repo, const char * spec)
+    {
+        return std::move(*repo.revparse_single(spec).single());
     }
 }

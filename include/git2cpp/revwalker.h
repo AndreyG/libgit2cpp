@@ -20,7 +20,8 @@ namespace git
         void hide(git_oid const * obj) const;
         void push(git_oid const * obj) const;
 
-        Commit next(Repository const & repo) const;
+        Commit  next(Repository const & repo)   const;
+        bool    next(char * id_buffer)          const;
 
         RevWalker               (RevWalker const &) = delete;
         RevWalker& operator =   (RevWalker const &) = delete;

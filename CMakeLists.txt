@@ -27,6 +27,7 @@ set(examples
     cat-file
     diff
     log
+    rev-list
 )
 
 foreach (example ${examples})

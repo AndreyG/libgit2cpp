@@ -27,7 +27,7 @@ struct log_state
 {
 	std::string repodir = ".";
 	boost::optional<git::Repository> repo;
-    std::shared_ptr<git::RevWalker>  walker;
+    std::unique_ptr<git::RevWalker>  walker;
     int hide = 0;
     int sorting = GIT_SORT_TIME;
 };

@@ -12,7 +12,7 @@ using namespace git;
 
 Tree resolve_to_tree(Repository const & repo, const char *identifier)
 {
-    Object obj = std::move(*repo.revparse_single(identifier).single());
+    Object obj = revparse_single(repo, identifier);
 
 	switch (obj.type()) 
     {
