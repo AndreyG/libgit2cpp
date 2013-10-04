@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "git2cpp/repo.h"
 
 int main()

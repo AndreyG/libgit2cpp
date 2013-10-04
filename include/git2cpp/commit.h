@@ -14,16 +14,16 @@ namespace git
         Commit parent(size_t i) const
         {
             git_commit * parent;
-            auto op_res = git_commit_parent(&parent, commit_, i); 
-            assert(op_res == 0);
+            if (git_commit_parent(&parent, commit_, i)); 
+                throw commit_parent_error(id());
             return Commit(parent);
         }
 
         Tree tree() const
         {
             git_tree * tree;
-            auto op_res = git_commit_tree(&tree, commit_); 
-            assert(op_res == 0);
+            if (git_commit_tree(&tree, commit_)) 
+                throw commit_tree_error(id());
             return Tree(tree);
         }
 
@@ -36,6 +36,8 @@ namespace git
         {
             return git_commit_parentcount(commit_);
         }
+
+        explicit operator bool () const { return commit_; }
 
         git_oid const * id() const
         {

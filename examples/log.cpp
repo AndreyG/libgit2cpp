@@ -4,9 +4,14 @@
 
 #include <boost/optional.hpp>
 
+#include <git2/revwalk.h>
+
 #include "git2cpp/repo.h"
 #include "git2cpp/pathspec.h"
 #include "git2cpp/threads_initializer.h"
+#include "git2cpp/id_to_str.h"
+#include "git2cpp/revspec.h"
+#include "git2cpp/revwalker.h"
 
 static void usage(const char *message, const char *arg)
 {
@@ -44,7 +49,24 @@ static void set_sorting(struct log_state *s, unsigned int sort_mode)
 	s->walker->sort(s->sorting);
 }
 
-static void push_rev(struct log_state *s, git_object *obj, int hide)
+void push_rev(log_state * s, git::Commit const & commit, int hide)
+{
+	hide = s->hide ^ hide;
+
+	if (!s->walker) {
+		s->walker = s->repo->rev_walker();
+		s->walker->sort(s->sorting);
+	}
+
+    if (!commit)
+        s->walker->push_head();
+	else if (hide)
+		s->walker->hide(commit.id());
+	else
+		s->walker->push(commit.id());
+}
+
+void push_rev(struct log_state *s, git::Object const & obj, int hide)
 {
 	hide = s->hide ^ hide;
 
@@ -56,14 +78,12 @@ static void push_rev(struct log_state *s, git_object *obj, int hide)
 	if (!obj)
 		s->walker->push_head();
 	else if (hide)
-		s->walker->hide(git_object_id(obj));
+		s->walker->hide(obj.id());
 	else
-		s->walker->push(git_object_id(obj));
-
-	git_object_free(obj);
+		s->walker->push(obj.id());
 }
 
-static int add_revision(struct log_state *s, const char *revstr)
+void add_revision(struct log_state *s, const char *revstr)
 {
 	int hide = 0;
 
@@ -72,37 +92,35 @@ static int add_revision(struct log_state *s, const char *revstr)
 	}
 
 	if (!revstr) {
-		push_rev(s, NULL, hide);
-		return 0;
+		push_rev(s, git::Commit(nullptr), hide);
+		return;
 	}
 
-	git_revspec revs;
-	if (*revstr == '^') {
-		revs.flags = GIT_REVPARSE_SINGLE;
-		hide = !hide;
+    if (*revstr == '^')
+        hide = !hide;
 
-		if (s->repo->revparse_single(revs.from, revstr + 1) < 0)
-			return -1;
-	} else if (s->repo->revparse(revs, revstr) < 0)
-		return -1;
+	git::Revspec revs = (*revstr == '^')
+        ? s->repo->revparse_single(revstr + 1)
+        : s->repo->revparse(revstr);
 
-	if ((revs.flags & GIT_REVPARSE_SINGLE) != 0)
-		push_rev(s, revs.from, hide);
-	else {
-		push_rev(s, revs.to, hide);
+	if (auto obj = revs.single())
+    {
+		push_rev(s, *obj, hide);
+    }
+	else 
+    {
+        git::Revspec::Range const & range = *revs.range();
+		push_rev(s, range.to, hide);
 
-		if ((revs.flags & GIT_REVPARSE_MERGE_BASE) != 0) {
+		if ((revs.flags() & GIT_REVPARSE_MERGE_BASE) != 0) {
 			git_oid base;
-            s->repo->merge_base(base, git_object_id(revs.from), git_object_id(revs.to));
-			s->repo->object_lookup(revs.to, base, GIT_OBJ_COMMIT);
+            s->repo->merge_base(base, range.from.id(), range.to.id());
 
-			push_rev(s, revs.to, hide);
+			push_rev(s, s->repo->commit_lookup(&base), hide);
 		}
 
-		push_rev(s, revs.from, !hide);
+		push_rev(s, range.from, !hide);
 	}
-
-	return 0;
 }
 
 static void print_time(const git_time *intime, const char *prefix)
@@ -133,19 +151,16 @@ static void print_time(const git_time *intime, const char *prefix)
 
 static void print_commit(git::Commit const & commit)
 {
-	char buf[GIT_OID_HEXSZ + 1];
 	int i, count;
 	const git_signature *sig;
 	const char *scan, *eol;
 
-	git_oid_tostr(buf, sizeof(buf), commit.id());
-	printf("commit %s\n", buf);
+	printf("commit %s\n", git::id_to_str(commit.id()).c_str());
 
 	if ((count = (int)commit.parents_num()) > 1) {
 		printf("Merge:");
 		for (i = 0; i < count; ++i) {
-			git_oid_tostr(buf, 8, commit.parent_id(i));
-			printf(" %s", buf);
+			printf(" %s", git::id_to_str(commit.parent_id(i), 7).c_str());
 		}
 		printf("\n");
 	}
@@ -225,10 +240,15 @@ int parse_options   ( int argc, char *argv[]
 		char* a = argv[i];
 
 		if (a[0] != '-') {
-			if (!add_revision(&s, a))
+            try
+            {
+			    add_revision(&s, a);
 				++count;
-			else /* try failed revision parse as filename */
-				break;
+            }
+            catch (...) /* try failed revision parse as filename */
+			{
+                break;
+            }
 		} else if (!strcmp(a, "--")) {
 			++i;
 			break;
@@ -302,7 +322,7 @@ int main(int argc, char *argv[])
 
 	while (auto oid = s.walker->next())
     {
-		git::Commit commit = s.repo->commit_lookup(*oid);
+		git::Commit commit = s.repo->commit_lookup(oid.get_ptr());
 
 		int parents = commit.parents_num();
 		if (parents < opt.min_parents)

@@ -9,6 +9,7 @@ extern "C"
 
 #include "git2cpp/repo.h"
 #include "git2cpp/error.h"
+#include "git2cpp/revwalker.h"
 
 namespace git
 {
@@ -33,19 +34,38 @@ namespace git
         git_repository_free(repo_);
     }
 
-    int Repository::revparse(git_revspec & out, const char * spec) const
+    Commit Repository::commit_lookup(git_oid const * oid) const
     {
-        return git_revparse(&out, repo_, spec);
+        git_commit * commit;
+        if (git_commit_lookup(&commit, repo_, oid))
+            throw commit_lookup_error(oid);
+        return Commit(commit);
     }
 
-    int Repository::revparse_single(git_object *& out, const char * spec) const
+    Revspec Repository::revparse(const char * spec) const
     {
-        return git_revparse_single(&out, repo_, spec);
+        git_revspec revspec;
+        if (git_revparse(&revspec, repo_, spec))
+            throw revparse_error(spec);
+        return Revspec(revspec);
+    }
+
+    Revspec Repository::revparse_single(const char * spec) const
+    {
+        git_object * obj;
+        if (git_revparse_single(&obj, repo_, spec) < 0)
+            throw revparse_error(spec);
+        return Revspec(obj);
     }
 
     Index Repository::index() const
     {
         return Index(repo_);
+    }
+
+    Odb Repository::odb() const
+    {
+        return Odb(repo_);
     }
 
     git_status_t Repository::file_status(const char * filepath) const
@@ -73,6 +93,11 @@ namespace git
                             , &res
                             );
         return res;
+    }
+
+    std::shared_ptr<RevWalker> Repository::rev_walker() const
+    {
+        return std::make_shared<RevWalker>(repo_);
     }
 
     int Repository::merge_base(git_oid & out, git_oid const * one, git_oid const * two) const

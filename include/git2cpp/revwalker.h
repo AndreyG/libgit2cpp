@@ -2,55 +2,20 @@
 
 #include <boost/optional.hpp>
 
-extern "C"
-{
-#include <git2/revwalk.h>
-}
-
 namespace git
 {
     struct RevWalker
     {
-        explicit RevWalker(git_revwalk * walker)
-            : walker_(walker)
-        {}
+        explicit RevWalker(git_repository * repo);
+        ~RevWalker();
 
-        ~RevWalker()
-        {
-            git_revwalk_free(walker_);
-        }
+        void sort(int sorting);
 
-        void sort(int sorting)
-        {
-            git_revwalk_sorting(walker_, sorting);
-        }
+        void push_head() const;
+        void hide(git_oid const * obj) const;
+        void push(git_oid const * obj) const;
 
-        void push_head() const
-        {
-            auto res = git_revwalk_push_head(walker_);
-            assert(res == 0);
-        }
-
-        void hide(git_oid const * obj) const
-        {
-            auto res = git_revwalk_hide(walker_, obj);
-            assert(res == 0);
-        }
-
-        void push(git_oid const * obj) const
-        {
-            auto res = git_revwalk_push(walker_, obj);
-            assert(res == 0);
-        }
-
-        boost::optional<git_oid> next() const
-        {
-            git_oid oid;
-            if (git_revwalk_next(&oid, walker_) == 0)
-                return oid;
-            else
-                return boost::none;
-        }
+        boost::optional<git_oid> next() const;
 
         RevWalker               (RevWalker const &) = delete;
         RevWalker& operator =   (RevWalker const &) = delete;

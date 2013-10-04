@@ -1,5 +1,7 @@
 #pragma once
 
+#include "error.h"
+
 extern "C" 
 {
     #include <git2/pathspec.h>
@@ -11,7 +13,8 @@ namespace git
     {
         explicit Pathspec(git_strarray const & pathspec)
         {
-            assert(git_pathspec_new(&ps_, &pathspec) == 0);
+            if (git_pathspec_new(&ps_, &pathspec))
+                throw pathspec_new_error();
         }
 
         git_pathspec * get() const { return ps_; }
