@@ -1,9 +1,14 @@
 #pragma once
 
-#include <boost/optional.hpp>
+#include "commit.h"
+
+struct git_repository;
+struct git_revwalk;
 
 namespace git
 {
+    struct Repository;
+
     struct RevWalker
     {
         explicit RevWalker(git_repository * repo);
@@ -15,7 +20,7 @@ namespace git
         void hide(git_oid const * obj) const;
         void push(git_oid const * obj) const;
 
-        boost::optional<git_oid> next() const;
+        Commit next(Repository const & repo) const;
 
         RevWalker               (RevWalker const &) = delete;
         RevWalker& operator =   (RevWalker const &) = delete;

@@ -320,10 +320,8 @@ int main(int argc, char *argv[])
 	count = 0;
     int printed = 0;
 
-	while (auto oid = s.walker->next())
+	while (auto commit = s.walker->next(*s.repo))
     {
-		git::Commit commit = s.repo->commit_lookup(oid.get_ptr());
-
 		int parents = commit.parents_num();
 		if (parents < opt.min_parents)
 			continue;

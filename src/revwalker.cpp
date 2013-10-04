@@ -5,6 +5,7 @@ extern "C"
 
 #include "git2cpp/error.h"
 #include "git2cpp/revwalker.h"
+#include "git2cpp/repo.h"
 
 namespace git
 {
@@ -42,13 +43,13 @@ namespace git
             throw non_commit_object_error(obj);
     }
 
-    boost::optional<git_oid> RevWalker::next() const
+    Commit RevWalker::next(Repository const & repo) const
     {
         git_oid oid;
         if (git_revwalk_next(&oid, walker_) == 0)
-            return oid;
+            return repo.commit_lookup(&oid);
         else
-            return boost::none;
+            return Commit();
     }
 }
 

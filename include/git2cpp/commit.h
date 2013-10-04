@@ -63,6 +63,10 @@ namespace git
             : commit_(commit)
         {}
 
+        Commit()
+            : commit_(nullptr)
+        {}
+
         Commit(Commit && other)
             : Commit(other.commit_)
         {
