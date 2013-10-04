@@ -17,6 +17,13 @@ namespace git
             throw index_open_error();
     }
 
+    Index::Index(const char * dir)
+    {
+        if (git_index_open(&index_, dir))
+            throw index_open_error();
+        git_index_read(index_);
+    }
+
     Index::~Index()
     {
         if (index_)
@@ -27,6 +34,16 @@ namespace git
         : index_(other.index_)
     {
         other.index_ = nullptr;
+    }
+
+    size_t Index::entrycount() const
+    {
+        return git_index_entrycount(index_);
+    }
+
+    git_index_entry const * Index::get(size_t i) const
+    {
+        return git_index_get_byindex(index_, i);
     }
 
     namespace

@@ -28,6 +28,7 @@ set(examples
     diff
     log
     rev-list
+    showindex
 )
 
 foreach (example ${examples})

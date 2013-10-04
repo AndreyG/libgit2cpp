@@ -5,13 +5,19 @@
 struct git_index;
 struct git_repository;
 struct git_strarray;
+struct git_index_entry;
 
 namespace git
 {
     struct Index
     {
         explicit Index(git_repository * repo);
+        explicit Index(const char * dir);
+
         ~Index();
+
+        size_t entrycount() const;
+        git_index_entry const * get(size_t i) const;
 
         typedef std::function<int (const char * path, const char * mathched_pathspec)> matched_path_callback_t;
         
