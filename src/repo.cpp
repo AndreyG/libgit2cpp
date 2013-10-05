@@ -9,7 +9,6 @@ extern "C"
 
 #include "git2cpp/repo.h"
 #include "git2cpp/error.h"
-#include "git2cpp/revwalker.h"
 
 namespace git
 {
@@ -126,9 +125,9 @@ namespace git
         return res;
     }
 
-    std::unique_ptr<RevWalker> Repository::rev_walker() const
+    RevWalker Repository::rev_walker() const
     {
-        return std::unique_ptr<RevWalker>(new RevWalker(repo_));
+        return RevWalker(repo_);
     }
 
     int Repository::merge_base(git_oid & out, git_oid const * one, git_oid const * two) const

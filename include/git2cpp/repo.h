@@ -2,7 +2,6 @@
 
 #include <string>
 #include <vector>
-#include <memory>
 
 extern "C"
 {
@@ -16,6 +15,7 @@ extern "C"
 #include "status.h"
 #include "reference.h"
 #include "signature.h"
+#include "revwalker.h"
 
 namespace git
 {
@@ -34,7 +34,7 @@ namespace git
         Revspec revparse        (const char * spec) const;
         Revspec revparse_single (const char * spec) const;
 
-        std::unique_ptr<struct RevWalker> rev_walker() const;
+        RevWalker rev_walker() const;
 
         git_status_t file_status(const char * filepath) const;
 

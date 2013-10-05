@@ -77,11 +77,11 @@ int main (int argc, char **argv)
         Repository repo(".");
         auto walker = repo.rev_walker();
 
-        revwalk_parseopts(repo, *walker, argc-1, argv+1);
+        revwalk_parseopts(repo, walker, argc-1, argv+1);
 
         char buf[41];
 
-        while (walker->next(buf)) 
+        while (walker.next(buf)) 
         {
             buf[40] = '\0';
             printf("%s\n", buf);

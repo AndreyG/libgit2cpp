@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <memory>
 #include <boost/optional.hpp>
 
 #include <git2/revwalk.h>
@@ -39,7 +40,7 @@ static void set_sorting(struct log_state *s, unsigned int sort_mode)
 	}
 
 	if (!s->walker)
-		s->walker = s->repo->rev_walker();
+		s->walker.reset(new git::RevWalker(s->repo->rev_walker()));
 
 	if (sort_mode == GIT_SORT_REVERSE)
 		s->sorting = s->sorting ^ GIT_SORT_REVERSE;
@@ -54,7 +55,7 @@ void push_rev(log_state * s, git::Commit const & commit, int hide)
 	hide = s->hide ^ hide;
 
 	if (!s->walker) {
-		s->walker = s->repo->rev_walker();
+		s->walker.reset(new git::RevWalker(s->repo->rev_walker()));
 		s->walker->sort(s->sorting);
 	}
 
@@ -71,7 +72,7 @@ void push_rev(struct log_state *s, git::Object const & obj, int hide)
 	hide = s->hide ^ hide;
 
 	if (!s->walker) {
-		s->walker = s->repo->rev_walker();
+		s->walker.reset(new git::RevWalker(s->repo->rev_walker()));
 		s->walker->sort(s->sorting);
 	}
 
