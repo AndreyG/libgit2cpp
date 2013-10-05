@@ -24,10 +24,10 @@ namespace git
 
     Revspec::Range const * Revspec::range() const
     {
-        if (flags_ & GIT_REVPARSE_SINGLE == 0)
-            return &revspec_;
-        else
+        if (flags_ & GIT_REVPARSE_SINGLE)
             return nullptr;
+        else
+            return &revspec_;
     }
 
     unsigned int Revspec::flags() const
