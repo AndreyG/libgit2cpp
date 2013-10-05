@@ -34,6 +34,7 @@ set(examples
     showindex
     status
     init
+    rev-parse
 )
 
 foreach (example ${examples})

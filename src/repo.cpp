@@ -130,9 +130,12 @@ namespace git
         return RevWalker(repo_);
     }
 
-    int Repository::merge_base(git_oid & out, git_oid const * one, git_oid const * two) const
+    git_oid Repository::merge_base(Revspec::Range const & range) const
     {
-        return git_merge_base(&out, repo_, one, two);
+        git_oid res;
+        if (git_merge_base(&res, repo_, range.from.id(), range.to.id()))
+            throw merge_base_error();
+        return res;
     }
 
     Reference Repository::head() const

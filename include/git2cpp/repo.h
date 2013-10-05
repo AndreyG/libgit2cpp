@@ -29,7 +29,7 @@ namespace git
         Commit commit_lookup(git_oid const * oid) const;
         Tree   tree_lookup  (git_oid const * oid) const;
 
-        int merge_base(git_oid & out, git_oid const * one, git_oid const * two) const;
+        git_oid merge_base(Revspec::Range const & range) const;
 
         Revspec revparse        (const char * spec) const;
         Revspec revparse_single (const char * spec) const;

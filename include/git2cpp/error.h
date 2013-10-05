@@ -283,5 +283,13 @@ namespace git
 		    return "Could not create commit"; 
         }
     };
+
+    struct merge_base_error : std::exception
+    {
+        virtual const char * what() const noexcept override
+        {
+		    return "Could not find merge base"; 
+        }
+    };
 }
 

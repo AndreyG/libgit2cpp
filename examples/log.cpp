@@ -114,9 +114,7 @@ void add_revision(struct log_state *s, const char *revstr)
 		push_rev(s, range.to, hide);
 
 		if ((revs.flags() & GIT_REVPARSE_MERGE_BASE) != 0) {
-			git_oid base;
-            s->repo->merge_base(base, range.from.id(), range.to.id());
-
+			git_oid base = s->repo->merge_base(range);
 			push_rev(s, s->repo->commit_lookup(&base), hide);
 		}
 
