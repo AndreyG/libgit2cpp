@@ -4,14 +4,18 @@
 #include <vector>
 #include <memory>
 
+extern "C"
+{
+#include <git2/repository.h>
+}
+
 #include "commit.h"
 #include "index.h"
 #include "odb.h"
 #include "revspec.h"
 #include "status.h"
 #include "reference.h"
-
-struct git_repository;
+#include "signature.h"
 
 namespace git
 {
@@ -23,6 +27,7 @@ namespace git
         git_repository * ptr() { return repo_; }
 
         Commit commit_lookup(git_oid const * oid) const;
+        Tree   tree_lookup  (git_oid const * oid) const;
 
         int merge_base(git_oid & out, git_oid const * one, git_oid const * two) const;
 
@@ -36,6 +41,8 @@ namespace git
         Index   index() const;
         Odb     odb()   const;
 
+        Signature signature() const;
+
         Status status(git_status_options const &) const;
 
         std::vector<std::string> branches() const;
@@ -46,10 +53,29 @@ namespace git
 
         int submodule_lookup(git_submodule *&, const char * name) const;
         
+        const char * path()     const;
+        const char * workdir()  const;
+
+        git_oid create_commit(const char * update_ref,
+                              Signature const & author,
+                              Signature const & commiter,
+                              const char * message_encoding,
+                              const char * message,
+                              Tree const & tree,
+                              int parent_count);
+
         explicit Repository(std::string const & dir);
+
+        struct init_tag {};
+        static init_tag init;
+        Repository(std::string const & dir, init_tag);
+        Repository(std::string const & dir, init_tag, 
+                   git_repository_init_options opts);
 
         Repository              (Repository const &) = delete;
         Repository& operator =  (Repository const &) = delete; 
+
+        Repository(Repository &&);
 
         ~Repository();
 

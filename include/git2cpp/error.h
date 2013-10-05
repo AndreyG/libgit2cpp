@@ -15,6 +15,21 @@ namespace git
         }
     };
 
+    struct repository_init_error : std::exception
+    {
+        explicit repository_init_error(std::string const & dir)
+            : message_("Could not initialize repository on path " + dir)
+        {}
+
+        virtual const char * what() const noexcept override
+        {
+            return message_.c_str();
+        }
+
+    private:
+        std::string message_;
+    };
+
     struct index_open_error : std::exception
     {
         virtual const char * what() const noexcept override 
@@ -35,6 +50,21 @@ namespace git
     {
         explicit commit_lookup_error(git_oid const * id)
             : message_("Could not lookup commit " + id_to_str(id)) 
+        {}
+
+        virtual const char * what() const noexcept override
+        {
+            return message_.c_str();
+        }
+
+    private:
+        std::string message_;
+    };
+
+    struct tree_lookup_error : std::exception
+    {
+        explicit tree_lookup_error(git_oid const * id)
+            : message_("Could not lookup tree " + id_to_str(id)) 
         {}
 
         virtual const char * what() const noexcept override
@@ -218,6 +248,39 @@ namespace git
         virtual const char * what() const noexcept override
         {
             return "Could not get status"; 
+        }
+    };
+
+    struct signature_create_error : std::exception
+    {
+        virtual const char * what() const noexcept override
+        {
+		    return  "Unable to create a commit signature."
+                    " Perhaps 'user.name' and 'user.email' are not set";
+        }
+    };
+
+    struct index_write_tree_error : std::exception
+    {
+        virtual const char * what() const noexcept override
+        {
+            return "Unable to write tree from index";
+        }
+    };
+
+    struct index_write_error : std::exception
+    {
+        virtual const char * what() const noexcept override
+        {
+            return "Unable to write index";
+        }
+    };
+
+    struct commit_create_error : std::exception
+    {
+        virtual const char * what() const noexcept override
+        {
+		    return "Could not create commit"; 
         }
     };
 }

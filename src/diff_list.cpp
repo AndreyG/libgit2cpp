@@ -6,23 +6,23 @@
 namespace git
 {
     DiffList diff           (git_repository * repo
-                            , Tree const & a, Tree const & b
+                            , Tree & a, Tree & b
                             , git_diff_options const & opts
                             )
     {
         git_diff_list * diff_list;
-        auto op_res = git_diff_tree_to_tree(&diff_list, repo, a.tree_, b.tree_, &opts); 
+        auto op_res = git_diff_tree_to_tree(&diff_list, repo, a.ptr(), b.ptr(), &opts); 
         assert(op_res == 0);
         return DiffList(diff_list);
     }
 
     DiffList diff_to_index  ( git_repository * repo
-                            , Tree const & t 
+                            , Tree & t 
                             , git_diff_options const & opts
                             ) 
     {
         git_diff_list * diff_list;
-        auto op_res = git_diff_tree_to_index(&diff_list, repo, t.tree_, nullptr, &opts); 
+        auto op_res = git_diff_tree_to_index(&diff_list, repo, t.ptr(), nullptr, &opts); 
         assert(op_res == 0);
         return DiffList(diff_list);
     }

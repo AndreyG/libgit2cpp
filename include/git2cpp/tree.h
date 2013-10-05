@@ -7,6 +7,9 @@ namespace git
 {
     struct Tree
     {
+        git_tree const  * ptr() const   { return tree_; }
+        git_tree        * ptr()         { return tree_; }
+
         int pathspec_match(uint32_t flags, Pathspec const & ps)
         {
             return git_pathspec_match_tree(NULL, tree_, flags, ps.get());
@@ -41,15 +44,6 @@ namespace git
         }
 
         explicit operator bool() const { return tree_; }
-
-        friend DiffList diff            ( git_repository *
-                                        , Tree const &, Tree const &
-                                        , git_diff_options const & opts
-                                        );
-        friend DiffList diff_to_index   ( git_repository *
-                                        , Tree const &
-                                        , git_diff_options const & opts
-                                        );
 
     private:
         git_tree * tree_;

@@ -16,6 +16,7 @@ set(lib_sources
     src/repo.cpp
     src/revspec.cpp
     src/revwalker.cpp
+    src/signature.cpp
     src/status.cpp
     src/threads_initializer.cpp
 )
@@ -32,6 +33,7 @@ set(examples
     rev-list
     showindex
     status
+    init
 )
 
 foreach (example ${examples})

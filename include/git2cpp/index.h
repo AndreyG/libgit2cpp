@@ -24,6 +24,8 @@ namespace git
         void update_all (git_strarray const & pathspec, matched_path_callback_t cb);
         void add_all    (git_strarray const & pathspec, matched_path_callback_t cb, unsigned int flags = 0);
 
+        git_oid write_tree() const;
+
         void write() const;
 
         Index               (Index const &) = delete;

@@ -213,7 +213,9 @@ static int match_int_arg(
 static int match_with_parent(git::Commit const & commit, int i, git_diff_options const & opts)
 {
     auto parent = commit.parent(i);
-    auto diff = git::diff(commit.owner(), parent.tree(), commit.tree(), opts);
+    auto c_tree = commit.tree();
+    auto p_tree = parent.tree();
+    auto diff = git::diff(commit.owner(), p_tree, c_tree, opts);
 
     return diff.deltas_num() > 0;
 }

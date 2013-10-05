@@ -122,7 +122,7 @@ enum {
 /* --cached */
 /* nothing */
 
-DiffList diff(Repository & repo, Tree const & t1, Tree const & t2, bool cached, git_diff_options const & opts)
+DiffList diff(Repository & repo, Tree & t1, Tree & t2, bool cached, git_diff_options const & opts)
 {
     auto r_ptr = repo.ptr();
 
@@ -133,7 +133,10 @@ DiffList diff(Repository & repo, Tree const & t1, Tree const & t2, bool cached, 
 	else if (t1) 
         return std::move(diff_to_index(r_ptr, t1, opts).merge(diff_index_to_workdir(r_ptr, opts)));
 	else if (cached) 
-		return diff_to_index(r_ptr, resolve_to_tree(repo, "HEAD"), opts);
+    {
+        auto tree = resolve_to_tree(repo, "HEAD");
+		return diff_to_index(r_ptr, tree, opts);
+    }
 	else
 		return diff_index_to_workdir(r_ptr, opts);
 }

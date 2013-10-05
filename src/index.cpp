@@ -73,7 +73,15 @@ namespace git
 
     void Index::write() const
     {
-        int res = git_index_write(index_);
-        assert(res == 0);
+        if (git_index_write(index_))
+            throw index_write_error();
+    }
+
+    git_oid Index::write_tree() const
+    {
+        git_oid res;
+        if (git_index_write_tree(&res, index_) < 0)
+            throw index_write_tree_error();
+        return res;
     }
 }

@@ -1,6 +1,5 @@
 extern "C"
 {
-#include <git2/repository.h>
 #include <git2/branch.h>
 #include <git2/types.h>
 #include <git2/merge.h>
@@ -30,6 +29,19 @@ namespace git
             throw repository_open_error();
     }
 
+    Repository::Repository(std::string const & dir, init_tag)
+    {
+        if (git_repository_init(&repo_, dir.c_str(), 0) < 0)
+            throw repository_init_error(dir);
+    }
+
+    Repository::Repository(std::string const & dir, init_tag, 
+                           git_repository_init_options opts)
+    {
+        if (git_repository_init_ext(&repo_, dir.c_str(), &opts) < 0)
+            throw repository_init_error(dir);
+    }
+
     Repository::~Repository()
     {
         git_repository_free(repo_);
@@ -40,12 +52,25 @@ namespace git
         return git_repository_is_bare(repo_);
     }
 
+    Signature Repository::signature() const
+    {
+        return Signature(repo_);
+    }
+
     Commit Repository::commit_lookup(git_oid const * oid) const
     {
         git_commit * commit;
         if (git_commit_lookup(&commit, repo_, oid))
             throw commit_lookup_error(oid);
         return Commit(commit);
+    }
+
+    Tree Repository::tree_lookup(git_oid const * oid) const
+    {
+        git_tree * tree;
+        if (git_tree_lookup(&tree, repo_, oid))
+            throw tree_lookup_error(oid);
+        return Tree(tree);
     }
 
     Revspec Repository::revparse(const char * spec) const
@@ -133,6 +158,35 @@ namespace git
     int Repository::submodule_lookup(git_submodule *& sm, const char * name) const
     {
         return git_submodule_lookup(&sm, repo_, name);
+    }
+
+    const char * Repository::path() const
+    {
+        return git_repository_path(repo_);
+    }
+
+    const char * Repository::workdir() const
+    {
+        return git_repository_workdir(repo_);
+    }
+
+    git_oid Repository::create_commit(const char * update_ref,
+                                      Signature const & author,
+                                      Signature const & commiter,
+                                      const char * message_encoding,
+                                      const char * message,
+                                      Tree const & tree,
+                                      int parent_count)
+    {
+        git_oid res;
+        if (git_commit_create_v(&res, repo_, update_ref, 
+                                author.ptr(), commiter.ptr(),
+                                message_encoding, message,
+                                tree.ptr(), parent_count))
+        {
+            throw commit_create_error();
+        }
+        return res;
     }
 
     Object revparse_single(Repository const & repo, const char * spec)

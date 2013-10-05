@@ -56,11 +56,11 @@ namespace git
     struct Tree;
 
     DiffList diff           ( git_repository * repo
-                            , Tree const & a, Tree const & b
+                            , Tree & a, Tree & b
                             , git_diff_options const & opts
                             );
     DiffList diff_to_index  ( git_repository * repo
-                            , Tree const & 
+                            , Tree & 
                             , git_diff_options const & opts
                             ); 
 
