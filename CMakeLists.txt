@@ -5,20 +5,9 @@ include_directories(include)
 
 set(CMAKE_CXX_FLAGS -std=c++11)
 
-set(lib_sources
-    src/diff_list.cpp
-    src/id_to_str.cpp
-    src/index.cpp
-    src/object.cpp
-    src/odb.cpp
-    src/odb_object.cpp
-    src/reference.cpp
-    src/repo.cpp
-    src/revspec.cpp
-    src/revwalker.cpp
-    src/signature.cpp
-    src/status.cpp
-    src/threads_initializer.cpp
+file(GLOB lib_sources
+    src/*.cpp
+    include/git2cpp/*.h
 )
 
 add_library(git2cpp ${lib_sources})
@@ -35,6 +24,7 @@ set(examples
     status
     init
     rev-parse
+    general
 )
 
 foreach (example ${examples})

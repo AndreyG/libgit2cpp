@@ -14,9 +14,13 @@ namespace git
             throw signature_create_error();
     }
 
+    Signature::Signature(const char * name, const char * email, git_time_t time, int offset)
+    {
+        git_signature_new(&sig_, name, email, time, offset);
+    }
+
     Signature::~Signature()
     {
         git_signature_free(sig_);
     }
 }
-

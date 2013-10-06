@@ -76,6 +76,21 @@ namespace git
         std::string message_;
     };
 
+    struct tag_lookup_error : std::exception
+    {
+        explicit tag_lookup_error(git_oid const * id)
+            : message_("Could not lookup tag " + id_to_str(id))
+        {}
+
+        virtual const char * what() const noexcept override
+        {
+            return message_.c_str();
+        }
+
+    private:
+        std::string message_;
+    };
+
     struct commit_parent_error : std::exception
     {
         explicit commit_parent_error(git_oid const * id)
@@ -137,6 +152,14 @@ namespace git
 
     private:
         std::string message_;
+    };
+
+    struct odb_write_error : std::exception
+    {
+        virtual const char * what() const noexcept override
+        {
+            return "odb write error";
+        }
     };
 
     struct file_not_found_error : std::exception
@@ -289,6 +312,14 @@ namespace git
         virtual const char * what() const noexcept override
         {
 		    return "Could not find merge base"; 
+        }
+    };
+
+    struct config_open_error : std::exception
+    {
+        virtual const char * what() const noexcept override
+        {
+            return "Could not open config";
         }
     };
 }

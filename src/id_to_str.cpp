@@ -18,4 +18,11 @@ namespace git
         git_oid_tostr(buf, sizeof(buf), oid);
         return std::string(buf);
     }
+
+    git_oid str_to_id(const char *str)
+    {
+        git_oid res;
+        git_oid_fromstr(&res, str);
+        return res;
+    }
 }

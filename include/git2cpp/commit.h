@@ -1,74 +1,43 @@
 #pragma once
 
-extern "C"
-{
-#include <git2/commit.h>
-}
-
 #include "tree.h"
+
+struct git_commit;
+struct git_oid;
+struct git_repository;
 
 namespace git
 {
     struct Commit
     {
-        Commit parent(size_t i) const
-        {
-            git_commit * parent;
-            if (git_commit_parent(&parent, commit_, i)); 
-                throw commit_parent_error(id());
-            return Commit(parent);
-        }
+        git_commit const * ptr() const { return commit_; }
 
-        Tree tree() const
-        {
-            git_tree * tree;
-            if (git_commit_tree(&tree, commit_)) 
-                throw commit_tree_error(id());
-            return Tree(tree);
-        }
+        size_t parents_num() const;
+        Commit parent(size_t i) const;
+        git_oid const * parent_id(size_t i) const;
 
-        git_repository * owner() const
-        {
-            return git_commit_owner(commit_);
-        }
+        Tree tree() const;
 
-        size_t parents_num() const
-        {
-            return git_commit_parentcount(commit_);
-        }
+        git_repository * owner() const;
 
         explicit operator bool () const { return commit_; }
 
-        git_oid const * id() const
-        {
-            return git_commit_id(commit_);
-        }
+        git_oid const * id() const;
 
-        git_oid const * parent_id(size_t i) const
-        {
-            return git_commit_parent_id(commit_, i);
-        }
+        git_signature const * author()      const;
+        git_signature const * commiter()    const;
 
-        git_signature const * author() const
-        {
-            return git_commit_author(commit_);
-        }
+        const char *    message()   const;
+        git_time_t      time()      const;
 
-        const char * message() const
-        {
-            return git_commit_message(commit_);
-        }
+        Commit(git_oid const * oid, git_repository * repo);
 
-        explicit Commit(git_commit * commit)
+        explicit Commit(git_commit * commit = nullptr)
             : commit_(commit)
         {}
 
-        Commit()
-            : commit_(nullptr)
-        {}
-
         Commit(Commit && other)
-            : Commit(other.commit_)
+            : commit_(other.commit_)
         {
             other.commit_ = nullptr;
         }
@@ -76,7 +45,7 @@ namespace git
         Commit              (Commit const &) = delete;
         Commit& operator =  (Commit const &) = delete; 
 
-        ~Commit() { git_commit_free(commit_); }
+        ~Commit();
 
     private:
         git_commit * commit_;

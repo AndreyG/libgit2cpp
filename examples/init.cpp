@@ -198,5 +198,5 @@ static void create_initial_commit(Repository & repo)
 	 * HEAD commit and making that be the parent of the initial commit,
 	 * but here this is the first commit so there will be no parent.
 	 */
-    repo.create_commit("HEAD", sig, sig, NULL, "Initial commit", tree, 0); 
+    repo.create_commit("HEAD", sig, sig, NULL, "Initial commit", tree);
 }

@@ -2,16 +2,24 @@
 
 #include <cstddef>
 
-struct git_odb_object;
+extern "C"
+{
+#include <git2/types.h>
+}
 
 namespace git
 {
     struct OdbObject
     {
-        OdbObject(git_odb_object * obj);
+        explicit OdbObject(git_odb_object * obj)
+            : obj_(obj)
+        {}
+
         ~OdbObject();
 
-        size_t size() const;
+        git_otype               type() const;
+        unsigned char const *   data() const;
+        size_t                  size() const;
 
         OdbObject               (OdbObject const &) = delete;
         OdbObject& operator =   (OdbObject const &) = delete;

@@ -17,7 +17,7 @@ namespace git
                 throw pathspec_new_error();
         }
 
-        git_pathspec * get() const { return ps_; }
+        git_pathspec * ptr() const { return ps_; }
 
         ~Pathspec()
         {

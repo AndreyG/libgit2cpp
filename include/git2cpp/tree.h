@@ -12,19 +12,32 @@ namespace git
 
         int pathspec_match(uint32_t flags, Pathspec const & ps)
         {
-            return git_pathspec_match_tree(NULL, tree_, flags, ps.get());
+            return git_pathspec_match_tree(NULL, tree_, flags, ps.ptr());
         }
 
-        explicit Tree(git_tree * tree)
+        size_t entrycount() const
+        {
+            return git_tree_entrycount(tree_);
+        }
+
+        git_tree_entry const * operator[] (size_t i) const
+        {
+            return git_tree_entry_byindex(tree_, i);
+        }
+
+        git_tree_entry const * operator[] (std::string const & filename) const
+        {
+            return git_tree_entry_byname(tree_, filename.c_str());
+        }
+
+        Tree(git_oid const * oid, git_repository * repo);
+
+        explicit Tree(git_tree * tree = nullptr)
             : tree_(tree)
         {}
 
-        Tree()
-            : Tree(nullptr)
-        {}
-
         Tree(Tree && other)
-            : Tree(other.tree_)
+            : tree_(other.tree_)
         {
             other.tree_ = nullptr;
         }

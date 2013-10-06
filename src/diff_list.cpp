@@ -69,5 +69,10 @@ namespace git
         git_diff_merge(diff_list_, other.diff_list_);
         return *this;
     }
+
+    size_t DiffList::deltas_num() const
+    {
+        return git_diff_num_deltas(diff_list_);
+    }
 }
 

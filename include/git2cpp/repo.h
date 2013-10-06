@@ -16,6 +16,9 @@ extern "C"
 #include "reference.h"
 #include "signature.h"
 #include "revwalker.h"
+#include "tag.h"
+#include "blob.h"
+#include "str_array.h"
 
 namespace git
 {
@@ -28,6 +31,8 @@ namespace git
 
         Commit commit_lookup(git_oid const * oid) const;
         Tree   tree_lookup  (git_oid const * oid) const;
+        Tag    tag_lookup   (git_oid const * oid) const;
+        Blob   blob_lookup  (git_oid const * oid) const;
 
         git_oid merge_base(Revspec::Range const & range) const;
 
@@ -38,6 +43,8 @@ namespace git
 
         git_status_t file_status(const char * filepath) const;
 
+        Object entry_to_object(git_tree_entry const * entry) const;
+
         Index   index() const;
         Odb     odb()   const;
 
@@ -45,11 +52,14 @@ namespace git
 
         Status status(git_status_options const &) const;
 
+        StrArray reference_list() const;
+
         std::vector<std::string> branches() const;
 
         bool is_bare() const;
 
-        Reference head() const;
+        Reference head()                    const;
+        Reference ref(const char * name)    const;
 
         int submodule_lookup(git_submodule *&, const char * name) const;
         
@@ -61,8 +71,15 @@ namespace git
                               Signature const & commiter,
                               const char * message_encoding,
                               const char * message,
+                              Tree const & tree);
+
+        git_oid create_commit(const char * update_ref,
+                              Signature const & author,
+                              Signature const & commiter,
+                              const char * message_encoding,
+                              const char * message,
                               Tree const & tree,
-                              int parent_count);
+                              Commit const & parent);
 
         explicit Repository(std::string const & dir);
 

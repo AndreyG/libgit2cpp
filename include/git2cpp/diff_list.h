@@ -11,10 +11,7 @@ namespace git
 {
     struct DiffList
     {
-        size_t deltas_num() const
-        {
-            return git_diff_num_deltas(diff_list_);
-        }
+        size_t deltas_num() const;
 
         typedef std::function<int   ( git_diff_delta const *
                                     , git_diff_range const *
