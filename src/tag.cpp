@@ -2,12 +2,14 @@
 
 #include "git2cpp/tag.h"
 #include "git2cpp/error.h"
+#include "git2cpp/repo.h"
 
 namespace git
 {
-    Tag::Tag(git_oid const * oid, git_repository * repo)
+    Tag::Tag(git_oid const * oid, Repository const & repo)
+       : repo_(repo)
     {
-        if (git_tag_lookup(&tag_, repo, oid))
+        if (git_tag_lookup(&tag_, repo.ptr(), oid))
             throw tag_lookup_error(oid);
     }
 
@@ -20,7 +22,7 @@ namespace git
     {
         git_object * obj;
         git_tag_target(&obj, tag_);
-        return Object(obj);
+        return Object(obj, repo_);
     }
 
     git_otype Tag::target_type() const

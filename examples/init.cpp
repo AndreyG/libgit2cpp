@@ -20,7 +20,7 @@
 #include <string.h>
 #include <time.h>
 
-#include "git2cpp/threads_initializer.h"
+#include "git2cpp/initializer.h"
 #include "git2cpp/repo.h"
 
 static void usage(const char *error, const char *arg)
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 	const char *templ = NULL, *gitdir = NULL, *dir = NULL;
 	size_t pfxlen;
 
-    ThreadsInitializer threads_initializer;
+    Initializer threads_initializer;
 
 	/* Process arguments */
 

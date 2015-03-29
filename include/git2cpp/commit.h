@@ -8,47 +8,54 @@ struct git_repository;
 
 namespace git
 {
-    struct Commit
-    {
-        git_commit const * ptr() const { return commit_; }
+   struct Repository;
 
-        size_t parents_num() const;
-        Commit parent(size_t i) const;
-        git_oid const * parent_id(size_t i) const;
+   struct Commit
+   {
+      git_commit const * ptr() const { return commit_; }
 
-        Tree tree() const;
+      size_t parents_num() const;
+      Commit parent(size_t i) const;
+      git_oid const * parent_id(size_t i) const;
 
-        git_repository * owner() const;
+      Tree tree() const;
 
-        explicit operator bool () const { return commit_; }
+      Repository const & owner() const { return *repo_; }
 
-        git_oid const * id() const;
+      explicit operator bool () const { return commit_; }
 
-        git_signature const * author()      const;
-        git_signature const * commiter()    const;
+      git_oid const * id() const;
 
-        const char *    message()   const;
-        git_time_t      time()      const;
+      git_signature const * author()      const;
+      git_signature const * commiter()    const;
 
-        Commit(git_oid const * oid, git_repository * repo);
+      const char *    message()   const;
+      git_time_t      time()      const;
 
-        explicit Commit(git_commit * commit = nullptr)
-            : commit_(commit)
-        {}
+      Commit(git_oid const * oid, Repository const & repo);
 
-        Commit(Commit && other)
-            : commit_(other.commit_)
-        {
-            other.commit_ = nullptr;
-        }
+      Commit(git_commit * commit, Repository const & repo)
+         : commit_(commit)
+         , repo_(&repo)
+      {}
 
-        Commit              (Commit const &) = delete;
-        Commit& operator =  (Commit const &) = delete; 
+      Commit() {}
 
-        ~Commit();
+      Commit(Commit && other)
+         : commit_(other.commit_)
+         , repo_(other.repo_)
+      {
+         other.commit_ = nullptr;
+      }
 
-    private:
-        git_commit * commit_;
-    };
+      Commit              (Commit const &) = delete;
+      Commit& operator =  (Commit const &) = delete;
+
+      ~Commit();
+
+   private:
+      git_commit * commit_       = nullptr;
+      Repository const * repo_   = nullptr;
+   };
 }
 

@@ -9,35 +9,36 @@ extern "C"
 
 namespace git
 {
-    struct Revspec
-    {
-        struct Range
-        {
-            Object from, to;
+   struct Repository;
 
-            explicit Range(git_object * single)
-                : from  (single)
-                , to    (nullptr)
-            {}
+   struct Revspec
+   {
+      struct Range
+      {
+         Object from, to;
 
-            explicit Range(git_revspec const & revspec)
-                : from  (revspec.from)
-                , to    (revspec.to)
-            {}
-        };
+         Range(git_object * single, Repository const & repo)
+            : from(single, repo)
+         {}
 
-        Object  const * single()    const;
-        Range   const * range()     const;
+         explicit Range(git_revspec const & revspec, Repository const & repo)
+            : from  (revspec.from, repo)
+            , to    (revspec.to,   repo)
+         {}
+      };
 
-        Object * single();
+      Object  const * single()    const;
+      Range   const * range()     const;
 
-        unsigned int flags() const;
+      Object * single();
 
-        Revspec(git_object * single);
-        Revspec(git_revspec const &);
+      unsigned int flags() const;
 
-    private:
-        unsigned int flags_ = 0;
-        Range revspec_;
-    };
+      Revspec(git_object * single, Repository const &);
+      Revspec(git_revspec const &, Repository const &);
+
+   private:
+      unsigned int flags_ = 0;
+      Range revspec_;
+   };
 }

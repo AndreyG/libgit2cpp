@@ -1,6 +1,5 @@
 #pragma once
 
-#include "diff_list.h"
 #include "pathspec.h"
 
 namespace git

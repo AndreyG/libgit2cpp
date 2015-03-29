@@ -4,7 +4,7 @@
 #include <assert.h>
 
 #include "git2cpp/repo.h"
-#include "git2cpp/threads_initializer.h"
+#include "git2cpp/initializer.h"
 
 enum print_options {
 	SKIP = 1,
@@ -98,7 +98,7 @@ int main (int argc, char** argv)
 
 	init_array(&array, argc-i, argv+i);
 
-    git::ThreadsInitializer threads_initializer;
+    git::Initializer threads_initializer;
 
 	git::Repository repo(".");
 

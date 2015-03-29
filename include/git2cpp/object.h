@@ -12,31 +12,36 @@ struct git_oid;
 
 namespace git
 {
-    struct Object
-    {
-        explicit Object(git_object * obj);
-        ~Object();
+   struct Repository;
 
-        explicit operator bool() const { return obj_; }
+   struct Object
+   {
+      Object() {}
 
-        git_otype       type()  const;
-        git_oid const * id()    const;
+      Object(git_object * obj, Repository const &);
+      ~Object();
 
-        git_blob    const * as_blob()   const;
-        git_commit  const * as_commit() const;
-        git_tree    const * as_tree()   const;
-        git_tag     const * as_tag()    const;
+      explicit operator bool() const { return obj_; }
 
-        Commit  to_commit();
-        Tree    to_tree();
+      git_otype       type()  const;
+      git_oid const * id()    const;
 
-        Object              (Object const &) = delete;
-        Object& operator =  (Object const &) = delete;
+      git_blob    const * as_blob()   const;
+      git_commit  const * as_commit() const;
+      git_tree    const * as_tree()   const;
+      git_tag     const * as_tag()    const;
 
-        Object(Object && other);
+      Commit  to_commit();
+      Tree    to_tree();
 
-    private:
-        git_object * obj_;
-    };
+      Object              (Object const &) = delete;
+      Object& operator =  (Object const &) = delete;
+
+      Object(Object && other);
+
+   private:
+      git_object * obj_          = nullptr;
+      Repository const * repo_   = nullptr;
+   };
 }
 

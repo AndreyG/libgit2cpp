@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-#include "git2cpp/threads_initializer.h"
+#include "git2cpp/initializer.h"
 #include "git2cpp/repo.h"
 #include "git2cpp/id_to_str.h"
 
@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
 	if (!action || !rev)
 		usage(NULL, NULL);
 
-    git::ThreadsInitializer threads_initializer;
+    git::Initializer threads_initializer;
 
     git::Repository repo(dir);
 	git::Object obj = revparse_single(repo, rev);

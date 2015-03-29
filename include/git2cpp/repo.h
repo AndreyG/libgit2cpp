@@ -25,9 +25,14 @@ namespace git
     struct non_existing_branch_error    {};
     struct missing_head_error           {};
 
+    enum class branch_type
+    {
+        LOCAL, REMOTE, ALL
+    };
+
     struct Repository
     {
-        git_repository * ptr() { return repo_; }
+        git_repository * ptr() const { return repo_; }
 
         Commit commit_lookup(git_oid const * oid) const;
         Tree   tree_lookup  (git_oid const * oid) const;
@@ -54,7 +59,7 @@ namespace git
 
         StrArray reference_list() const;
 
-        std::vector<std::string> branches() const;
+        std::vector<std::string> branches(branch_type) const;
 
         bool is_bare() const;
 

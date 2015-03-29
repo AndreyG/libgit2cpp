@@ -9,8 +9,9 @@ extern "C"
 
 namespace git
 {
-    Object::Object(git_object * obj)
+    Object::Object(git_object * obj, Repository const & repo)
         : obj_(obj)
+        , repo_(&repo)
     {}
 
     Object::~Object()
@@ -20,6 +21,7 @@ namespace git
 
     Object::Object(Object && other)
         : obj_(other.obj_)
+        , repo_(other.repo_)
     {
         other.obj_ = nullptr;
     }
@@ -59,7 +61,7 @@ namespace git
     Commit Object::to_commit()
     {
         assert(type() == GIT_OBJ_COMMIT);
-        Commit res(reinterpret_cast<git_commit *>(obj_));
+        Commit res(reinterpret_cast<git_commit *>(obj_), *repo_);
         obj_ = nullptr;
         return res;
     }

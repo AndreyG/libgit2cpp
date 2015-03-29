@@ -21,7 +21,7 @@ namespace git
     {
         if (git_index_open(&index_, dir))
             throw index_open_error();
-        git_index_read(index_);
+        git_index_read(index_, true);
     }
 
     Index::~Index()

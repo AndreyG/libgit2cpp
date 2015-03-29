@@ -13,6 +13,8 @@ file(GLOB lib_sources
 add_library(git2cpp ${lib_sources})
 target_link_libraries(git2cpp git2)
 
+install_targets(/lib git2cpp)
+
 set(examples
     add
     branch

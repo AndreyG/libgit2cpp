@@ -5,7 +5,7 @@
 #include <iostream>
 #include <boost/optional.hpp>
 
-#include "git2cpp/threads_initializer.h"
+#include "git2cpp/initializer.h"
 #include "git2cpp/repo.h"
 
 using namespace git;
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 {
 	parse_state ps;
 
-    ThreadsInitializer threads_initalizer;
+    Initializer threads_initalizer;
 
 	for (int i = 1; i < argc; ++i) {
 		const char * a = argv[i];

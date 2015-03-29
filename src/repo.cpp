@@ -8,6 +8,8 @@ extern "C"
 #include <git2/errors.h>
 }
 
+#include <boost/optional.hpp>
+
 #include "git2cpp/repo.h"
 #include "git2cpp/error.h"
 
@@ -59,7 +61,7 @@ namespace git
 
     Commit Repository::commit_lookup(git_oid const * oid) const
     {
-        return Commit(oid, repo_);
+        return Commit(oid, *this);
     }
 
     Tree Repository::tree_lookup(git_oid const * oid) const
@@ -69,7 +71,7 @@ namespace git
 
     Tag Repository::tag_lookup(git_oid const * oid) const
     {
-        return Tag(oid, repo_);
+        return Tag(oid, *this);
     }
 
     Blob Repository::blob_lookup(git_oid const * oid) const
@@ -82,7 +84,7 @@ namespace git
         git_revspec revspec;
         if (git_revparse(&revspec, repo_, spec))
             throw revparse_error(spec);
-        return Revspec(revspec);
+        return Revspec(revspec, *this);
     }
 
     Revspec Repository::revparse_single(const char * spec) const
@@ -90,7 +92,7 @@ namespace git
         git_object * obj;
         if (git_revparse_single(&obj, repo_, spec) < 0)
             throw revparse_error(spec);
-        return Revspec(obj);
+        return Revspec(obj, *this);
     }
 
     Index Repository::index() const
@@ -119,14 +121,62 @@ namespace git
         return res;
     }
 
-    std::vector<std::string> Repository::branches() const
+    struct branch_iterator
+    {
+        branch_iterator(Repository const & repo, branch_type type)
+            : type_(convert(type))
+        {
+            git_branch_iterator_new(&base_, repo.ptr(), type_);
+            ++(*this);
+        }
+
+        ~branch_iterator()
+        {
+            git_branch_iterator_free(base_);
+        }
+
+        explicit operator bool () const { return ref_.is_initialized(); }
+
+        void operator ++ ()
+        {
+            git_branch_t type;
+            git_reference * ref;
+            if (git_branch_next(&ref, &type, base_) == 0)
+            {
+                assert(type == type_);
+                ref_ = boost::in_place(ref);
+            }
+        }
+
+        Reference const * operator -> () const
+        {
+            return ref_.get_ptr();
+        }
+
+    private:
+        git_branch_t convert(branch_type t) const
+        {
+            switch (t)
+            {
+            case branch_type::LOCAL :   return GIT_BRANCH_LOCAL;
+            case branch_type::REMOTE:   return GIT_BRANCH_REMOTE;
+            case branch_type::ALL:      return GIT_BRANCH_REMOTE;
+            default:
+                throw std::logic_error("invalid branch type");
+            }
+        }
+
+    private:
+        git_branch_t type_;
+        git_branch_iterator * base_;
+        boost::optional<Reference> ref_;
+    };
+
+    std::vector<std::string> Repository::branches(branch_type type) const
     {
         std::vector<std::string> res;
-        git_branch_foreach  ( repo_
-                            , GIT_BRANCH_LOCAL | GIT_BRANCH_REMOTE
-                            , write_branch_name
-                            , &res
-                            );
+        for (branch_iterator it(*this, type); it; ++it)
+            it->name();
         return res;
     }
 
@@ -232,7 +282,7 @@ namespace git
     {
         git_object * obj;
         git_tree_entry_to_object(&obj, repo_, entry);
-        return Object(obj);
+        return Object(obj, *this);
     }
 
     Object revparse_single(Repository const & repo, const char * spec)
