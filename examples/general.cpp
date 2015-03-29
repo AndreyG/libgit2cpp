@@ -89,7 +89,7 @@ int main (int argc, char** argv)
         printf("\n*Raw to Hex*\n");
 
         // If you have a oid, you can easily get the hex value of the SHA as well.
-        std::cout << "SHA hex string: " << id_to_str(&oid) << std::endl;
+        std::cout << "SHA hex string: " << id_to_str(oid) << std::endl;
 
         // ### Working with the Object Database
 
@@ -109,7 +109,7 @@ int main (int argc, char** argv)
             // We can read raw objects directly from the object database if we have
             // the oid (SHA) of the object.  This allows us to access objects without
             // knowing thier type and inspect the raw bytes unparsed.
-            OdbObject obj = odb.read(&oid);
+            OdbObject obj = odb.read(oid);
 
             // A raw object only has three properties - the type (commit, blob, tree
             // or tag), the size of the raw data and the raw, unparsed data itself.
@@ -141,7 +141,7 @@ int main (int argc, char** argv)
 
             // Now that we've written the object, we can check out what SHA1 was
             // generated when the object was written to our database.
-            std::cout << "Written Object: " << id_to_str(&oid) << std::endl;
+            std::cout << "Written Object: " << id_to_str(oid) << std::endl;
         }
 
         // ### Object Parsing
@@ -163,7 +163,7 @@ int main (int argc, char** argv)
 
             oid = str_to_id("8496071c1b46c854b31185ea97743be6a8774479");
 
-            Commit commit = repo.commit_lookup(&oid);
+            Commit commit = repo.commit_lookup(oid);
 
             // Each of the properties of the commit object are accessible via methods,
             // including commonly needed variations, such as `git_commit_time` which
@@ -184,7 +184,7 @@ int main (int argc, char** argv)
             // based on) and merge commits will have two or more.  Commits can
             // technically have any number, though it's rare to have more than two.
             for (size_t p = 0, parents = commit.parents_num(); p != parents; ++p)
-                std::cout << "Parent: " << id_to_str(commit.parent(p).id()) << std::endl;
+                std::cout << "Parent: " << id_to_str(commit.parent_id(p)) << std::endl;
         }
 
         {
@@ -211,9 +211,9 @@ int main (int argc, char** argv)
             // parents.  Here we're creating oid objects to create the commit with,
             // but you can also use
             git_oid tree_id = str_to_id("f60079018b664e4e79329a7ef9559c8d9e0378d1");
-            Tree tree = repo.tree_lookup(&tree_id);
+            Tree tree = repo.tree_lookup(tree_id);
             git_oid parent_id = str_to_id("5b5b025afb0b4c913b4c338a42934a3863bf3644");
-            Commit parent = repo.commit_lookup(&parent_id);
+            Commit parent = repo.commit_lookup(parent_id);
 
             // Here we actually create the commit object with a single call with all
             // the values we need to create the commit.  The SHA key is written to the
@@ -228,7 +228,7 @@ int main (int argc, char** argv)
                         parent);
 
             // Now we can take a look at the commit SHA we've generated.
-            std::cout << "New Commit: " << id_to_str(&commit_id) << std::endl;
+            std::cout << "New Commit: " << id_to_str(commit_id) << std::endl;
         }
 
         {
@@ -244,7 +244,7 @@ int main (int argc, char** argv)
             // We create an oid for the tag object if we know the SHA and look it up
             // the same way that we would a commit (or any other object).
             oid = str_to_id("b25fa35b38051e4ae45d4222e795f9df2e43f1d1");
-            Tag tag = repo.tag_lookup(&oid);
+            Tag tag = repo.tag_lookup(oid);
 
             // Now that we have the tag object, we can extract the information it
             // generally contains: the target (usually a commit object), the type of
@@ -274,7 +274,7 @@ int main (int argc, char** argv)
 
             try
             {
-                Tree tree = repo.tree_lookup(&oid);
+                Tree tree = repo.tree_lookup(oid);
 
                 // Getting the count of entries in the tree so you can iterate over them
                 // if you want to.
@@ -316,7 +316,7 @@ int main (int argc, char** argv)
             printf("\n*Blob Parsing*\n");
 
             git_oid oid = str_to_id("1385f264afb75a56a5bec74243be9b367ba4ca08");
-            Blob blob = repo.blob_lookup(&oid);
+            Blob blob = repo.blob_lookup(oid);
 
             // You can access a buffer with the raw contents of the blob directly.
             // Note that this buffer may not be contain ASCII data for certain blobs
@@ -351,15 +351,15 @@ int main (int argc, char** argv)
             // branch1..branch2`, you would push the oid of `branch2` and hide the oid
             // of `branch1`.
             RevWalker walk = repo.rev_walker();
-            walk.sort(GIT_SORT_TOPOLOGICAL | GIT_SORT_REVERSE);
-            walk.push(&oid);
+            walk.sort(RevWalker::sorting::topological | RevWalker::sorting::reverse);
+            walk.push(oid);
 
             // Now that we have the starting point pushed onto the walker, we start
             // asking for ancestors. It will return them in the sorting order we asked
             // for as commit oids.  We can then lookup and parse the commited pointed
             // at by the returned OID; note that this operation is specially fast
             // since the raw contents of the commit object will be cached in memory
-            while (auto commit = walk.next(repo))
+            while (auto commit = walk.next())
             {
                 char const *          cmsg  = commit.message();
                 git_signature const * cauth = commit.author();

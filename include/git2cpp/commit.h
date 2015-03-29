@@ -16,7 +16,7 @@ namespace git
 
       size_t parents_num() const;
       Commit parent(size_t i) const;
-      git_oid const * parent_id(size_t i) const;
+      git_oid const & parent_id(size_t i) const;
 
       Tree tree() const;
 
@@ -24,15 +24,18 @@ namespace git
 
       explicit operator bool () const { return commit_; }
 
-      git_oid const * id() const;
+      git_oid const & id() const;
 
       git_signature const * author()      const;
       git_signature const * commiter()    const;
 
-      const char *    message()   const;
-      git_time_t      time()      const;
+      const char *   message()   const;
+      const char *   summary()   const;
+      git_time_t     time()      const;
 
-      Commit(git_oid const * oid, Repository const & repo);
+      git_oid merge_base(size_t p1, size_t p2) const;
+
+      Commit(git_oid const & oid, Repository const & repo);
 
       Commit(git_commit * commit, Repository const & repo)
          : commit_(commit)

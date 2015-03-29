@@ -11,3 +11,5 @@ namespace git
         Initializer& operator =  (Initializer const &) = delete;
     };
 }
+
+#define auto_git_initializer ::git::Initializer git_initializer; (void) git_initializer

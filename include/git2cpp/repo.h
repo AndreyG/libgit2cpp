@@ -34,10 +34,10 @@ namespace git
     {
         git_repository * ptr() const { return repo_; }
 
-        Commit commit_lookup(git_oid const * oid) const;
-        Tree   tree_lookup  (git_oid const * oid) const;
-        Tag    tag_lookup   (git_oid const * oid) const;
-        Blob   blob_lookup  (git_oid const * oid) const;
+        Commit commit_lookup(git_oid const & oid) const;
+        Tree   tree_lookup  (git_oid const & oid) const;
+        Tag    tag_lookup   (git_oid const & oid) const;
+        Blob   blob_lookup  (git_oid const & oid) const;
 
         git_oid merge_base(Revspec::Range const & range) const;
 

@@ -7,32 +7,48 @@ struct git_revwalk;
 
 namespace git
 {
-    struct Repository;
+   struct Repository;
 
-    struct RevWalker
-    {
-        explicit RevWalker(git_repository * repo);
-        ~RevWalker();
+   struct RevWalker
+   {
+      explicit RevWalker(Repository const & repo);
+      ~RevWalker();
 
-        void sort(int sorting);
+      enum class sorting : unsigned int
+      {
+         none        = 0,
+         topological = 1 << 0,
+         time        = 1 << 1,
+         reverse     = 1 << 2
+      };
 
-        void push_head() const;
-        void hide(git_oid const * obj) const;
-        void push(git_oid const * obj) const;
+      friend sorting operator ~ (sorting);
+      friend sorting operator | (sorting, sorting);
+      friend sorting operator & (sorting, sorting);
+      friend sorting operator ^ (sorting, sorting);
 
-        Commit  next(Repository const & repo)   const;
-        bool    next(char * id_buffer)          const;
+      void sort(sorting);
+      void simplify_first_parent();
 
-        RevWalker               (RevWalker const &) = delete;
-        RevWalker& operator =   (RevWalker const &) = delete;
+      void push_head() const;
+      void hide(git_oid const &) const;
+      void push(git_oid const &) const;
 
-        RevWalker(RevWalker && other)
-            : walker_(other.walker_)
-        {
-            other.walker_ = nullptr;
-        }
+      Commit  next()                 const;
+      bool    next(char * id_buffer) const;
 
-    private:
-        git_revwalk * walker_;
-    };
+      RevWalker               (RevWalker const &) = delete;
+      RevWalker& operator =   (RevWalker const &) = delete;
+
+      RevWalker(RevWalker && other)
+         : walker_(other.walker_)
+         , repo_(other.repo_)
+      {
+         other.walker_ = nullptr;
+      }
+
+   private:
+      git_revwalk * walker_;
+      Repository const & repo_;
+   };
 }

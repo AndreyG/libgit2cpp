@@ -27,6 +27,7 @@ set(examples
     init
     rev-parse
     general
+    commit-graph-generator
 )
 
 foreach (example ${examples})

@@ -31,9 +31,9 @@ namespace git
         return git_object_type(obj_);
     }
 
-    git_oid const * Object::id() const
+    git_oid const & Object::id() const
     {
-        return git_object_id(obj_);
+        return *git_object_id(obj_);
     }
 
 #define DEFINE_METHOD_AS(type_name, enum_element)                   \

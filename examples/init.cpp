@@ -190,7 +190,7 @@ static void create_initial_commit(Repository & repo)
 	 */
 
     git_oid tree_id = index.write_tree();
-    Tree tree = repo.tree_lookup(&tree_id);
+    Tree tree = repo.tree_lookup(tree_id);
 
 	/* Ready to create the initial commit
 	 *

@@ -26,9 +26,9 @@ namespace git
         return git_reference_type(ref_);
     }
 
-    git_oid const * Reference::target() const
+    git_oid const & Reference::target() const
     {
-        return git_reference_target(ref_);
+        return *git_reference_target(ref_);
     }
 
     const char * Reference::symbolic_target() const

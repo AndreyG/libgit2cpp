@@ -7,9 +7,9 @@ extern "C"
 
 namespace git
 {
-    Blob::Blob(const git_oid *oid, git_repository *repo)
+    Blob::Blob(git_oid const & oid, git_repository *repo)
     {
-        git_blob_lookup(&blob_, repo, oid);
+        git_blob_lookup(&blob_, repo, &oid);
     }
 
     Blob::~Blob()

@@ -29,7 +29,7 @@ namespace git
             return git_tree_entry_byname(tree_, filename.c_str());
         }
 
-        Tree(git_oid const * oid, git_repository * repo);
+        Tree(git_oid const & oid, git_repository * repo);
 
         explicit Tree(git_tree * tree = nullptr)
             : tree_(tree)

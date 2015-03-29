@@ -17,7 +17,7 @@ namespace git
 
         const char *    name()              const;
         git_ref_t       type()              const;
-        git_oid const * target()            const;
+        git_oid const & target()            const;
         const char *    symbolic_target()   const;
 
         Reference& operator =   (Reference const &) = delete;

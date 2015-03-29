@@ -21,10 +21,10 @@ namespace git
             git_odb_free(odb_);
     }
 
-    OdbObject Odb::read(git_oid const * oid) const
+    OdbObject Odb::read(git_oid const & oid) const
     {
         git_odb_object * obj;
-        if (git_odb_read(&obj, odb_, oid))
+        if (git_odb_read(&obj, odb_, &oid))
             throw odb_read_error(oid);
         return OdbObject(obj);
     }

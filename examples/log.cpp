@@ -31,10 +31,10 @@ struct log_state
    boost::optional<git::Repository> repo;
    std::unique_ptr<git::RevWalker>  walker;
    int hide = 0;
-   int sorting = GIT_SORT_TIME;
+   git::RevWalker::sorting sorting = git::RevWalker::sorting::time;
 };
 
-static void set_sorting(struct log_state *s, unsigned int sort_mode)
+static void set_sorting(struct log_state *s, git::RevWalker::sorting sort_mode)
 {
    if (!s->repo) {
       s->repo = boost::in_place(s->repodir);
@@ -43,10 +43,10 @@ static void set_sorting(struct log_state *s, unsigned int sort_mode)
    if (!s->walker)
       s->walker.reset(new git::RevWalker(s->repo->rev_walker()));
 
-   if (sort_mode == GIT_SORT_REVERSE)
-      s->sorting = s->sorting ^ GIT_SORT_REVERSE;
+   if (sort_mode == git::RevWalker::sorting::reverse)
+      s->sorting = s->sorting ^ git::RevWalker::sorting::reverse;
    else
-      s->sorting = sort_mode | (s->sorting & GIT_SORT_REVERSE);
+      s->sorting = sort_mode | (s->sorting & git::RevWalker::sorting::reverse);
 
    s->walker->sort(s->sorting);
 }
@@ -116,7 +116,7 @@ void add_revision(struct log_state *s, const char *revstr)
 
       if ((revs.flags() & GIT_REVPARSE_MERGE_BASE) != 0) {
          git_oid base = s->repo->merge_base(range);
-         push_rev(s, s->repo->commit_lookup(&base), hide);
+         push_rev(s, s->repo->commit_lookup(base), hide);
       }
 
       push_rev(s, range.from, !hide);
@@ -248,11 +248,11 @@ int parse_options   ( int argc, char *argv[]
          break;
       }
       else if (!strcmp(a, "--date-order"))
-         set_sorting(&s, GIT_SORT_TIME);
+         set_sorting(&s, git::RevWalker::sorting::time);
       else if (!strcmp(a, "--topo-order"))
-         set_sorting(&s, GIT_SORT_TOPOLOGICAL);
+         set_sorting(&s, git::RevWalker::sorting::topological);
       else if (!strcmp(a, "--reverse"))
-         set_sorting(&s, GIT_SORT_REVERSE);
+         set_sorting(&s, git::RevWalker::sorting::reverse);
       else if (!strncmp(a, "--git-dir=", strlen("--git-dir=")))
          s.repodir = a + strlen("--git-dir=");
       else if (match_int_arg(&opt.skip, a, "--skip=", 0))
@@ -314,7 +314,7 @@ int main(int argc, char *argv[])
    count = 0;
    int printed = 0;
 
-   while (git::Commit commit = s.walker->next(*s.repo))
+   while (git::Commit commit = s.walker->next())
    {
       int parents = commit.parents_num();
       if (parents < opt.min_parents)

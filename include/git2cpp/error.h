@@ -1,326 +1,183 @@
 #pragma once
 
 #include <stdexcept>
-#include <sstream>
+
+#include <boost/format.hpp>
 
 #include "id_to_str.h"
 
 namespace git
 {
-    struct repository_open_error : std::exception
-    {
-        virtual const char * what() const noexcept override 
-        {
-            return "Could not open repository";
-        }
-    };
+   struct error_t : std::runtime_error
+   {
+      explicit error_t(std::string const & message) : std::runtime_error(message) {}
+      explicit error_t(boost::format const & message) : error_t(str(message)) {}
+   };
 
-    struct repository_init_error : std::exception
-    {
-        explicit repository_init_error(std::string const & dir)
-            : message_("Could not initialize repository on path " + dir)
-        {}
+   struct repository_open_error : error_t
+   {
+      repository_open_error() : error_t("Could not open repository") {}
+   };
 
-        virtual const char * what() const noexcept override
-        {
-            return message_.c_str();
-        }
+   struct repository_init_error : error_t
+   {
+      explicit repository_init_error(std::string const & dir)
+         : error_t("Could not initialize repository on path " + dir)
+      {}
+   };
 
-    private:
-        std::string message_;
-    };
+   struct index_open_error : error_t
+   {
+      index_open_error() : error_t("Could not open repository index") {}
+   };
 
-    struct index_open_error : std::exception
-    {
-        virtual const char * what() const noexcept override 
-        {
-            return "Could not open repository index";
-        }
-    };
+   struct odb_open_error : error_t
+   {
+      odb_open_error() : error_t("Could not open ODB") {}
+   };
 
-    struct odb_open_error : std::exception
-    {
-        virtual const char * what() const noexcept override 
-        {
-            return "Could not open ODB";
-        }
-    };
+   struct commit_lookup_error : error_t
+   {
+      explicit commit_lookup_error(git_oid const & id)
+         : error_t("Could not lookup commit " + id_to_str(id))
+      {}
+   };
 
-    struct commit_lookup_error : std::exception
-    {
-        explicit commit_lookup_error(git_oid const * id)
-            : message_("Could not lookup commit " + id_to_str(id)) 
-        {}
+   struct tree_lookup_error : error_t
+   {
+      explicit tree_lookup_error(git_oid const & id)
+         : error_t("Could not lookup tree " + id_to_str(id))
+      {}
+   };
 
-        virtual const char * what() const noexcept override
-        {
-            return message_.c_str();
-        }
+   struct tag_lookup_error : error_t
+   {
+      explicit tag_lookup_error(git_oid const & id)
+         : error_t("Could not lookup tag " + id_to_str(id))
+      {}
+   };
 
-    private:
-        std::string message_;
-    };
+   struct commit_parent_error : error_t
+   {
+      explicit commit_parent_error(git_oid const & id)
+         : error_t("Could not get parent for commit " + id_to_str(id))
+      {}
+   };
 
-    struct tree_lookup_error : std::exception
-    {
-        explicit tree_lookup_error(git_oid const * id)
-            : message_("Could not lookup tree " + id_to_str(id)) 
-        {}
+   struct commit_tree_error : error_t
+   {
+      explicit commit_tree_error(git_oid const & id)
+         : error_t("Could not get tree for commit " + id_to_str(id))
+      {}
+   };
 
-        virtual const char * what() const noexcept override
-        {
-            return message_.c_str();
-        }
+   struct revparse_error : error_t
+   {
+      explicit revparse_error(const char * spec)
+         : error_t(boost::format("Could not resolve %1%") % spec)
+      {}
+   };
 
-    private:
-        std::string message_;
-    };
+   struct odb_read_error : error_t
+   {
+      explicit odb_read_error(git_oid const & id)
+         : error_t("Could not find obj " + id_to_str(id))
+      {}
+   };
 
-    struct tag_lookup_error : std::exception
-    {
-        explicit tag_lookup_error(git_oid const * id)
-            : message_("Could not lookup tag " + id_to_str(id))
-        {}
+   struct odb_write_error : error_t
+   {
+      odb_write_error() : error_t("odb write error") {}
+   };
 
-        virtual const char * what() const noexcept override
-        {
-            return message_.c_str();
-        }
+   struct file_not_found_error : error_t
+   {
+      explicit file_not_found_error(const char * filepath)
+         : error_t(boost::format("file path \"%1%\" not found") % filepath)
+      {}
+   };
 
-    private:
-        std::string message_;
-    };
+   struct ambiguous_path_error : error_t
+   {
+      explicit ambiguous_path_error(const char * filepath)
+         : error_t(boost::format("file path \"%1%\" is ambiguous") % filepath)
+      {}
+   };
 
-    struct commit_parent_error : std::exception
-    {
-        explicit commit_parent_error(git_oid const * id)
-            : message_("Could not get parent for commit " + id_to_str(id)) 
-        {}
+   struct unknown_file_status_error : error_t
+   {
+      explicit unknown_file_status_error(const char * filepath)
+         : error_t(boost::format("unknown error during getting status for file \"%1%\"") % filepath)
+      {}
+   };
 
-        virtual const char * what() const noexcept override
-        {
-            return message_.c_str();
-        }
+   struct pathspec_new_error : error_t
+   {
+      pathspec_new_error() : error_t("Could not build pathspec") {}
+   };
 
-    private:
-        std::string message_;
-    };
+   struct revwalk_new_error : error_t
+   {
+      revwalk_new_error() : error_t("Could not create revision walker") {}
+   };
 
-    struct commit_tree_error : std::exception
-    {
-        explicit commit_tree_error(git_oid const * id)
-            : message_("Could not get tree for commit " + id_to_str(id)) 
-        {}
+   struct invalid_head_error : error_t
+   {
+      invalid_head_error() : error_t("Could not find repository HEAD") {}
+   };
 
-        virtual const char * what() const noexcept override
-        {
-            return message_.c_str();
-        }
+   struct non_commit_object_error : error_t
+   {
+      explicit non_commit_object_error(git_oid const & id)
+         : error_t(str(boost::format("object %1% is not a commit") % id_to_str(id)))
+      {}
+   };
 
-    private:
-        std::string message_;
-    };
+   struct unknown_get_current_branch_error : error_t
+   {
+      unknown_get_current_branch_error() : error_t("failed to get current branch") {}
+   };
 
-    struct revparse_error : std::exception
-    {
-        explicit revparse_error(const char * spec)
-        {
-            std::ostringstream ss;
-            ss << "Could not resolve " << spec;
-            message_ = ss.str();
-        }
+   struct get_status_error : error_t
+   {
+      get_status_error() : error_t("Could not get status") {}
+   };
 
-        virtual const char * what() const noexcept override
-        {
-            return message_.c_str();
-        }
+   struct signature_create_error : error_t
+   {
+      signature_create_error()
+         : error_t("Unable to create a commit signature."
+                   " Perhaps 'user.name' and 'user.email' are not set")
+      {}
+   };
 
-    private:
-        std::string message_;
-    };
+   struct index_write_tree_error : error_t
+   {
+      index_write_tree_error() : error_t("Unable to write tree from index") {}
+   };
 
-    struct odb_read_error : std::exception
-    {
-        explicit odb_read_error(git_oid const * id)
-            : message_("Could not find obj " + id_to_str(id)) 
-        {}
+   struct index_write_error : error_t
+   {
+      index_write_error() : error_t("Unable to write index") {}
+   };
 
-        virtual const char * what() const noexcept override
-        {
-            return message_.c_str();
-        }
+   struct commit_create_error : error_t
+   {
+      commit_create_error() : error_t("Could not create commit") {}
+   };
 
-    private:
-        std::string message_;
-    };
+   struct merge_base_error : error_t
+   {
+      merge_base_error(git_oid const & c1, git_oid const & c2)
+         : error_t(boost::format("Could not find merge base for commits %1% and % 2%")
+                   % id_to_str(c1, 8)
+                   % id_to_str(c2, 8))
+      {}
+   };
 
-    struct odb_write_error : std::exception
-    {
-        virtual const char * what() const noexcept override
-        {
-            return "odb write error";
-        }
-    };
-
-    struct file_not_found_error : std::exception
-    {
-        explicit file_not_found_error(const char * filepath)
-        {
-            std::ostringstream ss;
-            ss << "file path \"" << filepath << "\" not found";
-            message_ = ss.str();
-        }
-
-        virtual const char * what() const noexcept override
-        {
-            return message_.c_str();
-        }
-
-    private:
-        std::string message_;
-    };
-
-    struct ambiguous_path_error : std::exception
-    {
-        explicit ambiguous_path_error(const char * filepath)
-        {
-            std::ostringstream ss;
-            ss << "file path \"" << filepath << "\" is ambiguous";
-            message_ = ss.str();
-        }
-
-        virtual const char * what() const noexcept override
-        {
-            return message_.c_str();
-        }
-
-    private:
-        std::string message_;
-    };
-
-    struct unknown_file_status_error : std::exception
-    {
-        explicit unknown_file_status_error(const char * filepath)
-        {
-            std::ostringstream ss;
-            ss << "unknown error during getting status for file \"" << filepath;
-            message_ = ss.str();
-        }
-
-        virtual const char * what() const noexcept override
-        {
-            return message_.c_str();
-        }
-
-    private:
-        std::string message_;
-    };
-
-    struct pathspec_new_error : std::exception
-    {
-        virtual const char * what() const noexcept override 
-        {
-            return "Could not build pathspec";
-        }
-    };
-
-    struct revwalk_new_error : std::exception
-    {
-        virtual const char * what() const noexcept override 
-        {
-            return "Could not create revision walker";
-        }
-    };
-
-    struct invalid_head_error : std::exception
-    {
-        virtual const char * what() const noexcept override 
-        {
-            return "Could not find repository HEAD";
-        }
-    };
-
-    struct non_commit_object_error : std::exception
-    {
-        explicit non_commit_object_error(git_oid const * id)
-        {
-            std::ostringstream ss;
-            ss << "object " << id_to_str(id) << " is not a commit";
-            message_ = ss.str();
-        }
-
-        virtual const char * what() const noexcept override
-        {
-            return message_.c_str();
-        }
-
-    private:
-        std::string message_;
-    };
-    
-    struct unknown_get_current_branch_error : std::exception
-    {
-        virtual const char * what() const noexcept override
-        {
-            return "failed to get current branch"; 
-        }
-    };
-
-    struct get_status_error : std::exception
-    {
-        virtual const char * what() const noexcept override
-        {
-            return "Could not get status"; 
-        }
-    };
-
-    struct signature_create_error : std::exception
-    {
-        virtual const char * what() const noexcept override
-        {
-		    return  "Unable to create a commit signature."
-                    " Perhaps 'user.name' and 'user.email' are not set";
-        }
-    };
-
-    struct index_write_tree_error : std::exception
-    {
-        virtual const char * what() const noexcept override
-        {
-            return "Unable to write tree from index";
-        }
-    };
-
-    struct index_write_error : std::exception
-    {
-        virtual const char * what() const noexcept override
-        {
-            return "Unable to write index";
-        }
-    };
-
-    struct commit_create_error : std::exception
-    {
-        virtual const char * what() const noexcept override
-        {
-		    return "Could not create commit"; 
-        }
-    };
-
-    struct merge_base_error : std::exception
-    {
-        virtual const char * what() const noexcept override
-        {
-		    return "Could not find merge base"; 
-        }
-    };
-
-    struct config_open_error : std::exception
-    {
-        virtual const char * what() const noexcept override
-        {
-            return "Could not open config";
-        }
-    };
+   struct config_open_error : error_t
+   {
+      config_open_error() : error_t("Could not open config") {}
+   };
 }
 

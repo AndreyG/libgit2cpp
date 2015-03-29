@@ -59,22 +59,22 @@ namespace git
         return Signature(repo_);
     }
 
-    Commit Repository::commit_lookup(git_oid const * oid) const
+    Commit Repository::commit_lookup(git_oid const & oid) const
     {
         return Commit(oid, *this);
     }
 
-    Tree Repository::tree_lookup(git_oid const * oid) const
+    Tree Repository::tree_lookup(git_oid const & oid) const
     {
         return Tree(oid, repo_);
     }
 
-    Tag Repository::tag_lookup(git_oid const * oid) const
+    Tag Repository::tag_lookup(git_oid const & oid) const
     {
         return Tag(oid, *this);
     }
 
-    Blob Repository::blob_lookup(git_oid const * oid) const
+    Blob Repository::blob_lookup(git_oid const & oid) const
     {
         return Blob(oid, repo_);
     }
@@ -182,29 +182,32 @@ namespace git
 
     RevWalker Repository::rev_walker() const
     {
-        return RevWalker(repo_);
+        return RevWalker(*this);
     }
 
     git_oid Repository::merge_base(Revspec::Range const & range) const
     {
         git_oid res;
-        if (git_merge_base(&res, repo_, range.from.id(), range.to.id()))
-            throw merge_base_error();
+        if (git_merge_base(&res, repo_, &range.from.id(), &range.to.id()))
+            throw merge_base_error(range.from.id(), range.to.id());
         return res;
     }
 
     Reference Repository::head() const
     {
         git_reference * head;
-        auto error = git_repository_head(&head, repo_);
-        if (error == GIT_EUNBORNBRANCH)
+        switch (auto error = git_repository_head(&head, repo_))
+        {
+        case GIT_EUNBORNBRANCH:
             throw non_existing_branch_error();
-        else if (error == GIT_ENOTFOUND)
+        case GIT_ENOTFOUND:
             throw missing_head_error();
-        else if (error)
-            throw unknown_get_current_branch_error();
-        else
-            return Reference(head);
+        default:
+           if (error == 0)
+              return Reference(head);
+           else
+              throw unknown_get_current_branch_error();
+        }
     }
 
     Reference Repository::ref(const char * name) const

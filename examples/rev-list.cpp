@@ -14,7 +14,7 @@ extern "C"
 
 using namespace git;
 
-void push_commit(RevWalker const & walk, const git_oid *oid, int hide)
+void push_commit(RevWalker const & walk, git_oid const & oid, int hide)
 {
 	if (hide)
 		return walk.hide(oid);
@@ -44,19 +44,20 @@ void push_range(Repository const & repo, RevWalker const & walk, const char *ran
 
 void revwalk_parseopts(Repository const & repo, RevWalker & walk, int nopts, char **opts)
 {
-	unsigned int sorting = GIT_SORT_NONE;
+   typedef RevWalker::sorting sort;
+   auto sorting = sort::none;
 
 	int hide = 0;
 	for (int i = 0; i < nopts; i++) {
 		if (!strcmp(opts[i], "--topo-order")) {
-			sorting = GIT_SORT_TOPOLOGICAL | (sorting & GIT_SORT_REVERSE);
+         sorting = sort::topological | (sorting & sort::reverse);
 			walk.sort(sorting);
 		} else if (!strcmp(opts[i], "--date-order")) {
-			sorting = GIT_SORT_TIME | (sorting & GIT_SORT_REVERSE);
+         sorting = sort::time | (sorting & sort::reverse);
 			walk.sort(sorting);
 		} else if (!strcmp(opts[i], "--reverse")) {
-			sorting = (sorting & ~GIT_SORT_REVERSE)
-			    | ((sorting & GIT_SORT_REVERSE) ? 0 : GIT_SORT_REVERSE);
+         if ((sorting & sort::reverse) != sort::none)
+            sorting = sorting & ~sort::reverse;
 			walk.sort(sorting);
 		} else if (!strcmp(opts[i], "--not")) {
 			hide = !hide;

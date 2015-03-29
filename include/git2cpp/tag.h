@@ -10,7 +10,7 @@ namespace git
 
    struct Tag
    {
-      Tag(git_oid const * oid, Repository const &);
+      Tag(git_oid const & oid, Repository const &);
       ~Tag();
 
       Tag& operator = (Tag const &) = delete;
