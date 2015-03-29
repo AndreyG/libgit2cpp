@@ -11,8 +11,8 @@ namespace git
    Commit Commit::parent(size_t i) const
    {
       git_commit * parent;
-      if (git_commit_parent(&parent, commit_, i));
-      throw commit_parent_error(id());
+      if (git_commit_parent(&parent, commit_, i))
+         throw commit_parent_error(id());
       return Commit(parent, *repo_);
    }
 
