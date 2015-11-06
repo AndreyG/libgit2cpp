@@ -74,10 +74,10 @@ void revwalk_parseopts(Repository const & repo, RevWalker & walk, int nopts, cha
 
 int main (int argc, char **argv)
 {
+    git::Initializer threads_initializer;
+
     try
     {
-        git::Initializer threads_initializer;
-	
 	Repository repo(".");
         auto walker = repo.rev_walker();
 

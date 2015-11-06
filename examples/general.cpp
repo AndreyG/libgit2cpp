@@ -67,11 +67,11 @@ int main (int argc, char** argv)
     assert(argc >= 2);
     const char *repo_path = argv[1];
 
+    git::Initializer threads_initializer;
+	
     try
     {
-        git::Initializer threads_initializer;
-	
-	Repository repo(repo_path);
+        Repository repo(repo_path);
 
         // ### SHA-1 Value Conversions
 
