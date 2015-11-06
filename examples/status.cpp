@@ -270,7 +270,7 @@ void print_short(Repository const & repo, Status const & status)
 			unsigned int smstatus = 0;
 
 			if (!repo.submodule_lookup(sm, s->index_to_workdir->new_file.path) &&
-				!git_submodule_status(&smstatus, sm))
+				!git_submodule_status(&smstatus, repo.ptr(), git_submodule_name(sm), git_submodule_ignore(sm)))
 			{
 				if (smstatus & GIT_SUBMODULE_STATUS_WD_MODIFIED)
 					extra = " (new commits)";
