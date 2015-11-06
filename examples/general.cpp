@@ -31,8 +31,10 @@
 #include <iostream>
 #include <cassert>
 
+#include "git2cpp/initializer.h"
 #include "git2cpp/repo.h"
 #include "git2cpp/config.h"
+
 using namespace git;
 
 // Almost all libgit2 functions return 0 on success or negative on error.
@@ -59,7 +61,7 @@ int main (int argc, char** argv)
   // simplest.  There are also [methods][me] for specifying the index file
   // and work tree locations, here we assume they are in the normal places.
 	//
-	// (Try running this program against tests-clar/resources/testrepo.git.)
+	// (Try running this program against libgit2/tests/resources/testrepo.git/)
   //
   // [me]: http://libgit2.github.com/libgit2/#HEAD/group/repository
     assert(argc >= 2);
@@ -67,7 +69,9 @@ int main (int argc, char** argv)
 
     try
     {
-        Repository repo(repo_path);
+        git::Initializer threads_initializer;
+	
+	Repository repo(repo_path);
 
         // ### SHA-1 Value Conversions
 
