@@ -180,7 +180,7 @@ static void print_commit(git::Commit const & commit)
    printf("\n");
 }
 
-void print_diff(git_diff_delta const &, git_diff_hunk const &, git_diff_line const & line)
+void print_diff(git_diff_delta const &, const git_diff_hunk *, git_diff_line const & line)
 {
    fwrite(line.content, 1, line.content_len, stdout);
 }
@@ -208,7 +208,7 @@ static int match_with_parent(git::Commit const & commit, int i, git_diff_options
    auto parent = commit.parent(i);
    auto c_tree = commit.tree();
    auto p_tree = parent.tree();
-   auto diff = git::diff(commit.owner(), p_tree, c_tree, opts);
+   auto diff = git::diff_tree_to_tree(commit.owner(), p_tree, c_tree, opts);
 
    return diff.deltas_num() > 0;
 }
@@ -316,7 +316,7 @@ int main(int argc, char *argv[])
 
    while (git::Commit commit = s.walker->next())
    {
-      int parents = commit.parents_num();
+      const int parents = commit.parents_num();
       if (parents < opt.min_parents)
          continue;
       if (opt.max_parents > 0 && parents > opt.max_parents)
@@ -367,7 +367,7 @@ int main(int argc, char *argv[])
             a = commit.parent(0).tree();
          }
 
-         git::diff(commit.owner(), a, b, diffopts).print(git::Diff::format::patch, print_diff);
+         git::diff_tree_to_tree(commit.owner(), a, b, diffopts).print(git::Diff::format::patch, print_diff);
       }
    }
 
