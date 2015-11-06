@@ -319,7 +319,7 @@ void print_short(Repository const & repo, Status const & status)
 
 int main(int argc, char *argv[])
 {
-	auto_git_initializer;
+	git::Initializer threads_initializer;
 	
 	int i, npaths = 0, format = FORMAT_DEFAULT, zterm = 0, showbranch = 0;
 	git_status_options opt = GIT_STATUS_OPTIONS_INIT;
