@@ -1,7 +1,3 @@
-extern "C"
-{
-#include <git2/revwalk.h>
-}
 
 #include "git2cpp/error.h"
 #include "git2cpp/revwalker.h"
