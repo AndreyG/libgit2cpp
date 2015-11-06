@@ -15,6 +15,7 @@ extern "C"
 #include <git2/submodule.h>
 }
 
+#include "git2cpp/initializer.h"
 #include "git2cpp/repo.h"
 
 using namespace git;
@@ -318,6 +319,8 @@ void print_short(Repository const & repo, Status const & status)
 
 int main(int argc, char *argv[])
 {
+	auto_git_initializer;
+	
 	int i, npaths = 0, format = FORMAT_DEFAULT, zterm = 0, showbranch = 0;
 	git_status_options opt = GIT_STATUS_OPTIONS_INIT;
 	const char *repodir = ".";
