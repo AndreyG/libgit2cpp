@@ -40,7 +40,7 @@ namespace git
             assert(delta);
             assert(line);
             auto cb = reinterpret_cast<Diff::print_callback_t const *>(payload);
-            (*cb)(*delta, *hunk, *line);
+            (*cb)(*delta, hunk, *line);
             return 0;
         }
 

@@ -29,7 +29,7 @@ namespace git
       };
 
       typedef
-         std::function<void (git_diff_delta const &, git_diff_hunk const &, git_diff_line const &)>
+         std::function<void (git_diff_delta const &, const git_diff_hunk *, git_diff_line const &)>
          print_callback_t;
 
       void print(format, print_callback_t print_callback) const;
