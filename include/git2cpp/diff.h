@@ -10,7 +10,8 @@ extern "C"
 namespace git
 {
    struct Repository;
-
+   struct Tree;
+   
    struct Diff
    {
       size_t deltas_num() const;
@@ -52,9 +53,7 @@ namespace git
       git_diff * diff_;
    };
 
-   struct Tree;
-
-   Diff diff                   (Repository const &, Tree & a, Tree & b,  git_diff_options const &);
+   Diff diff_tree_to_tree      (Repository const &, Tree & a, Tree & b,  git_diff_options const &);
    Diff diff_to_index          (Repository const &, Tree &,              git_diff_options const &);
    Diff diff_index_to_workdir  (Repository const &,                      git_diff_options const &);
 }

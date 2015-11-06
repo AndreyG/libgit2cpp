@@ -6,10 +6,10 @@
 
 namespace git
 {
-    Diff diff(Repository const & repo, Tree & a, Tree & b, git_diff_options const & opts)
+    Diff diff_tree_to_tree(Repository const & repo, Tree & a, Tree & b, git_diff_options const & opts)
     {
         git_diff * diff;
-        auto op_res = git_diff_tree_to_tree(&diff, repo.ptr(), a.ptr(), b.ptr(), &opts);
+        const auto op_res = git_diff_tree_to_tree(&diff, repo.ptr(), a.ptr(), b.ptr(), &opts);
         assert(op_res == 0);
         return Diff(diff);
     }
@@ -17,7 +17,7 @@ namespace git
     Diff diff_to_index(Repository const & repo, Tree & t, git_diff_options const & opts)
     {
         git_diff * diff;
-        auto op_res = git_diff_tree_to_index(&diff, repo.ptr(), t.ptr(), nullptr, &opts);
+        const auto op_res = git_diff_tree_to_index(&diff, repo.ptr(), t.ptr(), nullptr, &opts);
         assert(op_res == 0);
         return Diff(diff);
     }
@@ -25,7 +25,7 @@ namespace git
     Diff diff_index_to_workdir(Repository const & repo, git_diff_options const & opts)
     {
         git_diff * diff;
-        auto op_res = git_diff_index_to_workdir(&diff, repo.ptr(), nullptr, &opts);
+        const auto op_res = git_diff_index_to_workdir(&diff, repo.ptr(), nullptr, &opts);
         assert(op_res == 0);
         return Diff(diff);
     }
