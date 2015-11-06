@@ -3,6 +3,7 @@
 
 #include <iostream>
 
+#include "git2cpp/initializer.h"
 #include "git2cpp/repo.h"
 #include "git2cpp/revwalker.h"
 
@@ -75,7 +76,9 @@ int main (int argc, char **argv)
 {
     try
     {
-        Repository repo(".");
+        git::Initializer threads_initializer;
+	
+	Repository repo(".");
         auto walker = repo.rev_walker();
 
         revwalk_parseopts(repo, walker, argc-1, argv+1);
