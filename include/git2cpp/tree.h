@@ -45,6 +45,7 @@ namespace git
         {
             tree_ = other.tree_;
             other.tree_ = nullptr;
+            return *this;
         }
 
         Tree                (Tree const &) = delete;
