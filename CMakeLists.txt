@@ -40,3 +40,5 @@ foreach (example ${examples})
     add_executable(${example} examples/${example}.cpp)
     target_link_libraries(${example} git2cpp)
 endforeach(example)
+
+file(COPY test.sh DESTINATION . FILE_PERMISSIONS ${EXE_PERM})
