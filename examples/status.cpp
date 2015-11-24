@@ -15,6 +15,7 @@ extern "C"
 #include <git2/submodule.h>
 }
 
+#include "git2cpp/initializer.h"
 #include "git2cpp/repo.h"
 
 using namespace git;
@@ -270,7 +271,7 @@ void print_short(Repository const & repo, Status const & status)
 			unsigned int smstatus = 0;
 
 			if (!repo.submodule_lookup(sm, s->index_to_workdir->new_file.path) &&
-				!git_submodule_status(&smstatus, sm))
+				!git_submodule_status(&smstatus, repo.ptr(), git_submodule_name(sm), git_submodule_ignore(sm)))
 			{
 				if (smstatus & GIT_SUBMODULE_STATUS_WD_MODIFIED)
 					extra = " (new commits)";
@@ -318,6 +319,8 @@ void print_short(Repository const & repo, Status const & status)
 
 int main(int argc, char *argv[])
 {
+	git::Initializer threads_initializer;
+	
 	int i, npaths = 0, format = FORMAT_DEFAULT, zterm = 0, showbranch = 0;
 	git_status_options opt = GIT_STATUS_OPTIONS_INIT;
 	const char *repodir = ".";

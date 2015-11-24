@@ -1,9 +1,13 @@
 #pragma once
 
+extern "C"
+{
+#include <git2/revwalk.h>
+}
+
 #include "commit.h"
 
 struct git_repository;
-struct git_revwalk;
 
 namespace git
 {
@@ -16,10 +20,10 @@ namespace git
 
       enum class sorting : unsigned int
       {
-         none        = 0,
-         topological = 1 << 0,
-         time        = 1 << 1,
-         reverse     = 1 << 2
+         none        = GIT_SORT_NONE,
+         topological = GIT_SORT_TOPOLOGICAL,
+         time        = GIT_SORT_TIME,
+         reverse     = GIT_SORT_REVERSE
       };
 
       friend sorting operator ~ (sorting);

@@ -124,7 +124,8 @@ namespace git
     struct branch_iterator
     {
         branch_iterator(Repository const & repo, branch_type type)
-            : type_(convert(type))
+            : type_(convert(type)),
+	    m_DoneFlag(false)
         {
             git_branch_iterator_new(&base_, repo.ptr(), type_);
             ++(*this);
@@ -135,16 +136,25 @@ namespace git
             git_branch_iterator_free(base_);
         }
 
-        explicit operator bool () const { return ref_.is_initialized(); }
+        explicit operator bool () const { return ref_.is_initialized() && !m_DoneFlag; }
 
         void operator ++ ()
         {
             git_branch_t type;
             git_reference * ref;
-            if (git_branch_next(&ref, &type, base_) == 0)
+            const int	err = git_branch_next(&ref, &type, base_);
+            if (err == 0)
             {
                 assert(type == type_);
                 ref_ = boost::in_place(ref);
+            }
+            else if (err == GIT_ITEROVER)
+            {
+		m_DoneFlag = true;
+            }
+            else
+            {
+                throw std::logic_error("unknown git_branch_next error");
             }
         }
 
@@ -170,13 +180,14 @@ namespace git
         git_branch_t type_;
         git_branch_iterator * base_;
         boost::optional<Reference> ref_;
+	bool m_DoneFlag;
     };
 
     std::vector<std::string> Repository::branches(branch_type type) const
     {
         std::vector<std::string> res;
         for (branch_iterator it(*this, type); it; ++it)
-            it->name();
+            res.push_back(it->name());
         return res;
     }
 

@@ -37,6 +37,8 @@ namespace git
                             , git_diff_line const * line
                             , void * payload )
         {
+            assert(delta);
+            assert(line);
             auto cb = reinterpret_cast<Diff::print_callback_t const *>(payload);
             (*cb)(*delta, *hunk, *line);
             return 0;

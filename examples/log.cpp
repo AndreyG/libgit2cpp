@@ -296,12 +296,12 @@ int main(int argc, char *argv[])
    opt.max_parents = -1;
    opt.limit = -1;
 
+   git::Initializer threads_initializer;
+
    log_state s;
 
    int count = 0;
    int parsed_options_num = parse_options(argc, argv, s, opt, count);
-
-   git::Initializer threads_initializer;
 
    if (!count)
       add_revision(&s, NULL);

@@ -52,9 +52,9 @@ void parse_revision(parse_state & ps, const char *revstr)
 
 int main(int argc, char *argv[])
 {
-	parse_state ps;
-
     Initializer threads_initalizer;
+
+	parse_state ps;
 
 	for (int i = 1; i < argc; ++i) {
 		const char * a = argv[i];

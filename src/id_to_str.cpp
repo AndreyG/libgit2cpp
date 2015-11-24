@@ -14,9 +14,9 @@ namespace git
 
     std::string id_to_str(git_oid const & oid, size_t digits_num)
     {
-        char buf[digits_num + 1];
+        char buf[GIT_OID_HEXSZ + 1];
         git_oid_tostr(buf, sizeof(buf), &oid);
-        return std::string(buf);
+        return std::string(buf, buf + digits_num);
     }
 
     git_oid str_to_id(const char *str)
