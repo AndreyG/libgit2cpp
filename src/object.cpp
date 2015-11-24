@@ -68,7 +68,7 @@ namespace git
 
     Blob Object::to_blob() /*&&*/
     {
-       assert(type() == GIT_OBJ_COMMIT);
+       assert(type() == GIT_OBJ_BLOB);
        Blob res(reinterpret_cast<git_blob *>(obj_));
        obj_ = nullptr;
        return res;
