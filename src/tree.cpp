@@ -18,6 +18,11 @@ namespace git
         , repo_(&repo)
     {}
 
+    Tree::Tree()
+       : tree_(nullptr)
+       , repo_(nullptr)
+    {}
+
     Tree::Tree(Tree && other)
         : tree_(other.tree_)
         , repo_(other.repo_)
@@ -52,12 +57,12 @@ namespace git
 
     Tree::BorrowedEntry Tree::operator[] (size_t i) const
     {
-        return git_tree_entry_byindex(tree_, i);
+        return BorrowedEntry(git_tree_entry_byindex(tree_, i));
     }
 
     Tree::BorrowedEntry Tree::operator[] (std::string const & filename) const
     {
-        return git_tree_entry_byname(tree_, filename.c_str());
+        return BorrowedEntry(git_tree_entry_byname(tree_, filename.c_str()));
     }
 
     Tree::OwnedEntry Tree::find(const char * path) const
@@ -90,5 +95,10 @@ namespace git
        git_object * obj;
        git_tree_entry_to_object(&obj, repo_->ptr(), entry_);
        return Object(obj, *repo_).to_tree();
+    }
+
+    const char * Tree::BorrowedEntry::name() const
+    {
+       return git_tree_entry_name(entry_);
     }
 }

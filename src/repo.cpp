@@ -292,10 +292,10 @@ namespace git
         return res;
     }
 
-    Object Repository::entry_to_object(git_tree_entry const * entry) const
+    Object Repository::entry_to_object(Tree::BorrowedEntry entry) const
     {
         git_object * obj;
-        git_tree_entry_to_object(&obj, repo_, entry);
+        git_tree_entry_to_object(&obj, repo_, entry.ptr());
         return Object(obj, *this);
     }
 

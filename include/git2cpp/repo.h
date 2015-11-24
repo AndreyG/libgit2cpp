@@ -48,7 +48,7 @@ namespace git
 
         git_status_t file_status(const char * filepath) const;
 
-        Object entry_to_object(git_tree_entry const * entry) const;
+        Object entry_to_object(Tree::BorrowedEntry) const;
 
         Index   index() const;
         Odb     odb()   const;

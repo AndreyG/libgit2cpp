@@ -8,7 +8,22 @@ namespace git
 
     struct Tree
     {
-        typedef git_tree_entry const * BorrowedEntry;
+        struct BorrowedEntry
+        {
+           const char * name() const;
+
+           git_tree_entry const * ptr() const { return entry_; }
+
+        private:
+           friend struct Tree;
+
+           explicit BorrowedEntry(git_tree_entry const * entry)
+              : entry_(entry)
+           {}
+
+        private:
+           git_tree_entry const * entry_;
+        };
 
         struct OwnedEntry
         {
@@ -48,6 +63,7 @@ namespace git
         Tree(git_oid const &, Repository const &);
         Tree(git_tree *,      Repository const &);
 
+        Tree();
         ~Tree();
 
         Tree            (Tree &&);

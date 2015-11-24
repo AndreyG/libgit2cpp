@@ -285,13 +285,13 @@ int main (int argc, char** argv)
                 size_t cnt = tree.entrycount(); // 3
                 printf("tree entries: %d\n", (int)cnt);
 
-                git_tree_entry const * entry = tree[0];
-                printf("Entry name: %s\n", git_tree_entry_name(entry)); // "hello.c"
+                auto entry = tree[0];
+                printf("Entry name: %s\n", entry.name()); // "hello.c"
 
                 // You can also access tree entries by name if you know the name of the
                 // entry you're looking for.
                 entry = tree["README"];
-                git_tree_entry_name(entry); // "hello.c"
+                entry.name(); // "hello.c"
 
                 // Once you have the entry object, you can access the content or subtree
                 // (or commit, in the case of submodules) that it points to.  You can also
