@@ -16,6 +16,12 @@ namespace git
         git_blob_lookup(&blob_, repo, &oid);
     }
 
+    Blob::Blob(Blob && other)
+       : blob_(other.blob_)
+    {
+       other.blob_ = nullptr;
+    }
+
     Blob::~Blob()
     {
         git_blob_free(blob_);
