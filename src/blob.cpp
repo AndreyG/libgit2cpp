@@ -7,6 +7,10 @@ extern "C"
 
 namespace git
 {
+    Blob::Blob(git_blob * blob)
+       : blob_(blob)
+    {}
+
     Blob::Blob(git_oid const & oid, git_repository *repo)
     {
         git_blob_lookup(&blob_, repo, &oid);
@@ -17,7 +21,7 @@ namespace git
         git_blob_free(blob_);
     }
 
-    git_off_t Blob::size() const
+    std::size_t Blob::size() const
     {
         return git_blob_rawsize(blob_);
     }

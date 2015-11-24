@@ -1,9 +1,6 @@
 #pragma once
 
-extern "C"
-{
-#include <git2/types.h>
-}
+#include <cstddef>
 
 struct git_blob;
 struct git_repository;
@@ -13,10 +10,11 @@ namespace git
 {
     struct Blob
     {
+        explicit Blob(git_blob *);
         Blob(git_oid const & oid, git_repository * repo);
         ~Blob();
 
-        git_off_t       size()      const;
+        std::size_t     size()      const;
         const void *    content()   const;
 
         Blob& operator =    (Blob const &) = delete;
