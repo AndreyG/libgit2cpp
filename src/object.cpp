@@ -50,20 +50,28 @@ namespace git
 
 #undef DEFINE_METHOD_AS
 
-    Tree Object::to_tree()
+    Tree Object::to_tree() /*&&*/
     {
         assert(type() == GIT_OBJ_TREE);
-        Tree res(reinterpret_cast<git_tree *>(obj_));
+        Tree res(reinterpret_cast<git_tree *>(obj_), *repo_);
         obj_ = nullptr;
         return res;
     }
 
-    Commit Object::to_commit()
+    Commit Object::to_commit() /*&&*/
     {
         assert(type() == GIT_OBJ_COMMIT);
         Commit res(reinterpret_cast<git_commit *>(obj_), *repo_);
         obj_ = nullptr;
         return res;
+    }
+
+    Blob Object::to_blob() /*&&*/
+    {
+       assert(type() == GIT_OBJ_COMMIT);
+       Blob res(reinterpret_cast<git_blob *>(obj_));
+       obj_ = nullptr;
+       return res;
     }
 }
 

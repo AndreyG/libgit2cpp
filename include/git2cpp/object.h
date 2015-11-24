@@ -1,11 +1,7 @@
 #pragma once
 
-extern "C"
-{
-#include <git2/types.h>
-}
-
 #include "commit.h"
+#include "blob.h"
 
 struct git_object;
 struct git_oid;
@@ -31,8 +27,9 @@ namespace git
       git_tree    const * as_tree()   const;
       git_tag     const * as_tag()    const;
 
-      Commit  to_commit();
-      Tree    to_tree();
+      Commit  to_commit()  /*&&*/;
+      Tree    to_tree()    /*&&*/;
+      Blob    to_blob()    /*&&*/;
 
       Object              (Object const &) = delete;
       Object& operator =  (Object const &) = delete;

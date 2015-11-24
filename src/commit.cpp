@@ -23,7 +23,7 @@ namespace git
       git_tree * tree;
       if (git_commit_tree(&tree, commit_))
          throw commit_tree_error(id());
-      return Tree(tree);
+      return Tree(tree, *repo_);
    }
 
    size_t Commit::parents_num() const

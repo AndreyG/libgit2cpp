@@ -66,7 +66,7 @@ namespace git
 
     Tree Repository::tree_lookup(git_oid const & oid) const
     {
-        return Tree(oid, repo_);
+        return Tree(oid, *this);
     }
 
     Tag Repository::tag_lookup(git_oid const & oid) const

@@ -4,62 +4,63 @@
 
 namespace git
 {
+    struct Repository;
+
     struct Tree
     {
+        typedef git_tree_entry const * BorrowedEntry;
+
+        struct OwnedEntry
+        {
+           ~OwnedEntry();
+
+           OwnedEntry               (OwnedEntry const &) = delete;
+           OwnedEntry&  operator =  (OwnedEntry const &) = delete;
+
+           OwnedEntry               (OwnedEntry &&);
+           OwnedEntry&  operator =  (OwnedEntry &&);
+
+           Tree as_tree() /*&&*/;
+
+        private:
+            friend struct Tree;
+
+            OwnedEntry(git_tree_entry * entry, Repository const & repo);
+
+        private:
+            git_tree_entry * entry_;
+            Repository const * repo_;
+        };
+
         git_tree const  * ptr() const   { return tree_; }
         git_tree        * ptr()         { return tree_; }
 
-        int pathspec_match(uint32_t flags, Pathspec const & ps)
-        {
-            return git_pathspec_match_tree(NULL, tree_, flags, ps.ptr());
-        }
+        int pathspec_match(uint32_t flags, Pathspec const & ps);
 
-        size_t entrycount() const
-        {
-            return git_tree_entrycount(tree_);
-        }
+        size_t entrycount() const;
 
-        git_tree_entry const * operator[] (size_t i) const
-        {
-            return git_tree_entry_byindex(tree_, i);
-        }
+        BorrowedEntry operator[] (size_t) const;
 
-        git_tree_entry const * operator[] (std::string const & filename) const
-        {
-            return git_tree_entry_byname(tree_, filename.c_str());
-        }
+        BorrowedEntry operator[] (std::string const & filename) const;
 
-        Tree(git_oid const & oid, git_repository * repo);
+        OwnedEntry find(const char * path) const;
 
-        explicit Tree(git_tree * tree = nullptr)
-            : tree_(tree)
-        {}
+        Tree(git_oid const &, Repository const &);
+        Tree(git_tree *,      Repository const &);
 
-        Tree(Tree && other)
-            : tree_(other.tree_)
-        {
-            other.tree_ = nullptr;
-        }
+        ~Tree();
 
-        Tree& operator =(Tree && other)
-        {
-            tree_ = other.tree_;
-            other.tree_ = nullptr;
-            return *this;
-        }
+        Tree            (Tree &&);
+        Tree& operator =(Tree &&);
 
-        Tree                (Tree const &) = delete;
-        Tree& operator =    (Tree const &) = delete; 
-
-        ~Tree()
-        {
-            git_tree_free(tree_);
-        }
+        Tree            (Tree const &) = delete;
+        Tree& operator =(Tree const &) = delete;
 
         explicit operator bool() const { return tree_; }
 
     private:
         git_tree * tree_;
+        Repository const * repo_;
     };
 }
 
