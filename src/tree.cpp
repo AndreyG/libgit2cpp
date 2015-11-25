@@ -101,4 +101,9 @@ namespace git
     {
        return git_tree_entry_name(entry_);
     }
+
+    git_oid const & Tree::BorrowedEntry::id() const
+    {
+       return *git_tree_entry_id(entry_);
+    }
 }
