@@ -9,6 +9,7 @@ extern "C"
 }
 
 #include <boost/optional.hpp>
+#include <boost/utility/in_place_factory.hpp>
 
 #include "git2cpp/repo.h"
 #include "git2cpp/error.h"
