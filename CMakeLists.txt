@@ -41,4 +41,6 @@ foreach (example ${examples})
     target_link_libraries(${example} git2cpp)
 endforeach(example)
 
-file(COPY test.sh DESTINATION . FILE_PERMISSIONS ${EXE_PERM})
+file(COPY test_examples.sh DESTINATION . FILE_PERMISSIONS ${EXE_PERM})
+
+file(COPY resources DESTINATION . )

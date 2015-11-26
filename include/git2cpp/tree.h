@@ -10,8 +10,10 @@ namespace git
     {
         struct BorrowedEntry
         {
-           const char *    name()   const;
+           explicit operator bool () const { return entry_; }
+	   const char *    name()   const;
            git_oid const & id()     const;
+	   git_otype       type() const;
 
            git_tree_entry const * ptr() const { return entry_; }
 

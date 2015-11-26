@@ -6,7 +6,7 @@
 # set -v
 
 if [ $# -eq 0 ] ; then
-    echo "usage: test.sh read_only_repo [writable_repo]" 1>&2
+    echo "usage: test.sh <repo>" 1>&2
 	return 1
 fi
 
@@ -41,7 +41,10 @@ pushd $REPO
 
 test branch
 test commit-graph-generator . "$CWD/commit-graph.dot"
-test log
+test diff --patch HEAD HEAD~1
+test diff --name-only HEAD HEAD~1
+test log -3 --name-only
+test log -3 --patch
 test rev-list --topo-order HEAD
 test rev-parse HEAD
 test showindex
@@ -49,16 +52,11 @@ test status
 
 popd
 
-# write test (use libgit2/tests/resources/testrepo.git)
+# tests on static repo
 
-RW_REPO=$2
+test_repo=resources/testrepo.git
 
-if [ -z $RW_REPO ]; then
-	echo "no writable repo specified"
-	exit 0
-fi
-
-pushd $RW_REPO
+pushd $test_repo
 
 test cat-file -t a8233120f6ad708f843d861ce2b7228ec4e3dec6
 test cat-file -p a8233120f6ad708f843d861ce2b7228ec4e3dec6
