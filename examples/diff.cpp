@@ -62,8 +62,6 @@ const char *colors[] = {
    "\033[36m" /* cyan */
 };
 
-// int diff_output(const git_diff_delta*, const git_diff_hunk*, const git_diff_line*, void*);
-
 static int check_str_param(const char *arg, const char *pattern, const char **val)
 {
    const size_t len = strlen(pattern);
@@ -89,21 +87,21 @@ static void usage(const char *message, const char *arg)
 /* --cached */
 /* nothing */
 
-Diff calc_diff(Repository & repo, Tree & t1, Tree & t2, const bool cached, git_diff_options const & opts)
+Diff calc_diff(Repository & repo, Tree & t1, Tree & t2, const bool cached, Diff::option const & opts)
 {
    if (t1 && t2)
-      return git::diff_tree_to_tree(repo, t1, t2, opts);
+      return Diff(repo, t1, t2, opts);
    else if (t1 && cached)
-      return diff_to_index(repo, t1, opts);
+      return Diff::diff_to_index(repo, t1, opts);
    else if (t1)
-      return std::move(diff_to_index(repo, t1, opts).merge(diff_index_to_workdir(repo, opts)));
+      return std::move(Diff::diff_to_index(repo, t1, opts).merge(Diff::diff_index_to_workdir(repo, opts)));
    else if (cached)
    {
       auto tree = resolve_to_tree(repo, "HEAD");
-      return diff_to_index(repo, tree, opts);
+      return Diff::diff_to_index(repo, tree, opts);
    }
    else
-      return diff_index_to_workdir(repo, opts);
+      return Diff::diff_index_to_workdir(repo, opts);
 }
 
 int main(int argc, char *argv[])
@@ -111,12 +109,9 @@ int main(int argc, char *argv[])
 	const char*		dir = ".";
 	bool			cached_f = false;
 	vector<const char *>	treestr_list;
-	git_diff_options	opts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options	findopts = GIT_DIFF_FIND_OPTIONS_INIT;
+	Diff::option		opts = Diff::option::normal;
+	Diff::find_option	findopts = Diff::find_option::none;
 	
-	// opts.flags = GIT_DIFF_NORMAL;
-	// findopts.flags = GIT_DIFF_FIND_BY_CONFIG;
-		
 	for (int i = 1; i < argc; ++i)
 	{
 		const char *a = argv[i];
@@ -129,11 +124,11 @@ int main(int argc, char *argv[])
 		else if (!strcmp(a, "--cached"))
 			cached_f = true;
 		else if (!strcmp(a, "--ignore-all-space"))
-			findopts.flags |= GIT_DIFF_FIND_IGNORE_WHITESPACE;
+			findopts = findopts | Diff::find_option::ignore_whitespace;
 		else if (!strcmp(a, "--find-renames"))
-			findopts.flags |= GIT_DIFF_FIND_RENAMES;
+			findopts = findopts | Diff::find_option::renames;
 		else if (!strcmp(a, "--find-copies"))
-			findopts.flags |= GIT_DIFF_FIND_COPIES;
+			findopts = findopts | Diff::find_option::copies;
 		else if (!strcmp(a, "--help") || !strcmp(a, "-h"))
 			usage(NULL, NULL);
 		else if (!check_str_param(a, "--git-dir=", &dir))
@@ -143,10 +138,10 @@ int main(int argc, char *argv[])
 	if (treestr_list.empty() && !cached_f)
 		usage(NULL, NULL);
 	
-	const bool		simil_f = (GIT_DIFF_FIND_RENAMES | GIT_DIFF_FIND_COPIES) & findopts.flags;
-	const Diff::format	fmt = simil_f ? Diff::format::name_only : Diff::format::patch;
-	
 	git::Initializer threads_initializer;
+	
+	const bool		simil_f = (~(Diff::find_option::renames | Diff::find_option::copies) & findopts) != findopts;
+	const Diff::format	fmt = simil_f ? Diff::format::name_only : Diff::format::patch;
 	
 	try
 	{
@@ -166,6 +161,7 @@ int main(int argc, char *argv[])
 		
 		auto	func = [](git_diff_delta const &delta, const git_diff_hunk *hunk, git_diff_line const &ln)
 		{
+			// (hunk may be null)
 			const string	status_s = s_DiffStatusMap.count(delta.status) ? s_DiffStatusMap.at(delta.status) : "<unknown>";
 				
 			cerr << " " << status_s << " " << delta.old_file.path;
@@ -180,7 +176,7 @@ int main(int argc, char *argv[])
 				case GIT_DELTA_MODIFIED:
 					if (hunk && hunk->header_len)
 						cerr << " lines " << string(hunk->header, hunk->header + (hunk->header_len - 1));
-					else	cerr << " null hunk";
+					else	cerr << " <null hunk>";
 					break;
 					
 				case GIT_DELTA_ADDED:
