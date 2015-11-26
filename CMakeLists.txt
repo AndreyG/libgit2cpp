@@ -42,3 +42,5 @@ foreach (example ${examples})
 endforeach(example)
 
 file(COPY test_examples.sh DESTINATION . FILE_PERMISSIONS ${EXE_PERM})
+
+file(COPY resources DESTINATION . )
