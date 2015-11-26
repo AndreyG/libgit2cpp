@@ -3,6 +3,8 @@
 #include <string.h>
 
 #include <memory>
+#include <unordered_map>
+
 #include <boost/optional.hpp>
 
 #include <git2/revwalk.h>
@@ -14,6 +16,21 @@
 #include "git2cpp/revspec.h"
 #include "git2cpp/revwalker.h"
 #include "git2cpp/diff.h"
+
+using namespace std;
+using namespace git;
+
+static const
+unordered_map<int, string>	s_DiffStatusMap
+{
+	{GIT_DELTA_UNMODIFIED,	"UNMODIFIED"},
+	{GIT_DELTA_ADDED,		"ADDED"},
+	{GIT_DELTA_DELETED,		"DELETED"},
+	{GIT_DELTA_MODIFIED,	"MODIFIED"},
+	{GIT_DELTA_RENAMED,		"RENAMED"},
+	{GIT_DELTA_COPIED,		"COPIED"},
+	{GIT_DELTA_IGNORED,		"IGNORED"},
+};
 
 static void usage(const char *message, const char *arg)
 {
@@ -27,36 +44,36 @@ static void usage(const char *message, const char *arg)
 
 struct log_state 
 {
-   std::string repodir = ".";
-   boost::optional<git::Repository> repo;
-   std::unique_ptr<git::RevWalker>  walker;
-   int hide = 0;
-   git::RevWalker::sorting sorting = git::RevWalker::sorting::time;
+   string                       repodir = ".";
+   boost::optional<Repository>  repo;
+   unique_ptr<RevWalker>        walker;
+   int                          hide = 0;
+   RevWalker::sorting           sorting = RevWalker::sorting::time;
 };
 
-static void set_sorting(struct log_state *s, git::RevWalker::sorting sort_mode)
+static void set_sorting(struct log_state *s, RevWalker::sorting sort_mode)
 {
    if (!s->repo) {
       s->repo = boost::in_place(s->repodir);
    }
 
    if (!s->walker)
-      s->walker.reset(new git::RevWalker(s->repo->rev_walker()));
+      s->walker.reset(new RevWalker(s->repo->rev_walker()));
 
-   if (sort_mode == git::RevWalker::sorting::reverse)
-      s->sorting = s->sorting ^ git::RevWalker::sorting::reverse;
+   if (sort_mode == RevWalker::sorting::reverse)
+      s->sorting = s->sorting ^ RevWalker::sorting::reverse;
    else
-      s->sorting = sort_mode | (s->sorting & git::RevWalker::sorting::reverse);
+      s->sorting = sort_mode | (s->sorting & RevWalker::sorting::reverse);
 
    s->walker->sort(s->sorting);
 }
 
-void push_rev(log_state * s, git::Commit const & commit, int hide)
+void push_rev(log_state * s, Commit const & commit, int hide)
 {
    hide = s->hide ^ hide;
 
    if (!s->walker) {
-      s->walker.reset(new git::RevWalker(s->repo->rev_walker()));
+      s->walker.reset(new RevWalker(s->repo->rev_walker()));
       s->walker->sort(s->sorting);
    }
 
@@ -68,12 +85,12 @@ void push_rev(log_state * s, git::Commit const & commit, int hide)
       s->walker->push(commit.id());
 }
 
-void push_rev(struct log_state *s, git::Object const & obj, int hide)
+void push_rev(struct log_state *s, Object const & obj, int hide)
 {
    hide = s->hide ^ hide;
 
    if (!s->walker) {
-      s->walker.reset(new git::RevWalker(s->repo->rev_walker()));
+      s->walker.reset(new RevWalker(s->repo->rev_walker()));
       s->walker->sort(s->sorting);
    }
 
@@ -94,14 +111,14 @@ void add_revision(struct log_state *s, const char *revstr)
    }
 
    if (!revstr) {
-      push_rev(s, git::Commit(), hide);
+      push_rev(s, Commit(), hide);
       return;
    }
 
    if (*revstr == '^')
       hide = !hide;
 
-   git::Revspec revs = (*revstr == '^')
+   Revspec revs = (*revstr == '^')
          ? s->repo->revparse_single(revstr + 1)
          : s->repo->revparse(revstr);
 
@@ -111,7 +128,7 @@ void add_revision(struct log_state *s, const char *revstr)
    }
    else
    {
-      git::Revspec::Range const & range = *revs.range();
+      Revspec::Range const & range = *revs.range();
       push_rev(s, range.to, hide);
 
       if ((revs.flags() & GIT_REVPARSE_MERGE_BASE) != 0) {
@@ -123,7 +140,8 @@ void add_revision(struct log_state *s, const char *revstr)
    }
 }
 
-static void print_time(const git_time *intime, const char *prefix)
+static
+void print_time(const git_time *intime, const char *prefix)
 {
    char sign, out[32];
    struct tm intm;
@@ -149,18 +167,19 @@ static void print_time(const git_time *intime, const char *prefix)
    printf("%s%s %c%02d%02d\n", prefix, out, sign, hours, minutes);
 }
 
-static void print_commit(git::Commit const & commit)
+static
+void print_commit(Commit const & commit)
 {
    int i, count;
    const git_signature *sig;
    const char *scan, *eol;
 
-   printf("commit %s\n", git::id_to_str(commit.id()).c_str());
+   printf("commit %s\n", id_to_str(commit.id()).c_str());
 
    if ((count = (int)commit.parents_num()) > 1) {
       printf("Merge:");
       for (i = 0; i < count; ++i) {
-         printf(" %s", git::id_to_str(commit.parent_id(i), 7).c_str());
+         printf(" %s", id_to_str(commit.parent_id(i), 7).c_str());
       }
       printf("\n");
    }
@@ -180,20 +199,16 @@ static void print_commit(git::Commit const & commit)
    printf("\n");
 }
 
-void print_diff(git_diff_delta const &, const git_diff_hunk *, git_diff_line const & line)
-{
-   fwrite(line.content, 1, line.content_len, stdout);
-}
-
-static int match_int(int *value, const char *arg, int allow_negative)
+static
+int match_int(int *value, const char *arg, int allow_negative)
 {
    char *found;
    *value = (int)strtol(arg, &found, 10);
    return (found && *found == '\0' && (allow_negative || *value >= 0));
 }
 
-static int match_int_arg(
-      int *value, const char *arg, const char *pfx, int allow_negative)
+static
+int match_int_arg(int *value, const char *arg, const char *pfx, int allow_negative)
 {
    size_t pfxlen = strlen(pfx);
    if (strncmp(arg, pfx, pfxlen) != 0)
@@ -203,31 +218,29 @@ static int match_int_arg(
    return 1;
 }
 
-static int match_with_parent(git::Commit const & commit, int i, git_diff_options const & opts)
+static
+int match_with_parent(Commit const & commit, int i)
 {
    auto parent = commit.parent(i);
    auto c_tree = commit.tree();
    auto p_tree = parent.tree();
-   auto diff = git::diff_tree_to_tree(commit.owner(), p_tree, c_tree, opts);
+   Diff diff(commit.owner(), p_tree, c_tree, Diff::option::normal);
 
    return diff.deltas_num() > 0;
 }
 
-struct log_options {
-   int show_diff;
-   int skip, limit;
-   int min_parents, max_parents;
-   git_time_t before;
-   git_time_t after;
-   char *author;
-   char *committer;
+struct log_options
+{
+   int          show_diff, show_names;
+   int          skip, limit;
+   int          min_parents, max_parents;
+   git_time_t   before;
+   git_time_t   after;
+   char         *author;
+   char         *committer;
 };
 
-int parse_options   ( int argc, char *argv[]
-                      , log_state & s
-                      , log_options & opt
-                      , int count
-                      )
+int parse_options(int argc, char *argv[], log_state &s, log_options &opt, int count)
 {
    int i = 1;
    for (; i < argc; ++i) {
@@ -248,11 +261,11 @@ int parse_options   ( int argc, char *argv[]
          break;
       }
       else if (!strcmp(a, "--date-order"))
-         set_sorting(&s, git::RevWalker::sorting::time);
+         set_sorting(&s, RevWalker::sorting::time);
       else if (!strcmp(a, "--topo-order"))
-         set_sorting(&s, git::RevWalker::sorting::topological);
+         set_sorting(&s, RevWalker::sorting::topological);
       else if (!strcmp(a, "--reverse"))
-         set_sorting(&s, git::RevWalker::sorting::reverse);
+         set_sorting(&s, RevWalker::sorting::reverse);
       else if (!strncmp(a, "--git-dir=", strlen("--git-dir=")))
          s.repodir = a + strlen("--git-dir=");
       else if (match_int_arg(&opt.skip, a, "--skip=", 0))
@@ -282,6 +295,8 @@ int parse_options   ( int argc, char *argv[]
          /* found valid --min_parents */;
       else if (!strcmp(a, "-p") || !strcmp(a, "-u") || !strcmp(a, "--patch"))
          opt.show_diff = 1;
+      else if (!strcmp(a, "--name-only") || !strcmp(a, "--name-status"))
+         opt.show_names = 1;
       else
          usage("Unsupported argument", a);
    }
@@ -291,85 +306,122 @@ int parse_options   ( int argc, char *argv[]
 
 int main(int argc, char *argv[])
 {
-   log_options opt;
-   memset(&opt, 0, sizeof(opt));
-   opt.max_parents = -1;
-   opt.limit = -1;
+    log_options opt;
+    memset(&opt, 0, sizeof(opt));
+    opt.max_parents = -1;
+    opt.limit = -1;
 
-   git::Initializer threads_initializer;
+    Initializer threads_initializer;
 
-   log_state s;
+    log_state s;
 
-   int count = 0;
-   int parsed_options_num = parse_options(argc, argv, s, opt, count);
+    int count = 0;
+    int parsed_options_num = parse_options(argc, argv, s, opt, count);
 
-   if (!count)
-      add_revision(&s, NULL);
+    if (!count) add_revision(&s, NULL);
 
-   git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-   diffopts.pathspec.strings = &argv[parsed_options_num];
-   diffopts.pathspec.count   = argc - parsed_options_num;
-   git::Pathspec ps(diffopts.pathspec);
+    git_diff_options    diffopts = GIT_DIFF_OPTIONS_INIT;
+    diffopts.pathspec.strings = &argv[parsed_options_num];
+    diffopts.pathspec.count = argc - parsed_options_num;
 
-   count = 0;
-   int printed = 0;
+    Pathspec    ps(diffopts.pathspec);
 
-   while (git::Commit commit = s.walker->next())
-   {
-      const int parents = commit.parents_num();
-      if (parents < opt.min_parents)
-         continue;
-      if (opt.max_parents > 0 && parents > opt.max_parents)
-         continue;
+    count = 0;
+    int printed = 0;
 
-      if (diffopts.pathspec.count > 0)
-      {
-         int unmatched = parents;
+    while (Commit commit = s.walker->next())
+    {
+        const int parents = commit.parents_num();
+        if (parents < opt.min_parents)                          continue;
+        if (opt.max_parents > 0 && parents > opt.max_parents)   continue;
 
-         if (parents == 0)
-         {
-            if (commit.tree().pathspec_match(GIT_PATHSPEC_NO_MATCH_ERROR, ps) != 0)
-               unmatched = 1;
-         }
-         else if (parents == 1)
-         {
-            unmatched = match_with_parent(commit, 0, diffopts) ? 0 : 1;
-         }
-         else
-         {
-            for (int i = 0; i < parents; ++i)
+        if (diffopts.pathspec.count > 0)
+        {
+            int unmatched = parents;
+
+            if (parents == 0)
             {
-               if (match_with_parent(commit, i, diffopts))
-                  unmatched--;
+                if (commit.tree().pathspec_match(GIT_PATHSPEC_NO_MATCH_ERROR, ps) != 0)
+                    unmatched = 1;
             }
-         }
+            else if (parents == 1)
+            {
+                unmatched = match_with_parent(commit, 0) ? 0 : 1;
+            }
+            else
+            {
+                for (int i = 0; i < parents; ++i)
+                {
+                    if (match_with_parent(commit, i))    unmatched--;
+                }
+            }
 
-         if (unmatched > 0)
-            continue;
-      }
+            if (unmatched > 0)                          continue;
+        }
 
-      if (count++ < opt.skip)
-         continue;
-      if (opt.limit != -1 && printed++ >= opt.limit) {
-         break;
-      }
+        if (count++ < opt.skip)                         continue;
+        if (opt.limit != -1 && printed++ >= opt.limit)  break;
 
-      print_commit(commit);
+        print_commit(commit);
 
-      if (opt.show_diff)
-      {
-         if (parents > 1)
-            continue;
-         git::Tree b = commit.tree();
-         git::Tree a;
-         if (parents == 1)
-         {
-            a = commit.parent(0).tree();
-         }
+        if (!(opt.show_diff || opt.show_names))         continue;
+        
+        if (parents > 1)                                continue;
+        
+        Tree b = commit.tree();
+        Tree a;
+        if (parents == 1)   a = commit.parent(0).tree();
 
-         git::diff_tree_to_tree(commit.owner(), a, b, diffopts).print(git::Diff::format::patch, print_diff);
-      }
-   }
+        Diff	diff(commit.owner(), a, b, Diff::option::normal);
 
-   return 0;
+        if (opt.show_names)    diff.find_similar(Diff::find_option::renames);
+        
+        const size_t	n_diffs = diff.deltas_num();
+		if (!n_diffs)                                   continue;
+
+        auto	func = [=](git_diff_delta const &delta, const git_diff_hunk *hunk, git_diff_line const &line)
+            {
+                if (opt.show_names)
+                {
+                    const string	status_s = s_DiffStatusMap.count(delta.status) ? s_DiffStatusMap.at(delta.status) : "<unknown>";
+                        
+                    cerr << " " << status_s << " " << delta.old_file.path;
+                    
+                    switch (delta.status)
+                    {
+                        case GIT_DELTA_RENAMED:
+                        case GIT_DELTA_COPIED:
+                            cerr << " to " << delta.new_file.path << " simil = " << delta.similarity;
+                            break;
+                            
+                        case GIT_DELTA_MODIFIED:
+                        case GIT_DELTA_ADDED:
+                        case GIT_DELTA_DELETED:
+                        default:
+                        
+                            break;
+                    }
+                    
+                    cerr << endl;
+                }
+                
+                if (opt.show_diff)
+                {
+                    assert(line.content);       // not null-terminated
+                    const size_t    len = line.content_len;
+                
+                    string  s(line.content, len);
+                
+                    cerr << s;
+                }
+            };
+        
+        const Diff::format	fmt = opt.show_diff ? Diff::format::patch : Diff::format::name_only;
+        
+        diff.print(fmt, func);
+
+        cerr << endl;
+    }
+
+    return 0;
 }

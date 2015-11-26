@@ -20,10 +20,10 @@ using namespace git;
 static const
 unordered_map<int, string>	s_DiffStatusMap
 {
-	{GIT_DELTA_UNMODIFIED,		"UNMODIFIED"},
+	{GIT_DELTA_UNMODIFIED,	"UNMODIFIED"},
 	{GIT_DELTA_ADDED,		"ADDED"},
 	{GIT_DELTA_DELETED,		"DELETED"},
-	{GIT_DELTA_MODIFIED,		"MODIFIED"},
+	{GIT_DELTA_MODIFIED,	"MODIFIED"},
 	{GIT_DELTA_RENAMED,		"RENAMED"},
 	{GIT_DELTA_COPIED,		"COPIED"},
 	{GIT_DELTA_IGNORED,		"IGNORED"},
@@ -54,7 +54,9 @@ Tree resolve_to_tree(Repository const & repo, const char *identifier)
    throw std::logic_error(ss.str());
 }
 
-const char *colors[] = {
+// (currently unused)
+const char *colors[]
+{
    "\033[m", /* reset */
    "\033[1m", /* bold */
    "\033[31m", /* red */
@@ -106,12 +108,14 @@ Diff calc_diff(Repository & repo, Tree & t1, Tree & t2, const bool cached, Diff:
 
 int main(int argc, char *argv[])
 {
-	const char*		dir = ".";
-	bool			cached_f = false;
-	vector<const char *>	treestr_list;
-	Diff::option		opts = Diff::option::normal;
-	Diff::find_option	findopts = Diff::find_option::none;
+	const char*		        dir = ".";
+	bool			        cached_f, show_diff, show_files;
+	vector<const char *>    treestr_list;
+    Diff::option	        opts = Diff::option::normal;
+	Diff::find_option       findopts = Diff::find_option::none;
 	
+	cached_f = show_diff = show_files = false;
+    
 	for (int i = 1; i < argc; ++i)
 	{
 		const char *a = argv[i];
@@ -129,7 +133,11 @@ int main(int argc, char *argv[])
 			findopts = findopts | Diff::find_option::renames;
 		else if (!strcmp(a, "--find-copies"))
 			findopts = findopts | Diff::find_option::copies;
-		else if (!strcmp(a, "--help") || !strcmp(a, "-h"))
+		else if (!strcmp(a, "-p") || !strcmp(a, "-u") || !strcmp(a, "--patch"))
+            show_diff = true;
+        else if (!strcmp(a, "--name-only") || !strcmp(a, "--name-status"))
+            show_files = true;
+        else if (!strcmp(a, "--help") || !strcmp(a, "-h"))
 			usage(NULL, NULL);
 		else if (!check_str_param(a, "--git-dir=", &dir))
 			usage("Unknown option", a);
@@ -141,7 +149,7 @@ int main(int argc, char *argv[])
 	git::Initializer threads_initializer;
 	
 	const bool		simil_f = (~(Diff::find_option::renames | Diff::find_option::copies) & findopts) != findopts;
-	const Diff::format	fmt = simil_f ? Diff::format::name_only : Diff::format::patch;
+	const Diff::format	fmt = (show_files || simil_f) ? Diff::format::name_only : Diff::format::patch;
 	
 	try
 	{
@@ -159,34 +167,42 @@ int main(int argc, char *argv[])
 		cerr << n_diffs << " delta(s)" << endl;
 		if (!n_diffs)	return 0;
 		
-		auto	func = [](git_diff_delta const &delta, const git_diff_hunk *hunk, git_diff_line const &ln)
+		auto	func = [=](git_diff_delta const &delta, const git_diff_hunk *hunk, git_diff_line const &line)
 		{
 			// (hunk may be null)
 			const string	status_s = s_DiffStatusMap.count(delta.status) ? s_DiffStatusMap.at(delta.status) : "<unknown>";
 				
-			cerr << " " << status_s << " " << delta.old_file.path;
+			if (show_files)
+            {
+                cerr << " " << status_s << " " << delta.old_file.path;
 			
-			switch (delta.status)
-			{
-				case GIT_DELTA_RENAMED:
-				case GIT_DELTA_COPIED:
-					cerr << " to " << delta.new_file.path << " simil = " << delta.similarity;
-					break;
-					
-				case GIT_DELTA_MODIFIED:
-					if (hunk && hunk->header_len)
-						cerr << " lines " << string(hunk->header, hunk->header + (hunk->header_len - 1));
-					else	cerr << " <null hunk>";
-					break;
-					
-				case GIT_DELTA_ADDED:
-				case GIT_DELTA_DELETED:
-				default:
-				
-					break;
-			}
-			
-			cerr << endl;
+                switch (delta.status)
+                {
+                    case GIT_DELTA_RENAMED:
+                    case GIT_DELTA_COPIED:
+                        cerr << " to " << delta.new_file.path << " simil = " << delta.similarity;
+                        break;
+                        
+                    case GIT_DELTA_MODIFIED:
+                    case GIT_DELTA_ADDED:
+                    case GIT_DELTA_DELETED:
+                    default:
+                        
+                        break;
+                }
+                
+                cerr << endl;
+            }
+            
+            if ((delta.status == GIT_DELTA_MODIFIED) && show_diff)
+            {
+                assert(line.content);       // not null-terminated
+                const size_t    len = line.content_len;
+                
+                string  s(line.content, len);
+                
+                cerr << s;
+            }
 		};
 			
 		df.print(fmt, func);
