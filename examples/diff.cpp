@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <git2.h>
+#include <string.h>
 
 #include <cstdlib>
 #include <string>
