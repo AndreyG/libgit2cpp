@@ -14,12 +14,12 @@ Testing
 =======
 
     $ cd build
-    $ ./test.sh <path_to_non_shared_repo> [path_to_libgit2_testrepo]
+    $ ./test_examples.sh <path_to_non_shared_repo> [path_to_libgit2_testrepo]
 
 e.g.
     
     $ mkdir build && cd build
     $ cmake ..
     $ make
-    $ ./test.sh .. ../../libgit2/tests/resources/testrepo.git
+    $ ./test_examples.sh .. ../../libgit2/tests/resources/testrepo.git
 
