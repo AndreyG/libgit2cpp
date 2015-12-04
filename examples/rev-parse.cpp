@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <boost/optional.hpp>
+#include <boost/utility/in_place_factory.hpp>
 
 #include "git2cpp/initializer.h"
 #include "git2cpp/repo.h"
