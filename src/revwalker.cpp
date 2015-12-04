@@ -1,17 +1,9 @@
-
-#include "git2cpp/error.h"
 #include "git2cpp/revwalker.h"
+#include "git2cpp/error.h"
 #include "git2cpp/repo.h"
 
 namespace git
 {
-    RevWalker::RevWalker(Repository const & repo)
-       : repo_(repo)
-    {
-        if (git_revwalk_new(&walker_, repo.ptr()))
-            throw revwalk_new_error();
-    }
-
     RevWalker::~RevWalker()
     {
         git_revwalk_free(walker_);

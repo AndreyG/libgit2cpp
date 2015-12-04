@@ -6,13 +6,6 @@
 
 namespace git
 {
-    Tree::Tree(git_oid const & oid, Repository const & repo)
-       : repo_(&repo)
-    {
-        if (git_tree_lookup(&tree_, repo.ptr(), &oid))
-            throw tree_lookup_error(oid);
-    }
-
     Tree::Tree(git_tree * tree, Repository const & repo)
         : tree_(tree)
         , repo_(&repo)
@@ -90,11 +83,17 @@ namespace git
        git_tree_entry_free(entry_);
     }
 
-    Tree Tree::OwnedEntry::as_tree()
+    Tree::OwnedEntry::OwnedEntry(OwnedEntry && other)
+        : entry_(other.entry_)
+        , repo_(other.repo_)
     {
-       git_object * obj;
-       git_tree_entry_to_object(&obj, repo_->ptr(), entry_);
-       return Object(obj, *repo_).to_tree();
+        other.entry_    = nullptr;
+        other.repo_     = nullptr;
+    }
+
+    Tree Tree::OwnedEntry::to_tree() /* && */
+    {
+        return repo_->entry_to_object(std::move(*this)).to_tree();
     }
 
     const char * Tree::BorrowedEntry::name() const

@@ -1,12 +1,12 @@
-extern "C"
-{
 #include <git2/commit.h>
 #include <git2/branch.h>
 #include <git2/types.h>
 #include <git2/merge.h>
 #include <git2/submodule.h>
 #include <git2/errors.h>
-}
+#include <git2/tag.h>
+#include <git2/revwalk.h>
+#include <git2/blob.h>
 
 #include <boost/optional.hpp>
 #include <boost/utility/in_place_factory.hpp>
@@ -38,8 +38,7 @@ namespace git
             throw repository_init_error(dir);
     }
 
-    Repository::Repository(std::string const & dir, init_tag, 
-                           git_repository_init_options opts)
+    Repository::Repository(std::string const & dir, init_tag, git_repository_init_options opts)
     {
         if (git_repository_init_ext(&repo_, dir.c_str(), &opts) < 0)
             throw repository_init_error(dir);
@@ -62,22 +61,38 @@ namespace git
 
     Commit Repository::commit_lookup(git_oid const & oid) const
     {
-        return Commit(oid, *this);
+       git_commit * commit;
+       if (git_commit_lookup(&commit, repo_, &oid))
+          throw commit_lookup_error(oid);
+       else
+          return { commit, *this };
     }
 
     Tree Repository::tree_lookup(git_oid const & oid) const
     {
-        return Tree(oid, *this);
+        git_tree * tree;
+        if (git_tree_lookup(&tree, repo_, &oid))
+            throw tree_lookup_error(oid);
+        else
+            return { tree, *this };
     }
 
     Tag Repository::tag_lookup(git_oid const & oid) const
     {
-        return Tag(oid, *this);
+       git_tag * tag;
+       if (git_tag_lookup(&tag, repo_, &oid))
+           throw tag_lookup_error(oid);
+       else
+          return { tag, *this };
     }
 
     Blob Repository::blob_lookup(git_oid const & oid) const
     {
-        return Blob(oid, repo_);
+        git_blob * blob;
+        if (git_blob_lookup(&blob, repo_, &oid))
+            throw blob_lookup_error(oid);
+        else
+            return Blob(blob);
     }
 
     Revspec Repository::revparse(const char * spec) const
@@ -85,7 +100,8 @@ namespace git
         git_revspec revspec;
         if (git_revparse(&revspec, repo_, spec))
             throw revparse_error(spec);
-        return Revspec(revspec, *this);
+        else
+            return { revspec, *this };
     }
 
     Revspec Repository::revparse_single(const char * spec) const
@@ -124,11 +140,10 @@ namespace git
 
     struct branch_iterator
     {
-        branch_iterator(Repository const & repo, branch_type type)
-            : type_(convert(type)),
-	    m_DoneFlag(false)
+        branch_iterator(git_repository * repo, branch_type type)
+            : type_(convert(type))
         {
-            git_branch_iterator_new(&base_, repo.ptr(), type_);
+            git_branch_iterator_new(&base_, repo, type_);
             ++(*this);
         }
 
@@ -137,24 +152,23 @@ namespace git
             git_branch_iterator_free(base_);
         }
 
-        explicit operator bool () const { return ref_.is_initialized() && !m_DoneFlag; }
+        explicit operator bool () const { return ref_.is_initialized(); }
 
         void operator ++ ()
         {
             git_branch_t type;
             git_reference * ref;
-            const int	err = git_branch_next(&ref, &type, base_);
-            if (err == 0)
+            switch (git_branch_next(&ref, &type, base_))
             {
+            case GIT_OK:
                 assert(type == type_);
                 ref_ = boost::in_place(ref);
-            }
-            else if (err == GIT_ITEROVER)
-            {
-		m_DoneFlag = true;
-            }
-            else
-            {
+                break;
+            case GIT_ITEROVER:
+                ref_ = boost::none;
+                break;
+            default:
+                ref_ = boost::none;
                 throw std::logic_error("unknown git_branch_next error");
             }
         }
@@ -181,44 +195,51 @@ namespace git
         git_branch_t type_;
         git_branch_iterator * base_;
         boost::optional<Reference> ref_;
-	bool m_DoneFlag;
     };
 
     std::vector<std::string> Repository::branches(branch_type type) const
     {
         std::vector<std::string> res;
-        for (branch_iterator it(*this, type); it; ++it)
+        for (branch_iterator it(repo_, type); it; ++it)
             res.push_back(it->name());
         return res;
     }
 
     RevWalker Repository::rev_walker() const
     {
-        return RevWalker(*this);
+        git_revwalk * walker;
+        if (git_revwalk_new(&walker, repo_))
+            throw revwalk_new_error();
+        else
+            return { walker, *this };
+    }
+
+    git_oid Repository::merge_base(git_oid const & a, git_oid const & b) const
+    {
+        git_oid res;
+        if (git_merge_base(&res, repo_, &a, &b))
+            throw merge_base_error(a, b);
+        return res;
     }
 
     git_oid Repository::merge_base(Revspec::Range const & range) const
     {
-        git_oid res;
-        if (git_merge_base(&res, repo_, &range.from.id(), &range.to.id()))
-            throw merge_base_error(range.from.id(), range.to.id());
-        return res;
+        return merge_base(range.from.id(), range.to.id());
     }
 
     Reference Repository::head() const
     {
         git_reference * head;
-        switch (auto error = git_repository_head(&head, repo_))
+        switch (git_repository_head(&head, repo_))
         {
+        case GIT_OK:
+            return Reference(head);
         case GIT_EUNBORNBRANCH:
             throw non_existing_branch_error();
         case GIT_ENOTFOUND:
             throw missing_head_error();
         default:
-           if (error == 0)
-              return Reference(head);
-           else
-              throw unknown_get_current_branch_error();
+            throw unknown_get_current_branch_error();
         }
     }
 
@@ -241,9 +262,13 @@ namespace git
         return StrArray(str_array);
     }
 
-    int Repository::submodule_lookup(git_submodule *& sm, const char * name) const
+    Submodule Repository::submodule_lookup(const char * name) const
     {
-        return git_submodule_lookup(&sm, repo_, name);
+        git_submodule * sm;
+        if (git_submodule_lookup(&sm, repo_, name))
+            throw submodule_lookup_error(name);
+        else
+            return { sm, repo_ };
     }
 
     const char * Repository::path() const
@@ -293,15 +318,52 @@ namespace git
         return res;
     }
 
+    namespace
+    {
+        Object tree_entry_to_object(git_tree_entry const * entry, Repository const & repo, git_repository * repo_ptr)
+        {
+            git_object * obj;
+            git_tree_entry_to_object(&obj, repo_ptr, entry);
+            return Object(obj, repo);
+        }
+    }
+
     Object Repository::entry_to_object(Tree::BorrowedEntry entry) const
     {
-        git_object * obj;
-        git_tree_entry_to_object(&obj, repo_, entry.ptr());
-        return Object(obj, *this);
+        return tree_entry_to_object(entry.ptr(), *this, repo_);
+    }
+
+    Object Repository::entry_to_object(Tree::OwnedEntry entry) const
+    {
+        return tree_entry_to_object(entry.ptr(), *this, repo_);
     }
 
     Object revparse_single(Repository const & repo, const char * spec)
     {
         return std::move(*repo.revparse_single(spec).single());
+    }
+
+    Diff Repository::diff(Tree & a, Tree & b, git_diff_options const & opts) const
+    {
+        git_diff * diff;
+        auto op_res = git_diff_tree_to_tree(&diff, repo_, a.ptr(), b.ptr(), &opts);
+        assert(op_res == 0);
+        return Diff(diff);
+    }
+
+    Diff Repository::diff_to_index(Tree & t, git_diff_options const & opts) const
+    {
+        git_diff * diff;
+        auto op_res = git_diff_tree_to_index(&diff, repo_, t.ptr(), nullptr, &opts);
+        assert(op_res == 0);
+        return Diff(diff);
+    }
+
+    Diff Repository::diff_index_to_workdir(git_diff_options const & opts) const
+    {
+        git_diff * diff;
+        auto op_res = git_diff_index_to_workdir(&diff, repo_, nullptr, &opts);
+        assert(op_res == 0);
+        return Diff(diff);
     }
 }

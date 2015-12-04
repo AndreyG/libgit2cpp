@@ -57,6 +57,20 @@ namespace git
       {}
    };
 
+   struct blob_lookup_error : error_t
+   {
+      explicit blob_lookup_error(git_oid const & id)
+         : error_t("Could not lookup blob " + id_to_str(id))
+      {}
+   };
+
+   struct submodule_lookup_error : error_t
+   {
+       explicit submodule_lookup_error(std::string const & name)
+           : error_t("Counld not lookup submodule " + name)
+       {}
+   };
+
    struct commit_parent_error : error_t
    {
       explicit commit_parent_error(git_oid const & id)

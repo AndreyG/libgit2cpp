@@ -209,7 +209,7 @@ static int match_with_parent(git::Commit const & commit, int i, git_diff_options
    auto parent = commit.parent(i);
    auto c_tree = commit.tree();
    auto p_tree = parent.tree();
-   auto diff = git::diff(commit.owner(), p_tree, c_tree, opts);
+   auto diff = commit.owner().diff(p_tree, c_tree, opts);
 
    return diff.deltas_num() > 0;
 }
@@ -368,7 +368,7 @@ int main(int argc, char *argv[])
             a = commit.parent(0).tree();
          }
 
-         git::diff(commit.owner(), a, b, diffopts).print(git::Diff::format::patch, print_diff);
+         s.repo->diff(a, b, diffopts).print(git::Diff::format::patch, print_diff);
       }
    }
 

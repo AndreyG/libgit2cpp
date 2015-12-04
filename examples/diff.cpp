@@ -75,21 +75,21 @@ enum {
 /* --cached */
 /* nothing */
 
-Diff calc_diff(Repository & repo, Tree & t1, Tree & t2, bool cached, git_diff_options const & opts)
+Diff calc_diff(Repository const & repo, Tree & t1, Tree & t2, bool cached, git_diff_options const & opts)
 {
    if (t1 && t2)
-      return git::diff(repo, t1, t2, opts);
+      return repo.diff(t1, t2, opts);
    else if (t1 && cached)
-      return diff_to_index(repo, t1, opts);
+      return repo.diff_to_index(t1, opts);
    else if (t1)
-      return std::move(diff_to_index(repo, t1, opts).merge(diff_index_to_workdir(repo, opts)));
+      return std::move(repo.diff_to_index(t1, opts).merge(repo.diff_index_to_workdir(opts)));
    else if (cached)
    {
       auto tree = resolve_to_tree(repo, "HEAD");
-      return diff_to_index(repo, tree, opts);
+      return repo.diff_to_index(tree, opts);
    }
    else
-      return diff_index_to_workdir(repo, opts);
+      return repo.diff_index_to_workdir(opts);
 }
 
 int main(int argc, char *argv[])

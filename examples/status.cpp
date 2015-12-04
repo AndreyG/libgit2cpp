@@ -264,25 +264,22 @@ void print_short(Repository const & repo, Status const & status)
 		if (istatus == '?' && wstatus == '?')
 			continue;
 
-		if (s->index_to_workdir &&
-			s->index_to_workdir->new_file.mode == GIT_FILEMODE_COMMIT)
-		{
-			git_submodule *sm = NULL;
-			unsigned int smstatus = 0;
+        if (s->index_to_workdir && s->index_to_workdir->new_file.mode == GIT_FILEMODE_COMMIT)
+        {
+            auto sm = repo.submodule_lookup(s->index_to_workdir->new_file.path);
+            auto smstatus = sm.get_status();
 
-			if (!repo.submodule_lookup(sm, s->index_to_workdir->new_file.path) &&
-				!git_submodule_status(&smstatus, repo.ptr(), git_submodule_name(sm), git_submodule_ignore(sm)))
-			{
-				if (smstatus & GIT_SUBMODULE_STATUS_WD_MODIFIED)
-					extra = " (new commits)";
-				else if (smstatus & GIT_SUBMODULE_STATUS_WD_INDEX_MODIFIED)
-					extra = " (modified content)";
-				else if (smstatus & GIT_SUBMODULE_STATUS_WD_WD_MODIFIED)
-					extra = " (modified content)";
-				else if (smstatus & GIT_SUBMODULE_STATUS_WD_UNTRACKED)
-					extra = " (untracked content)";
-			}
-		}
+            typedef Submodule::status status;
+
+            if (contains(smstatus, status::wd_modified))
+                extra = " (new commits)";
+            else if (contains(smstatus, status::wd_index_modified))
+                extra = " (modified content)";
+            else if (contains(smstatus, status::wd_wd_modified))
+                extra = " (modified content)";
+            else if (contains(smstatus, status::wd_untracked))
+                extra = " (untracked content)";
+        }
 
 		if (s->head_to_index) {
 			a = s->head_to_index->old_file.path;

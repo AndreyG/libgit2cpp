@@ -2,11 +2,8 @@
 #include "git2cpp/repo.h"
 #include "git2cpp/error.h"
 
-extern "C"
-{
 #include <git2/commit.h>
 #include <git2/merge.h>
-}
 
 namespace git
 {
@@ -68,17 +65,7 @@ namespace git
 
    git_oid Commit::merge_base(size_t p1, size_t p2) const
    {
-      git_oid res;
-      if (git_merge_base(&res, repo_->ptr(), &parent_id(p1), &parent_id(p2)))
-         throw merge_base_error(parent_id(p1), parent_id(p2));
-      return res;
-   }
-
-   Commit::Commit(git_oid const & oid, Repository const & repo)
-      : repo_(&repo)
-   {
-      if (git_commit_lookup(&commit_, repo.ptr(), &oid))
-         throw commit_lookup_error(oid);
+      return repo_->merge_base(parent_id(p1), parent_id(p2));
    }
 
    Commit::~Commit() { git_commit_free(commit_); }

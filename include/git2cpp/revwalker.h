@@ -1,13 +1,8 @@
 #pragma once
 
-extern "C"
-{
 #include <git2/revwalk.h>
-}
 
 #include "commit.h"
-
-struct git_repository;
 
 namespace git
 {
@@ -15,7 +10,11 @@ namespace git
 
    struct RevWalker
    {
-      explicit RevWalker(Repository const & repo);
+      RevWalker(git_revwalk * walker, Repository const & repo)
+         : walker_(walker)
+         , repo_(repo)
+      {}
+
       ~RevWalker();
 
       enum class sorting : unsigned int

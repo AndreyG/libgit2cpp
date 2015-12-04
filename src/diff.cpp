@@ -1,35 +1,9 @@
-#include <cassert>
-
 #include "git2cpp/diff.h"
-#include "git2cpp/tree.h"
-#include "git2cpp/repo.h"
+
+#include <cassert>
 
 namespace git
 {
-    Diff diff(Repository const & repo, Tree & a, Tree & b, git_diff_options const & opts)
-    {
-        git_diff * diff;
-        auto op_res = git_diff_tree_to_tree(&diff, repo.ptr(), a.ptr(), b.ptr(), &opts);
-        assert(op_res == 0);
-        return Diff(diff);
-    }
-
-    Diff diff_to_index(Repository const & repo, Tree & t, git_diff_options const & opts)
-    {
-        git_diff * diff;
-        auto op_res = git_diff_tree_to_index(&diff, repo.ptr(), t.ptr(), nullptr, &opts);
-        assert(op_res == 0);
-        return Diff(diff);
-    }
-
-    Diff diff_index_to_workdir(Repository const & repo, git_diff_options const & opts)
-    {
-        git_diff * diff;
-        auto op_res = git_diff_index_to_workdir(&diff, repo.ptr(), nullptr, &opts);
-        assert(op_res == 0);
-        return Diff(diff);
-    }
-
     namespace
     {
         int apply_callback  ( git_diff_delta const * delta
@@ -55,6 +29,13 @@ namespace git
            case Diff::format::raw:           return GIT_DIFF_FORMAT_RAW;
            }
         }
+    }
+
+    Diff::~Diff() { git_diff_free(diff_); }
+
+    void Diff::find_similar(git_diff_find_options & findopts)
+    {
+        git_diff_find_similar(diff_, &findopts);
     }
 
     Diff& Diff::merge(Diff const & other)

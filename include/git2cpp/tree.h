@@ -13,14 +13,15 @@ namespace git
            const char *    name()   const;
            git_oid const & id()     const;
 
-           git_tree_entry const * ptr() const { return entry_; }
-
         private:
            friend struct Tree;
+           friend struct Repository;
 
            explicit BorrowedEntry(git_tree_entry const * entry)
               : entry_(entry)
            {}
+
+           git_tree_entry const * ptr() const { return entry_; }
 
         private:
            git_tree_entry const * entry_;
@@ -36,12 +37,15 @@ namespace git
            OwnedEntry               (OwnedEntry &&);
            OwnedEntry&  operator =  (OwnedEntry &&);
 
-           Tree as_tree() /*&&*/;
+           Tree to_tree() /*&&*/;
 
         private:
             friend struct Tree;
+            friend struct Repository;
 
             OwnedEntry(git_tree_entry * entry, Repository const & repo);
+
+            git_tree_entry const * ptr() const { return entry_; }
 
         private:
             git_tree_entry * entry_;
@@ -61,8 +65,7 @@ namespace git
 
         OwnedEntry find(const char * path) const;
 
-        Tree(git_oid const &, Repository const &);
-        Tree(git_tree *,      Repository const &);
+        Tree(git_tree *, Repository const &);
 
         Tree();
         ~Tree();

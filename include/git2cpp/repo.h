@@ -3,11 +3,6 @@
 #include <string>
 #include <vector>
 
-extern "C"
-{
-#include <git2/repository.h>
-}
-
 #include "commit.h"
 #include "index.h"
 #include "odb.h"
@@ -19,6 +14,8 @@ extern "C"
 #include "tag.h"
 #include "blob.h"
 #include "str_array.h"
+#include "diff.h"
+#include "submodule.h"
 
 namespace git
 {
@@ -32,14 +29,13 @@ namespace git
 
     struct Repository
     {
-        git_repository * ptr() const { return repo_; }
-
         Commit commit_lookup(git_oid const & oid) const;
         Tree   tree_lookup  (git_oid const & oid) const;
         Tag    tag_lookup   (git_oid const & oid) const;
         Blob   blob_lookup  (git_oid const & oid) const;
 
-        git_oid merge_base(Revspec::Range const & range) const;
+        git_oid merge_base(Revspec::Range const & range)       const;
+        git_oid merge_base(git_oid const &, git_oid const &)   const;
 
         Revspec revparse        (const char * spec) const;
         Revspec revparse_single (const char * spec) const;
@@ -48,10 +44,15 @@ namespace git
 
         git_status_t file_status(const char * filepath) const;
 
+        Object entry_to_object(Tree::OwnedEntry)    const;
         Object entry_to_object(Tree::BorrowedEntry) const;
 
         Index   index() const;
         Odb     odb()   const;
+
+        Diff diff                   (Tree &, Tree &,  git_diff_options const &) const;
+        Diff diff_to_index          (Tree &,          git_diff_options const &) const;
+        Diff diff_index_to_workdir  (                 git_diff_options const &) const;
 
         Signature signature() const;
 
@@ -66,7 +67,7 @@ namespace git
         Reference head()                    const;
         Reference ref(const char * name)    const;
 
-        int submodule_lookup(git_submodule *&, const char * name) const;
+        Submodule submodule_lookup(const char * name) const;
         
         const char * path()     const;
         const char * workdir()  const;
@@ -91,8 +92,7 @@ namespace git
         struct init_tag {};
         static init_tag init;
         Repository(std::string const & dir, init_tag);
-        Repository(std::string const & dir, init_tag, 
-                   git_repository_init_options opts);
+        Repository(std::string const & dir, init_tag, git_repository_init_options opts);
 
         Repository              (Repository const &) = delete;
         Repository& operator =  (Repository const &) = delete; 

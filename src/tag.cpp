@@ -6,12 +6,10 @@
 
 namespace git
 {
-    Tag::Tag(git_oid const & oid, Repository const & repo)
-       : repo_(repo)
-    {
-        if (git_tag_lookup(&tag_, repo.ptr(), &oid))
-            throw tag_lookup_error(oid);
-    }
+    Tag::Tag(git_tag * tag, Repository const & repo)
+       : tag_(tag)
+       , repo_(repo)
+    {}
 
     Tag::~Tag()
     {

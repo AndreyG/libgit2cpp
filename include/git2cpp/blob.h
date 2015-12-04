@@ -11,7 +11,6 @@ namespace git
     struct Blob
     {
         explicit Blob(git_blob *);
-        Blob(git_oid const & oid, git_repository * repo);
         ~Blob();
 
         std::size_t     size()      const;
