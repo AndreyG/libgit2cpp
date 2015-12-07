@@ -93,7 +93,8 @@ namespace git
 
     Tree Tree::OwnedEntry::to_tree() /* && */
     {
-        return repo_->entry_to_object(std::move(*this)).to_tree();
+        auto const & repo = *repo_;
+        return repo.entry_to_object(std::move(*this)).to_tree();
     }
 
     const char * Tree::BorrowedEntry::name() const
