@@ -55,7 +55,10 @@ namespace git
 
     Tree::BorrowedEntry Tree::operator[] (std::string const & filename) const
     {
-        return BorrowedEntry(git_tree_entry_byname(tree_, filename.c_str()));
+        if (auto entry = git_tree_entry_byname(tree_, filename.c_str()))
+            return BorrowedEntry(entry);
+        else
+            throw file_not_found_error(filename.c_str());
     }
 
     Tree::OwnedEntry Tree::find(const char * path) const
