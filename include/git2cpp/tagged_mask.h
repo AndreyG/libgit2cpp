@@ -7,13 +7,15 @@ namespace git
     {
         typedef tagged_mask_t self_t;
 
-        explicit tagged_mask_t(RawType value)
+        explicit tagged_mask_t(RawType value = RawType())
             : value_(value)
         {}
 
         RawType value() const { return value_; }
 
         operator bool() const { return value_; }
+
+        self_t& operator |= (self_t other) { value_ |= other.value_; return *this; }
 
         friend self_t operator ~ (self_t x) { return self_t(~x.value_); }
 
