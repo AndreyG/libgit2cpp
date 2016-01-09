@@ -1,12 +1,22 @@
 #pragma once
 
-#include <git2/revwalk.h>
-
+#include "tagged_mask.h"
 #include "commit.h"
 
 namespace git
 {
     struct Repository;
+
+    namespace revwalker {
+    namespace sorting
+    {
+        typedef tagged_mask_t<struct tag> type;
+
+        extern const type none;
+        extern const type topological;
+        extern const type time;
+        extern const type reverse;
+    }}
 
     struct RevWalker
     {
@@ -17,20 +27,7 @@ namespace git
 
         ~RevWalker();
 
-        enum class sorting : unsigned int
-        {
-            none        = GIT_SORT_NONE,
-            topological = GIT_SORT_TOPOLOGICAL,
-            time        = GIT_SORT_TIME,
-            reverse     = GIT_SORT_REVERSE
-        };
-
-        friend sorting operator ~ (sorting);
-        friend sorting operator | (sorting, sorting);
-        friend sorting operator & (sorting, sorting);
-        friend sorting operator ^ (sorting, sorting);
-
-        void sort(sorting);
+        void sort(revwalker::sorting::type);
         void simplify_first_parent();
 
         void push_head() const;

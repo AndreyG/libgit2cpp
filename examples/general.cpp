@@ -355,7 +355,7 @@ int main (int argc, char** argv)
             // branch1..branch2`, you would push the oid of `branch2` and hide the oid
             // of `branch1`.
             RevWalker walk = repo.rev_walker();
-            walk.sort(RevWalker::sorting::topological | RevWalker::sorting::reverse);
+            walk.sort(revwalker::sorting::topological | revwalker::sorting::reverse);
             walk.push(oid);
 
             // Now that we have the starting point pushed onto the walker, we start

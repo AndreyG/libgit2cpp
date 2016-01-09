@@ -2,44 +2,27 @@
 #include "git2cpp/error.h"
 #include "git2cpp/repo.h"
 
+#include <git2/revwalk.h>
+
 namespace git
 {
+    namespace revwalker {
+    namespace sorting
+    {
+        const type none         (GIT_SORT_NONE);
+        const type topological  (GIT_SORT_TOPOLOGICAL);
+        const type time         (GIT_SORT_TIME);
+        const type reverse      (GIT_SORT_REVERSE);
+    }}
+
     RevWalker::~RevWalker()
     {
         git_revwalk_free(walker_);
     }
 
-    namespace
+    void RevWalker::sort(revwalker::sorting::type s)
     {
-       unsigned int raw(RevWalker::sorting s)
-       {
-          return static_cast<unsigned int>(s);
-       }
-    }
-
-    RevWalker::sorting operator ~ (RevWalker::sorting s)
-    {
-       return RevWalker::sorting(~raw(s));
-    }
-
-    RevWalker::sorting operator | (RevWalker::sorting a, RevWalker::sorting b)
-    {
-       return RevWalker::sorting(raw(a) | raw(b));
-    }
-
-    RevWalker::sorting operator ^ (RevWalker::sorting a, RevWalker::sorting b)
-    {
-       return RevWalker::sorting(raw(a) ^ raw(b));
-    }
-
-    RevWalker::sorting operator & (RevWalker::sorting a, RevWalker::sorting b)
-    {
-       return RevWalker::sorting(raw(a) & raw(b));
-    }
-
-    void RevWalker::sort(sorting s)
-    {
-        git_revwalk_sorting(walker_, raw(s));
+        git_revwalk_sorting(walker_, s.value());
     }
 
     void RevWalker::simplify_first_parent()

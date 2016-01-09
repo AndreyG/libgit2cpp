@@ -45,7 +45,7 @@ void push_range(Repository const & repo, RevWalker const & walk, const char *ran
 
 void revwalk_parseopts(Repository const & repo, RevWalker & walk, int nopts, char **opts)
 {
-   typedef RevWalker::sorting sort;
+   namespace sort = revwalker::sorting;
    auto sorting = sort::none;
 
 	int hide = 0;

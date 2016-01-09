@@ -32,10 +32,10 @@ struct log_state
    boost::optional<git::Repository> repo;
    std::unique_ptr<git::RevWalker>  walker;
    int hide = 0;
-   git::RevWalker::sorting sorting = git::RevWalker::sorting::time;
+   git::revwalker::sorting::type sorting = git::revwalker::sorting::time;
 };
 
-static void set_sorting(struct log_state *s, git::RevWalker::sorting sort_mode)
+static void set_sorting(struct log_state *s, git::revwalker::sorting::type sort_mode)
 {
    if (!s->repo) {
       s->repo = boost::in_place(s->repodir);
@@ -44,10 +44,10 @@ static void set_sorting(struct log_state *s, git::RevWalker::sorting sort_mode)
    if (!s->walker)
       s->walker.reset(new git::RevWalker(s->repo->rev_walker()));
 
-   if (sort_mode == git::RevWalker::sorting::reverse)
-      s->sorting = s->sorting ^ git::RevWalker::sorting::reverse;
+   if (sort_mode == git::revwalker::sorting::reverse)
+      s->sorting = s->sorting ^ git::revwalker::sorting::reverse;
    else
-      s->sorting = sort_mode | (s->sorting & git::RevWalker::sorting::reverse);
+      s->sorting = sort_mode | (s->sorting & git::revwalker::sorting::reverse);
 
    s->walker->sort(s->sorting);
 }
@@ -249,11 +249,11 @@ int parse_options   ( int argc, char *argv[]
          break;
       }
       else if (!strcmp(a, "--date-order"))
-         set_sorting(&s, git::RevWalker::sorting::time);
+         set_sorting(&s, git::revwalker::sorting::time);
       else if (!strcmp(a, "--topo-order"))
-         set_sorting(&s, git::RevWalker::sorting::topological);
+         set_sorting(&s, git::revwalker::sorting::topological);
       else if (!strcmp(a, "--reverse"))
-         set_sorting(&s, git::RevWalker::sorting::reverse);
+         set_sorting(&s, git::revwalker::sorting::reverse);
       else if (!strncmp(a, "--git-dir=", strlen("--git-dir=")))
          s.repodir = a + strlen("--git-dir=");
       else if (match_int_arg(&opt.skip, a, "--skip=", 0))

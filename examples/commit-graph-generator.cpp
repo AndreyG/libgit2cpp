@@ -9,7 +9,7 @@ namespace
    {
       void operator() (git::RevWalker & walker)
       {
-         walker.sort(git::RevWalker::sorting::topological);
+         walker.sort(git::revwalker::sorting::topological);
          walker.simplify_first_parent();
 
          while (git::Commit commit = walker.next())
