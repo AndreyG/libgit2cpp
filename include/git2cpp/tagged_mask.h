@@ -13,7 +13,7 @@ namespace git
 
         RawType value() const { return value_; }
 
-        operator bool() const { return value_; }
+        explicit operator bool() const { return value_; }
 
         self_t& operator |= (self_t other) { value_ |= other.value_; return *this; }
 
