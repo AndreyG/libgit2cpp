@@ -30,7 +30,7 @@ struct log_state
 {
    std::string repodir = ".";
    boost::optional<git::Repository> repo;
-   std::unique_ptr<git::RevWalker>  walker;
+   boost::optional<git::RevWalker>  walker;
    int hide = 0;
    git::revwalker::sorting::type sorting = git::revwalker::sorting::time;
 };
@@ -42,7 +42,7 @@ static void set_sorting(struct log_state *s, git::revwalker::sorting::type sort_
    }
 
    if (!s->walker)
-      s->walker.reset(new git::RevWalker(s->repo->rev_walker()));
+      s->walker = s->repo->rev_walker();
 
    if (sort_mode == git::revwalker::sorting::reverse)
       s->sorting = s->sorting ^ git::revwalker::sorting::reverse;
@@ -57,7 +57,7 @@ void push_rev(log_state * s, git::Commit const & commit, int hide)
    hide = s->hide ^ hide;
 
    if (!s->walker) {
-      s->walker.reset(new git::RevWalker(s->repo->rev_walker()));
+      s->walker = s->repo->rev_walker();
       s->walker->sort(s->sorting);
    }
 
@@ -74,7 +74,7 @@ void push_rev(struct log_state *s, git::Object const & obj, int hide)
    hide = s->hide ^ hide;
 
    if (!s->walker) {
-      s->walker.reset(new git::RevWalker(s->repo->rev_walker()));
+      s->walker = s->repo->rev_walker();
       s->walker->sort(s->sorting);
    }
 
