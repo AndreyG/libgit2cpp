@@ -22,7 +22,7 @@ namespace git
     {
         RevWalker(git_revwalk * walker, Repository const & repo)
             : walker_(walker)
-            , repo_(repo)
+            , repo_(&repo)
         {}
 
         ~RevWalker();
@@ -47,8 +47,16 @@ namespace git
             other.walker_ = nullptr;
         }
 
+        RevWalker& operator = (RevWalker && other)
+        {
+            walker_ = other.walker_;
+            repo_   = other.repo_;
+            other.walker_ = nullptr;
+            return *this;
+        }
+
     private:
         git_revwalk * walker_;
-        Repository const & repo_;
+        Repository const * repo_;
     };
 }

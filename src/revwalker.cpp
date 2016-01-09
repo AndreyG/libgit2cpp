@@ -52,7 +52,7 @@ namespace git
     {
         git_oid oid;
         if (git_revwalk_next(&oid, walker_) == 0)
-            return repo_.commit_lookup(oid);
+            return repo_->commit_lookup(oid);
         else
             return Commit();
     }
