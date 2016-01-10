@@ -17,6 +17,8 @@ namespace git
 
         ~Buffer();
 
+        explicit operator bool() const { return ptr(); }
+
         const char * ptr() const { return buf_.ptr; }
 
     private:
