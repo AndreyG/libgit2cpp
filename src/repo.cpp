@@ -359,6 +359,22 @@ namespace git
         return Diff(diff);
     }
 
+    Diff Repository::diff_to_workdir(Tree & t, git_diff_options const & opts) const
+    {
+        git_diff * diff;
+        auto op_res = git_diff_tree_to_workdir(&diff, repo_, t.ptr(), &opts);
+        assert(op_res == 0);
+        return Diff(diff);
+    }
+
+    Diff Repository::diff_to_workdir_with_index(Tree & t, git_diff_options const & opts) const
+    {
+        git_diff * diff;
+        auto op_res = git_diff_tree_to_workdir_with_index(&diff, repo_, t.ptr(), &opts);
+        assert(op_res == 0);
+        return Diff(diff);
+    }
+
     Diff Repository::diff_index_to_workdir(git_diff_options const & opts) const
     {
         git_diff * diff;

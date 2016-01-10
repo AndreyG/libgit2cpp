@@ -50,9 +50,11 @@ namespace git
         Index   index() const;
         Odb     odb()   const;
 
-        Diff diff                   (Tree &, Tree &,  git_diff_options const &) const;
-        Diff diff_to_index          (Tree &,          git_diff_options const &) const;
-        Diff diff_index_to_workdir  (                 git_diff_options const &) const;
+        Diff diff                       (Tree &, Tree &,    git_diff_options const &) const;
+        Diff diff_to_index              (Tree &,            git_diff_options const &) const;
+        Diff diff_to_workdir            (Tree &,            git_diff_options const &) const;
+        Diff diff_to_workdir_with_index (Tree &,            git_diff_options const &) const;
+        Diff diff_index_to_workdir      (                   git_diff_options const &) const;
 
         Signature signature() const;
 
