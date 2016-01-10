@@ -23,6 +23,9 @@ namespace git
         friend self_t operator & (self_t x, self_t y) { return self_t(x.value_ & y.value_); }
         friend self_t operator ^ (self_t x, self_t y) { return self_t(x.value_ ^ y.value_); }
 
+        friend bool operator == (self_t x, self_t y) { return x.value_ == y.value_; }
+        friend bool operator != (self_t x, self_t y) { return x.value_ != y.value_; }
+
     private:
         RawType value_;
     };
