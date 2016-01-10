@@ -39,12 +39,6 @@ namespace git
         git_diff_find_similar(diff_, &findopts);
     }
 
-    Diff& Diff::merge(Diff const & other)
-    {
-        git_diff_merge(diff_, other.diff_);
-        return *this;
-    }
-
     size_t Diff::deltas_num() const
     {
         return git_diff_num_deltas(diff_);

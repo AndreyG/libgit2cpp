@@ -52,8 +52,6 @@ namespace git
 
         void find_similar(git_diff_find_options &);
 
-        Diff& merge(Diff const & other);
-
         Stats stats() const;
 
         enum class format
