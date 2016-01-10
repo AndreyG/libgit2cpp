@@ -368,7 +368,7 @@ int main(int argc, char *argv[])
             a = commit.parent(0).tree();
          }
 
-         s.repo->diff(a, b, diffopts).print(git::Diff::format::patch, print_diff);
+         s.repo->diff(a, b, diffopts).print(git::diff::format::patch, print_diff);
       }
    }
 

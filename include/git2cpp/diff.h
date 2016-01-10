@@ -22,6 +22,11 @@ namespace git
             extern const type number;
             extern const type include_summary;
         }}
+
+        enum class format
+        {
+            patch, patch_header, raw, name_only, name_status
+        };
     }
 
     struct Diff
@@ -54,16 +59,11 @@ namespace git
 
         Stats stats() const;
 
-        enum class format
-        {
-            patch, patch_header, raw, name_only, name_status
-        };
-
         typedef
             std::function<void (git_diff_delta const &, git_diff_hunk const &, git_diff_line const &)>
             print_callback_t;
 
-        void print(format, print_callback_t print_callback) const;
+        void print(diff::format, print_callback_t print_callback) const;
 
         explicit Diff(git_diff * diff)
             : diff_(diff)

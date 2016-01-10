@@ -77,7 +77,7 @@ struct opts_t {
     int color = -1;
     cache_t cache = cache_t::normal;
     output::type output;
-    Diff::format format = Diff::format::patch;
+    diff::format format = diff::format::patch;
     const char *treeish1 = nullptr;
     const char *treeish2 = nullptr;
     const char *dir = ".";
@@ -215,21 +215,21 @@ opts_t::opts_t(int argc, char *argv[])
         else if (!strcmp(a, "-p") || !strcmp(a, "-u") ||
                  !strcmp(a, "--patch")) {
             output |= output::diff;
-            format = Diff::format::patch;
+            format = diff::format::patch;
         }
         else if (!strcmp(a, "--cached"))
             cache = cache_t::only;
         else if (!strcmp(a, "--nocache"))
             cache = cache_t::none;
         else if (!strcmp(a, "--name-only") || !strcmp(a, "--format=name"))
-            format = Diff::format::name_only;
+            format = diff::format::name_only;
         else if (!strcmp(a, "--name-status") ||
                 !strcmp(a, "--format=name-status"))
-            format = Diff::format::name_status;
+            format = diff::format::name_status;
         else if (!strcmp(a, "--raw") || !strcmp(a, "--format=raw"))
-            format = Diff::format::raw;
+            format = diff::format::raw;
         else if (!strcmp(a, "--format=diff-index")) {
-            format = Diff::format::raw;
+            format = diff::format::raw;
             diffopts.id_abbrev = 40;
         }
         else if (!strcmp(a, "--color"))

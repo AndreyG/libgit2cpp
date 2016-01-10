@@ -3,8 +3,35 @@
 
 #include <cassert>
 
+#include <boost/container/flat_map.hpp>
+
 namespace git
 {
+    namespace diff
+    {
+        namespace stats {
+        namespace format
+        {
+            const type none             (GIT_DIFF_STATS_NONE);
+            const type full             (GIT_DIFF_STATS_FULL);
+            const type _short           (GIT_DIFF_STATS_SHORT);
+            const type number           (GIT_DIFF_STATS_NUMBER);
+            const type include_summary  (GIT_DIFF_STATS_INCLUDE_SUMMARY);
+        }}
+
+        git_diff_format_t convert(format f)
+        {
+            static const boost::container::flat_map<format, git_diff_format_t> converter = {
+                { format::patch,        GIT_DIFF_FORMAT_PATCH           },
+                { format::patch_header, GIT_DIFF_FORMAT_PATCH_HEADER    },
+                { format::raw,          GIT_DIFF_FORMAT_RAW             },
+                { format::name_only,    GIT_DIFF_FORMAT_NAME_ONLY       },
+                { format::name_status,  GIT_DIFF_FORMAT_NAME_STATUS     },
+            };
+            return converter.at(f);
+        }
+    }
+
     namespace
     {
         int apply_callback  ( git_diff_delta const * delta
@@ -17,18 +44,6 @@ namespace git
             auto cb = reinterpret_cast<Diff::print_callback_t const *>(payload);
             (*cb)(*delta, *hunk, *line);
             return 0;
-        }
-
-        git_diff_format_t convert(Diff::format f)
-        {
-           switch (f)
-           {
-           case Diff::format::name_only:     return GIT_DIFF_FORMAT_NAME_ONLY;
-           case Diff::format::name_status:   return GIT_DIFF_FORMAT_NAME_STATUS;
-           case Diff::format::patch:         return GIT_DIFF_FORMAT_PATCH;
-           case Diff::format::patch_header:  return GIT_DIFF_FORMAT_PATCH_HEADER;
-           case Diff::format::raw:           return GIT_DIFF_FORMAT_RAW;
-           }
         }
     }
 
@@ -44,7 +59,7 @@ namespace git
         return git_diff_num_deltas(diff_);
     }
 
-    void Diff::print(format f, print_callback_t print_callback) const
+    void Diff::print(diff::format f, print_callback_t print_callback) const
     {
        git_diff_print(diff_, convert(f), &apply_callback, &print_callback);
     }
@@ -70,19 +85,6 @@ namespace git
             throw error_t("git_diff_stats_to_buf fail");
         else
             return Buffer(buf);
-    }
-
-    namespace diff
-    {
-        namespace stats {
-        namespace format
-        {
-            const type none             (GIT_DIFF_STATS_NONE);
-            const type full             (GIT_DIFF_STATS_FULL);
-            const type _short           (GIT_DIFF_STATS_SHORT);
-            const type number           (GIT_DIFF_STATS_NUMBER);
-            const type include_summary  (GIT_DIFF_STATS_INCLUDE_SUMMARY);
-        }}
     }
 }
 
