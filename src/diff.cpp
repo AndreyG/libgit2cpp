@@ -4,6 +4,7 @@
 #include <cassert>
 
 #include <boost/container/flat_map.hpp>
+#include <boost/assign/list_of.hpp>
 
 namespace git
 {
@@ -21,13 +22,14 @@ namespace git
 
         git_diff_format_t convert(format f)
         {
-            static const boost::container::flat_map<format, git_diff_format_t> converter = {
-                { format::patch,        GIT_DIFF_FORMAT_PATCH           },
-                { format::patch_header, GIT_DIFF_FORMAT_PATCH_HEADER    },
-                { format::raw,          GIT_DIFF_FORMAT_RAW             },
-                { format::name_only,    GIT_DIFF_FORMAT_NAME_ONLY       },
-                { format::name_status,  GIT_DIFF_FORMAT_NAME_STATUS     },
-            };
+            static const boost::container::flat_map<format, git_diff_format_t> converter
+                  = boost::assign::list_of<std::pair<format, git_diff_format_t>>
+                ( format::patch,        GIT_DIFF_FORMAT_PATCH           )
+                ( format::patch_header, GIT_DIFF_FORMAT_PATCH_HEADER    )
+                ( format::raw,          GIT_DIFF_FORMAT_RAW             )
+                ( format::name_only,    GIT_DIFF_FORMAT_NAME_ONLY       )
+                ( format::name_status,  GIT_DIFF_FORMAT_NAME_STATUS     )
+                  ;
             return converter.at(f);
         }
     }
