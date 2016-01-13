@@ -40,6 +40,11 @@ namespace git
    {
       return *git_commit_parent_id(commit_, i);
    }
+   
+   git_oid const & Commit::tree_id(void) const
+   {
+      return *git_commit_tree_id(commit_);
+   }
 
    git_signature const * Commit::author() const
    {

@@ -19,7 +19,8 @@ namespace git
       git_oid const & parent_id(size_t i) const;
 
       Tree tree() const;
-
+      git_oid const & tree_id(void) const;
+      
       Repository const & owner() const { return *repo_; }
 
       explicit operator bool () const { return commit_; }
