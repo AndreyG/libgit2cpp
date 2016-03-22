@@ -10,11 +10,6 @@
 
 #include <iostream>
 
-extern "C"
-{
-#include <git2/submodule.h>
-}
-
 #include "git2cpp/initializer.h"
 #include "git2cpp/repo.h"
 
@@ -79,25 +74,25 @@ void print_long(Status const & status)
 	/* print index changes */
 
 	for (size_t i = 0; i < maxi; ++i) {
-		auto s = status[i];
+        auto const & s = status[i];
 
-		if (s->status == GIT_STATUS_CURRENT)
+        if (s.status == GIT_STATUS_CURRENT)
 			continue;
 
-		if (s->status & GIT_STATUS_WT_DELETED)
+        if (s.status & GIT_STATUS_WT_DELETED)
 			rm_in_workdir = 1;
 
 		const char *istatus = nullptr;
 
-		if (s->status & GIT_STATUS_INDEX_NEW)
+        if (s.status & GIT_STATUS_INDEX_NEW)
 			istatus = "new file: ";
-		if (s->status & GIT_STATUS_INDEX_MODIFIED)
+        if (s.status & GIT_STATUS_INDEX_MODIFIED)
 			istatus = "modified: ";
-		if (s->status & GIT_STATUS_INDEX_DELETED)
+        if (s.status & GIT_STATUS_INDEX_DELETED)
 			istatus = "deleted:  ";
-		if (s->status & GIT_STATUS_INDEX_RENAMED)
+        if (s.status & GIT_STATUS_INDEX_RENAMED)
 			istatus = "renamed:  ";
-		if (s->status & GIT_STATUS_INDEX_TYPECHANGE)
+        if (s.status & GIT_STATUS_INDEX_TYPECHANGE)
 			istatus = "typechange:";
 
 		if (istatus == NULL)
@@ -110,8 +105,8 @@ void print_long(Status const & status)
 			header = 1;
 		}
 
-		old_path = s->head_to_index->old_file.path;
-		new_path = s->head_to_index->new_file.path;
+        old_path = s.head_to_index->old_file.path;
+        new_path = s.head_to_index->new_file.path;
 
 		if (old_path && new_path && strcmp(old_path, new_path))
 			printf("#\t%s  %s -> %s\n", istatus, old_path, new_path);
@@ -128,20 +123,20 @@ void print_long(Status const & status)
 	/* print workdir changes to tracked files */
 
 	for (size_t i = 0; i < maxi; ++i) {
-		auto s = status[i];
+        auto const & s = status[i];
 
-		if (s->status == GIT_STATUS_CURRENT || !s->index_to_workdir)
+        if (s.status == GIT_STATUS_CURRENT || !s.index_to_workdir)
 			continue;
 
 		const char *wstatus = nullptr;
 
-		if (s->status & GIT_STATUS_WT_MODIFIED)
+        if (s.status & GIT_STATUS_WT_MODIFIED)
 			wstatus = "modified: ";
-		if (s->status & GIT_STATUS_WT_DELETED)
+        if (s.status & GIT_STATUS_WT_DELETED)
 			wstatus = "deleted:  ";
-		if (s->status & GIT_STATUS_WT_RENAMED)
+        if (s.status & GIT_STATUS_WT_RENAMED)
 			wstatus = "renamed:  ";
-		if (s->status & GIT_STATUS_WT_TYPECHANGE)
+        if (s.status & GIT_STATUS_WT_TYPECHANGE)
 			wstatus = "typechange:";
 
 		if (wstatus == NULL)
@@ -155,8 +150,8 @@ void print_long(Status const & status)
 			header = 1;
 		}
 
-		old_path = s->index_to_workdir->old_file.path;
-		new_path = s->index_to_workdir->new_file.path;
+        old_path = s.index_to_workdir->old_file.path;
+        new_path = s.index_to_workdir->new_file.path;
 
 		if (old_path && new_path && strcmp(old_path, new_path))
 			printf("#\t%s  %s -> %s\n", wstatus, old_path, new_path);
@@ -175,9 +170,9 @@ void print_long(Status const & status)
 	header = 0;
 
 	for (size_t i = 0; i < maxi; ++i) {
-		auto s = status[i];
+        auto const & s = status[i];
 
-		if (s->status == GIT_STATUS_WT_NEW) {
+        if (s.status == GIT_STATUS_WT_NEW) {
 
 			if (!header) {
 				printf("# Untracked files:\n");
@@ -186,7 +181,7 @@ void print_long(Status const & status)
 				header = 1;
 			}
 
-			printf("#\t%s\n", s->index_to_workdir->old_file.path);
+            printf("#\t%s\n", s.index_to_workdir->old_file.path);
 		}
 	}
 
@@ -195,9 +190,9 @@ void print_long(Status const & status)
 	/* print ignored files */
 
 	for (size_t i = 0; i < maxi; ++i) {
-		auto s = status[i];
+        auto const & s = status[i];
 
-		if (s->status == GIT_STATUS_IGNORED) {
+        if (s.status == GIT_STATUS_IGNORED) {
 
 			if (!header) {
 				printf("# Ignored files:\n");
@@ -206,7 +201,7 @@ void print_long(Status const & status)
 				header = 1;
 			}
 
-			printf("#\t%s\n", s->index_to_workdir->old_file.path);
+            printf("#\t%s\n", s.index_to_workdir->old_file.path);
 		}
 	}
 
@@ -222,41 +217,41 @@ void print_short(Repository const & repo, Status const & status)
 
 	for (size_t i = 0; i < maxi; ++i) 
     {
-		auto s = status[i];
+        auto const & s = status[i];
 
-		if (s->status == GIT_STATUS_CURRENT)
+        if (s.status == GIT_STATUS_CURRENT)
 			continue;
 
 		a = b = c = NULL;
 		istatus = wstatus = ' ';
 		extra = "";
 
-		if (s->status & GIT_STATUS_INDEX_NEW)
+        if (s.status & GIT_STATUS_INDEX_NEW)
 			istatus = 'A';
-		if (s->status & GIT_STATUS_INDEX_MODIFIED)
+        if (s.status & GIT_STATUS_INDEX_MODIFIED)
 			istatus = 'M';
-		if (s->status & GIT_STATUS_INDEX_DELETED)
+        if (s.status & GIT_STATUS_INDEX_DELETED)
 			istatus = 'D';
-		if (s->status & GIT_STATUS_INDEX_RENAMED)
+        if (s.status & GIT_STATUS_INDEX_RENAMED)
 			istatus = 'R';
-		if (s->status & GIT_STATUS_INDEX_TYPECHANGE)
+        if (s.status & GIT_STATUS_INDEX_TYPECHANGE)
 			istatus = 'T';
 
-		if (s->status & GIT_STATUS_WT_NEW) {
+        if (s.status & GIT_STATUS_WT_NEW) {
 			if (istatus == ' ')
 				istatus = '?';
 			wstatus = '?';
 		}
-		if (s->status & GIT_STATUS_WT_MODIFIED)
+        if (s.status & GIT_STATUS_WT_MODIFIED)
 			wstatus = 'M';
-		if (s->status & GIT_STATUS_WT_DELETED)
+        if (s.status & GIT_STATUS_WT_DELETED)
 			wstatus = 'D';
-		if (s->status & GIT_STATUS_WT_RENAMED)
+        if (s.status & GIT_STATUS_WT_RENAMED)
 			wstatus = 'R';
-		if (s->status & GIT_STATUS_WT_TYPECHANGE)
+        if (s.status & GIT_STATUS_WT_TYPECHANGE)
 			wstatus = 'T';
 
-		if (s->status & GIT_STATUS_IGNORED) {
+        if (s.status & GIT_STATUS_IGNORED) {
 			istatus = '!';
 			wstatus = '!';
 		}
@@ -264,9 +259,9 @@ void print_short(Repository const & repo, Status const & status)
 		if (istatus == '?' && wstatus == '?')
 			continue;
 
-        if (s->index_to_workdir && s->index_to_workdir->new_file.mode == GIT_FILEMODE_COMMIT)
+        if (s.index_to_workdir && s.index_to_workdir->new_file.mode == GIT_FILEMODE_COMMIT)
         {
-            auto sm = repo.submodule_lookup(s->index_to_workdir->new_file.path);
+            auto sm = repo.submodule_lookup(s.index_to_workdir->new_file.path);
             auto smstatus = sm.get_status();
 
             typedef Submodule::status status;
@@ -281,16 +276,16 @@ void print_short(Repository const & repo, Status const & status)
                 extra = " (untracked content)";
         }
 
-		if (s->head_to_index) {
-			a = s->head_to_index->old_file.path;
-			b = s->head_to_index->new_file.path;
+        if (s.head_to_index) {
+            a = s.head_to_index->old_file.path;
+            b = s.head_to_index->new_file.path;
 		}
-		if (s->index_to_workdir) {
+        if (s.index_to_workdir) {
 			if (!a)
-				a = s->index_to_workdir->old_file.path;
+                a = s.index_to_workdir->old_file.path;
 			if (!b)
-				b = s->index_to_workdir->old_file.path;
-			c = s->index_to_workdir->new_file.path;
+                b = s.index_to_workdir->old_file.path;
+            c = s.index_to_workdir->new_file.path;
 		}
 
 		if (istatus == 'R') {
@@ -307,10 +302,10 @@ void print_short(Repository const & repo, Status const & status)
 	}
 
 	for (size_t i = 0; i < maxi; ++i) {
-		auto s = status[i];
+        auto const & s = status[i];
 
-		if (s->status == GIT_STATUS_WT_NEW)
-			printf("?? %s\n", s->index_to_workdir->old_file.path);
+        if (s.status == GIT_STATUS_WT_NEW)
+            printf("?? %s\n", s.index_to_workdir->old_file.path);
 	}
 }
 

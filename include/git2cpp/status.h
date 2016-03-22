@@ -17,7 +17,7 @@ namespace git
         ~Status();
 
         size_t entrycount() const;
-        git_status_entry const * operator[] (size_t i) const;
+        git_status_entry const & operator[] (size_t i) const;
 
         Status              (Status const &) = delete;
         Status& operator =  (Status const &) = delete;
