@@ -1,12 +1,22 @@
 project (libgit2cpp)
 cmake_minimum_required(VERSION 2.8)
 
+# Build options
+OPTION( USE_BOOST       "Enable use of boost header libraries" OFF )
+
+
 set(CMAKE_CXX_FLAGS -std=c++11)
 
-file(GLOB lib_sources
+file(GLOB_RECURSE lib_sources
     src/*.cpp
     include/git2cpp/*.h
 )
+
+IF(USE_BOOST)
+    add_definitions(-DUSE_BOOST=1)
+    find_package(Boost REQUIRED)
+    include_directories(${BOOST_INCLUDEDIR})
+ENDIF()
 
 add_library(git2cpp ${lib_sources})
 

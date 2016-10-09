@@ -72,7 +72,7 @@ namespace git
        case GIT_ENOTFOUND:
           throw file_not_found_error(path);
        default:
-          throw error_t(boost::format("unknown error inside function: 'git_tree_entry_bypath': %1%") % status);
+          throw error_t(internal::format("unknown error inside function: 'git_tree_entry_bypath': %d", status));
        }
     }
 
