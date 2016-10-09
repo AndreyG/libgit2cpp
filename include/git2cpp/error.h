@@ -1,17 +1,30 @@
 #pragma once
 
 #include <stdexcept>
-
-#include <boost/format.hpp>
+#include <sstream>
 
 #include "id_to_str.h"
 
 namespace git
 {
+   namespace internal{
+      inline void _format(std::stringstream & ss){
+	  }
+	  template<typename T, typename ...Args>
+      inline void _format(std::stringstream & ss, T&&value, Args&&... args){
+		ss << value;
+		_format(ss, std::forward<Args>(args)...);
+	  }
+	  template<typename ...Args>
+      inline std::string format(Args&&... args){
+		std::stringstream ss;
+		_format(ss, std::forward<Args>(args)...);
+		return ss.str();
+	  }
+   }
    struct error_t : std::runtime_error
    {
       explicit error_t(std::string const & message) : std::runtime_error(message) {}
-      explicit error_t(boost::format const & message) : error_t(str(message)) {}
    };
 
    struct repository_open_error : error_t
@@ -88,7 +101,7 @@ namespace git
    struct revparse_error : error_t
    {
       explicit revparse_error(const char * spec)
-         : error_t(boost::format("Could not resolve %1%") % spec)
+         : error_t(internal::format("Could not resolve ", spec))
       {}
    };
 
@@ -107,21 +120,21 @@ namespace git
    struct file_not_found_error : error_t
    {
       explicit file_not_found_error(const char * filepath)
-         : error_t(boost::format("file path \"%1%\" not found") % filepath)
+         : error_t(internal::format("file path \"",filepath,"\" not found"))
       {}
    };
 
    struct ambiguous_path_error : error_t
    {
       explicit ambiguous_path_error(const char * filepath)
-         : error_t(boost::format("file path \"%1%\" is ambiguous") % filepath)
+         : error_t(internal::format("file path \"",filepath,"\" is ambiguous"))
       {}
    };
 
    struct unknown_file_status_error : error_t
    {
       explicit unknown_file_status_error(const char * filepath)
-         : error_t(boost::format("unknown error during getting status for file \"%1%\"") % filepath)
+         : error_t(internal::format("unknown error during getting status for file \"",filepath,"\""))
       {}
    };
 
@@ -143,7 +156,7 @@ namespace git
    struct non_commit_object_error : error_t
    {
       explicit non_commit_object_error(git_oid const & id)
-         : error_t(str(boost::format("object %1% is not a commit") % id_to_str(id)))
+         : error_t(internal::format("object ",id_to_str(id)," is not a commit"))
       {}
    };
 
@@ -182,11 +195,11 @@ namespace git
 
    struct merge_base_error : error_t
    {
-      merge_base_error(git_oid const & c1, git_oid const & c2)
-         : error_t(boost::format("Could not find merge base for commits %1% and % 2%")
-                   % id_to_str(c1, 8)
-                   % id_to_str(c2, 8))
-      {}
+        merge_base_error(git_oid const & c1, git_oid const & c2)
+         : error_t(internal::format(
+            "Could not find merge base for commits ", id_to_str(c1, 8)," and ", id_to_str(c2, 8)
+           ))
+        {}
    };
 
    struct config_open_error : error_t
