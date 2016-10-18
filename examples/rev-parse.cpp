@@ -3,8 +3,7 @@
 #include <string.h>
 
 #include <iostream>
-#include <boost/optional.hpp>
-#include <boost/utility/in_place_factory.hpp>
+#include <memory>
 
 #include "git2cpp/initializer.h"
 #include "git2cpp/repo.h"
@@ -22,14 +21,14 @@ static void usage(const char *message, const char *arg)
 }
 
 struct parse_state {
-	boost::optional<Repository> repo;
-	std::string repodir = ".";
+    std::shared_ptr<Repository> repo;
+    std::string repodir = ".";
 };
 
 void parse_revision(parse_state & ps, const char *revstr)
 {
-	if (!ps.repo) 
-        ps.repo = boost::in_place(ps.repodir);
+    if (!ps.repo)
+        ps.repo = std::make_shared<Repository>(ps.repodir);
 
     Revspec rs = ps.repo->revparse(revstr);
 

@@ -3,8 +3,6 @@
 #include <string.h>
 
 #include <memory>
-#include <boost/optional.hpp>
-#include <boost/utility/in_place_factory.hpp>
 
 #include <git2/revwalk.h>
 
@@ -16,6 +14,8 @@
 #include "git2cpp/revwalker.h"
 #include "git2cpp/diff.h"
 
+#include "git2cpp/internal/optional.h"
+
 static void usage(const char *message, const char *arg)
 {
    if (message && arg)
@@ -26,11 +26,11 @@ static void usage(const char *message, const char *arg)
    exit(1);
 }
 
-struct log_state 
+struct log_state
 {
    std::string repodir = ".";
-   boost::optional<git::Repository> repo;
-   boost::optional<git::RevWalker>  walker;
+   git::internal::optional<git::Repository> repo;
+   git::internal::optional<git::RevWalker>  walker;
    int hide = 0;
    git::revwalker::sorting::type sorting = git::revwalker::sorting::time;
 };
@@ -38,7 +38,7 @@ struct log_state
 static void set_sorting(struct log_state *s, git::revwalker::sorting::type sort_mode)
 {
    if (!s->repo) {
-      s->repo = boost::in_place(s->repodir);
+      git::internal::emplace(s->repo, s->repodir);
    }
 
    if (!s->walker)
@@ -91,7 +91,7 @@ void add_revision(struct log_state *s, const char *revstr)
    int hide = 0;
 
    if (!s->repo) {
-      s->repo = boost::in_place(s->repodir);
+      git::internal::emplace(s->repo, s->repodir);
    }
 
    if (!revstr) {

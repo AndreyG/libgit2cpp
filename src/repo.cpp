@@ -8,11 +8,12 @@
 #include <git2/revwalk.h>
 #include <git2/blob.h>
 
-#include <boost/optional.hpp>
-#include <boost/utility/in_place_factory.hpp>
+#include <cassert>
 
 #include "git2cpp/repo.h"
 #include "git2cpp/error.h"
+
+#include "git2cpp/internal/optional.h"
 
 namespace git
 {
@@ -162,13 +163,13 @@ namespace git
             {
             case GIT_OK:
                 assert(type == type_);
-                ref_ = boost::in_place(ref);
+                internal::emplace(ref_, ref);
                 break;
             case GIT_ITEROVER:
-                ref_ = boost::none;
+                ref_ = internal::none;
                 break;
             default:
-                ref_ = boost::none;
+                ref_ = internal::none;
                 throw std::logic_error("unknown git_branch_next error");
             }
         }
@@ -194,7 +195,7 @@ namespace git
     private:
         git_branch_t type_;
         git_branch_iterator * base_;
-        boost::optional<Reference> ref_;
+        internal::optional<Reference> ref_;
     };
 
     std::vector<std::string> Repository::branches(branch_type type) const
