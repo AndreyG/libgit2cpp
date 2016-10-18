@@ -1,27 +1,13 @@
 #pragma once
 
 #include <stdexcept>
-#include <sstream>
 
 #include "id_to_str.h"
+#include "internal/format.h"
 
 namespace git
 {
-   namespace internal{
-      inline void _format(std::stringstream & ss){
-	  }
-	  template<typename T, typename ...Args>
-      inline void _format(std::stringstream & ss, T&&value, Args&&... args){
-		ss << value;
-		_format(ss, std::forward<Args>(args)...);
-	  }
-	  template<typename ...Args>
-      inline std::string format(Args&&... args){
-		std::stringstream ss;
-		_format(ss, std::forward<Args>(args)...);
-		return ss.str();
-	  }
-   }
+
    struct error_t : std::runtime_error
    {
       explicit error_t(std::string const & message) : std::runtime_error(message) {}
@@ -101,7 +87,7 @@ namespace git
    struct revparse_error : error_t
    {
       explicit revparse_error(const char * spec)
-         : error_t(internal::format("Could not resolve ", spec))
+         : error_t(internal::format("Could not resolve %s", spec))
       {}
    };
 
@@ -120,21 +106,21 @@ namespace git
    struct file_not_found_error : error_t
    {
       explicit file_not_found_error(const char * filepath)
-         : error_t(internal::format("file path \"",filepath,"\" not found"))
+         : error_t(internal::format("file path \"%s\" not found", filepath))
       {}
    };
 
    struct ambiguous_path_error : error_t
    {
       explicit ambiguous_path_error(const char * filepath)
-         : error_t(internal::format("file path \"",filepath,"\" is ambiguous"))
+         : error_t(internal::format("file path \"%s\" is ambiguous", filepath))
       {}
    };
 
    struct unknown_file_status_error : error_t
    {
       explicit unknown_file_status_error(const char * filepath)
-         : error_t(internal::format("unknown error during getting status for file \"",filepath,"\""))
+         : error_t(internal::format("unknown error during getting status for file \"%s\"", filepath))
       {}
    };
 
@@ -156,7 +142,7 @@ namespace git
    struct non_commit_object_error : error_t
    {
       explicit non_commit_object_error(git_oid const & id)
-         : error_t(internal::format("object ",id_to_str(id)," is not a commit"))
+         : error_t(internal::format("object %s is not a commit", id_to_str(id).c_str()))
       {}
    };
 
@@ -197,7 +183,7 @@ namespace git
    {
         merge_base_error(git_oid const & c1, git_oid const & c2)
          : error_t(internal::format(
-            "Could not find merge base for commits ", id_to_str(c1, 8)," and ", id_to_str(c2, 8)
+            "Could not find merge base for commits %s and %s", id_to_str(c1, 8).c_str(), id_to_str(c2, 8).c_str()
            ))
         {}
    };

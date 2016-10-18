@@ -13,7 +13,7 @@
 #include "git2cpp/repo.h"
 #include "git2cpp/error.h"
 
-#include "git2cpp/optional.h"
+#include "git2cpp/internal/optional.h"
 
 namespace git
 {
@@ -163,7 +163,7 @@ namespace git
             {
             case GIT_OK:
                 assert(type == type_);
-                ref_ = internal::in_place<Reference>(ref);
+                internal::emplace(ref_, ref);
                 break;
             case GIT_ITEROVER:
                 ref_ = internal::none;

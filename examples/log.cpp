@@ -14,7 +14,7 @@
 #include "git2cpp/revwalker.h"
 #include "git2cpp/diff.h"
 
-#include "git2cpp/optional.h"
+#include "git2cpp/internal/optional.h"
 
 static void usage(const char *message, const char *arg)
 {
@@ -38,7 +38,7 @@ struct log_state
 static void set_sorting(struct log_state *s, git::revwalker::sorting::type sort_mode)
 {
    if (!s->repo) {
-      s->repo = git::internal::in_place<git::Repository>(s->repodir);
+      git::internal::emplace(s->repo, s->repodir);
    }
 
    if (!s->walker)
@@ -91,7 +91,7 @@ void add_revision(struct log_state *s, const char *revstr)
    int hide = 0;
 
    if (!s->repo) {
-      s->repo = git::internal::in_place<git::Repository>(s->repodir);
+      git::internal::emplace(s->repo, s->repodir);
    }
 
    if (!revstr) {
