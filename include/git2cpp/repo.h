@@ -89,12 +89,13 @@ namespace git
                               Tree const & tree,
                               Commit const & parent);
 
+        explicit Repository(const char * dir);
         explicit Repository(std::string const & dir);
 
         struct init_tag {};
         static init_tag init;
-        Repository(std::string const & dir, init_tag);
-        Repository(std::string const & dir, init_tag, git_repository_init_options opts);
+        Repository(const char * dir, init_tag);
+        Repository(const char * dir, init_tag, git_repository_init_options opts);
 
         Repository              (Repository const &) = delete;
         Repository& operator =  (Repository const &) = delete; 

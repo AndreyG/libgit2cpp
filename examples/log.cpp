@@ -28,7 +28,7 @@ static void usage(const char *message, const char *arg)
 
 struct log_state
 {
-   std::string repodir = ".";
+   const char * repodir = ".";
    git::internal::optional<git::Repository> repo;
    git::internal::optional<git::RevWalker>  walker;
    int hide = 0;

@@ -9,6 +9,8 @@
 #include <string.h>
 
 #include <iostream>
+#include <string_view>
+#include <optional>
 
 #include "git2cpp/initializer.h"
 #include "git2cpp/repo.h"
@@ -40,15 +42,20 @@ enum {
  * - A sample status formatter that matches the "short" format
  */
 
+bool starts_with(std::string_view str, std::string_view prefix)
+{
+    return str.size() >= prefix.size() && std::equal(prefix.begin(), prefix.end(), str.begin());
+}
+
 void show_branch(Repository const & repo, int format)
 {
-	const char * branch = nullptr;
+    std::optional<std::string_view> branch;
     try
-	{
-        Reference head = repo.head();
-		branch = head.name();
-		if (!strncmp(branch, "refs/heads/", strlen("refs/heads/")))
-			branch += strlen("refs/heads/");
+    {
+        branch = repo.head().name();
+        static const std::string_view refs_heads = "refs/heads/";
+        if (starts_with(*branch, refs_heads))
+            branch->remove_prefix(refs_heads.length());
     }
     catch (non_existing_branch_error    const &) {}
     catch (missing_head_error           const &) {}
@@ -57,11 +64,10 @@ void show_branch(Repository const & repo, int format)
         throw e;
     }
 
-	if (format == FORMAT_LONG)
-		printf("# On branch %s\n",
-			branch ? branch : "Not currently on any branch.");
-	else
-		printf("## %s\n", branch ? branch : "HEAD (no branch)");
+    if (format == FORMAT_LONG)
+        printf("# On branch %s\n", branch.value_or("Not currently on any branch."));
+    else
+        printf("## %s\n", branch.value_or("HEAD (no branch)"));
 }
 
 void print_long(Status const & status)
@@ -95,7 +101,7 @@ void print_long(Status const & status)
         if (s.status & GIT_STATUS_INDEX_TYPECHANGE)
 			istatus = "typechange:";
 
-		if (istatus == NULL)
+		if (!istatus)
 			continue;
 
 		if (!header) {
@@ -311,9 +317,9 @@ void print_short(Repository const & repo, Status const & status)
 
 int main(int argc, char *argv[])
 {
-	git::Initializer threads_initializer;
+	auto_git_initializer;
 	
-	int i, npaths = 0, format = FORMAT_DEFAULT, zterm = 0, showbranch = 0;
+	int npaths = 0, format = FORMAT_DEFAULT, zterm = 0, showbranch = 0;
 	git_status_options opt = GIT_STATUS_OPTIONS_INIT;
 	const char *repodir = ".";
 
@@ -325,7 +331,7 @@ int main(int argc, char *argv[])
 		GIT_STATUS_OPT_RENAMES_HEAD_TO_INDEX |
 		GIT_STATUS_OPT_SORT_CASE_SENSITIVELY;
 
-	for (i = 1; i < argc; ++i) {
+	for (int i = 1; i < argc; ++i) {
 		if (argv[i][0] != '-') {
 			if (npaths < MAX_PATHSPEC)
             {

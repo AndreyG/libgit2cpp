@@ -27,21 +27,27 @@ namespace git
         }
     }
 
+    Repository::Repository(const char * dir)
+    {
+        if (git_repository_open_ext(&repo_, dir, 0, NULL))
+            throw repository_open_error(dir);
+    }
+
     Repository::Repository(std::string const & dir)
     {
         if (git_repository_open_ext(&repo_, dir.c_str(), 0, NULL))
-            throw repository_open_error();
+            throw repository_open_error(dir);
     }
 
-    Repository::Repository(std::string const & dir, init_tag)
+    Repository::Repository(const char * dir, init_tag)
     {
-        if (git_repository_init(&repo_, dir.c_str(), 0) < 0)
+        if (git_repository_init(&repo_, dir, 0) < 0)
             throw repository_init_error(dir);
     }
 
-    Repository::Repository(std::string const & dir, init_tag, git_repository_init_options opts)
+    Repository::Repository(const char * dir, init_tag, git_repository_init_options opts)
     {
-        if (git_repository_init_ext(&repo_, dir.c_str(), &opts) < 0)
+        if (git_repository_init_ext(&repo_, dir, &opts) < 0)
             throw repository_init_error(dir);
     }
 

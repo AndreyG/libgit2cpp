@@ -23,7 +23,7 @@ static void usage(const char *message, const char *arg)
 
 struct parse_state {
     internal::optional<Repository> repo;
-    std::string repodir = ".";
+    const char * repodir = ".";
 };
 
 void parse_revision(parse_state & ps, const char *revstr)
@@ -53,7 +53,7 @@ void parse_revision(parse_state & ps, const char *revstr)
 
 int main(int argc, char *argv[])
 {
-    Initializer threads_initalizer;
+    auto_git_initializer;
 
 	parse_state ps;
 

@@ -15,7 +15,9 @@ namespace git
 
    struct repository_open_error : error_t
    {
-      repository_open_error() : error_t("Could not open repository") {}
+      repository_open_error(std::string const & dir)
+          : error_t("Could not open repository on path " + dir)
+      {}
    };
 
    struct repository_init_error : error_t

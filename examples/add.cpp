@@ -98,7 +98,7 @@ int main (int argc, char** argv)
 
 	init_array(&array, argc-i, argv+i);
 
-    git::Initializer threads_initializer;
+    auto_git_initializer;
 
 	git::Repository repo(".");
 
