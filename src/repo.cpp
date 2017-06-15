@@ -153,7 +153,7 @@ namespace git
             git_branch_iterator_free(base_);
         }
 
-        explicit operator bool () const { return ref_.is_initialized(); }
+        explicit operator bool () const { return internal::has_value(ref_); }
 
         void operator ++ ()
         {
@@ -176,7 +176,7 @@ namespace git
 
         Reference const * operator -> () const
         {
-            return ref_.get_ptr();
+            return &ref_.value();
         }
 
     private:

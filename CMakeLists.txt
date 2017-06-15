@@ -4,9 +4,6 @@ cmake_minimum_required(VERSION 2.8)
 # Build options
 OPTION( USE_BOOST       "Enable use of boost header libraries" OFF )
 
-
-set(CMAKE_CXX_FLAGS -std=c++11)
-
 file(GLOB_RECURSE lib_sources
     src/*.cpp
     include/git2cpp/*.h
@@ -28,6 +25,8 @@ target_include_directories(git2cpp
 )
 
 target_link_libraries(git2cpp git2)
+
+target_compile_features(git2cpp PUBLIC cxx_std_17)
 
 install_targets(/lib git2cpp)
 

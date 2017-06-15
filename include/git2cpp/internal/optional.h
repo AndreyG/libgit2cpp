@@ -3,6 +3,16 @@
 #ifdef USE_BOOST
     #include <boost/optional.hpp>
     #include <boost/utility/typed_in_place_factory.hpp>
+    #define GIT_USE_BOOST_OPTIONAL
+
+#elif defined(__has_include) && __has_include(<optional>)
+    #include <optional>
+    #define GIT_USE_STD_OPTIONAL
+
+#elif defined(__has_include) && __has_include(<experimental/optional>)
+    #include <experimental/optional>
+    #define GIT_USE_STD_EXPERIMENTAL_OPTIONAL
+
 #else
     #include <memory>
     #include <cstddef>
@@ -11,20 +21,66 @@
 namespace git {
 namespace internal
 {
-#ifdef USE_BOOST
+#if defined(GIT_USE_BOOST_OPTIONAL)
+    #undef GIT_USE_BOOST_OPTIONAL
     using boost::optional;
-    using boost::in_place;
     using boost::none_t;
     using boost::none;
 
     template<typename T, typename ...Args>
-    optional<T> & emplace(optional<T> & opt, Args&&... args){
-        opt = in_place<T>(std::forward<Args>(args)...);
+    optional<T> & emplace(optional<T> & opt, Args&&... args)
+    {
+        opt = boost::in_place<T>(std::forward<Args>(args)...);
         return opt;
     }
+
+    template<typename T>
+    bool has_value(optional<T> const & opt)
+    {
+        return opt.is_initialized();
+    }
+
+#elif defined(GIT_USE_STD_OPTIONAL)
+    #undef GIT_USE_STD_OPTIONAL
+    using std::optional;
+    using none_t = std::nullopt_t;
+    const none_t none = std::nullopt;
+
+    template<typename T, typename ...Args>
+    optional<T> & emplace(optional<T> & opt, Args&&... args)
+    {
+        opt.emplace(std::forward<Args>(args)...);
+        return opt;
+    }
+
+    template<typename T>
+    bool has_value(optional<T> const & opt)
+    {
+        return opt.has_value();
+    }
+
+#elif defined(GIT_USE_STD_EXPERIMENTAL_OPTIONAL)
+    #undef GIT_USE_STD_EXPERIMENTAL_OPTIONAL
+    using std::experimental::optional;
+    using none_t = std::experimental::nullopt_t;
+    const none_t none = std::experimental::nullopt;
+
+    template<typename T, typename ...Args>
+    optional<T> & emplace(optional<T> & opt, Args&&... args)
+    {
+        opt.emplace(std::forward<Args>(args)...);
+        return opt;
+    }
+
+    template<typename T>
+    bool has_value(optional<T> const & opt)
+    {
+        return static_cast<bool>(opt);
+    }
+
 #else
-    typedef nullptr_t none_t;
-    const constexpr none_t none = nullptr;
+    typedef std::nullptr_t none_t;
+    const none_t none = nullptr;
 
     //Simple (and incomplete) optional implementations
     template<typename T>
@@ -37,8 +93,8 @@ namespace internal
         enum non_movable_t{};
         enum non_copyable_t{};
 
-        static const constexpr bool movable = std::is_move_constructible<T>::value && std::is_move_assignable<T>::value;
-        static const constexpr bool copyable = std::is_copy_constructible<T>::value && std::is_copy_assignable<T>::value;
+        static const bool movable = std::is_move_constructible<T>::value && std::is_move_assignable<T>::value;
+        static const bool copyable = std::is_copy_constructible<T>::value && std::is_copy_assignable<T>::value;
         typedef typename std::conditional<movable, T, non_movable_t>::type MovableT;
         typedef typename std::conditional<copyable, T, non_copyable_t>::type CopyableT;
 
@@ -63,37 +119,33 @@ namespace internal
         ~optional() { reset(); }
 
     public: //getting value
-        T const* get_ptr() const { return reinterpret_cast<T const*>(&storage);}
-        T*       get_ptr()       { return reinterpret_cast<T*>(&storage);}
 
-        const
-        T& value() const         { return *get_ptr(); }
-        T& value()               { return *get_ptr(); }
+        T const & value()        const { return reinterpret_cast<T const &>(storage); }
+        T       & value()              { return reinterpret_cast<T &>(storage); }
 
         T const & operator*  ()  const { return value(); }
         T       & operator * ()        { return value(); }
 
-        T const * operator -> () const { return get_ptr(); }
-        T       * operator -> ()       { return get_ptr(); }
+        T const * operator -> () const { return &value(); }
+        T       * operator -> ()       { return &value(); }
 
     public: //querying state
-        bool is_initialized() const { return initialized; }
 
-        explicit operator bool() const { return is_initialized(); }
+        explicit operator bool() const { return initialized; }
 
     public: //change state
         void reset()
         {
-            if (is_initialized())
+            if (initialized)
             {
-                get_ptr()->~T();
+                value().~T();
                 initialized = false;
             }
         }
 
         template<typename ...Args>
         void emplace(Args&&... args){
-            if (is_initialized())
+            if (initialized)
                 reset();
             init(std::forward<Args>(args)...);
         }
@@ -106,10 +158,10 @@ namespace internal
             return set_from_value(value);
         }
         optional & assign(optional const & other)  {
-            return set_or_reset(other.value(), other.is_initialized());
+            return set_or_reset(other.value(), other.initialized);
         }
         optional & assign(optional && other)  {
-            return set_or_reset(std::move(other.value()), other.is_initialized());
+            return set_or_reset(std::move(other.value()), other.initialized);
         }
 
     protected:
@@ -127,12 +179,10 @@ namespace internal
         template<typename U>
         optional & set_from_value(U&& u)
         {
-            if(is_initialized()){
+            if (initialized)
                 reinterpret_cast<T&>(storage) = std::forward<U>(u);
-            }
-            else{
+            else
                 init(std::forward<U>(u));
-            }
 
             return *this;
         }
@@ -152,6 +202,12 @@ namespace internal
     optional<T> & emplace(optional<T> & opt, Args&&... args){
         opt.emplace(std::forward<Args>(args)...);
         return opt;
+    }
+
+    template<typename T>
+    bool has_value(optional<T> const & opt)
+    {
+        return static_cast<bool>(opt);
     }
 #endif
 
