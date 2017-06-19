@@ -58,7 +58,7 @@ namespace git
 
         Signature signature() const;
 
-        Status status(git_status_options const &) const;
+        Status status(Status::Options const &) const;
 
         StrArray reference_list() const;
 

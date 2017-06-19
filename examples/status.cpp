@@ -320,16 +320,13 @@ int main(int argc, char *argv[])
 	auto_git_initializer;
 	
 	int npaths = 0, format = FORMAT_DEFAULT, zterm = 0, showbranch = 0;
-	git_status_options opt = GIT_STATUS_OPTIONS_INIT;
+    Status::Options opt;
 	const char *repodir = ".";
 
     const size_t MAX_PATHSPEC = 8;
     char * pathspec[MAX_PATHSPEC];
 
-	opt.show  = GIT_STATUS_SHOW_INDEX_AND_WORKDIR;
-	opt.flags = GIT_STATUS_OPT_INCLUDE_UNTRACKED |
-		GIT_STATUS_OPT_RENAMES_HEAD_TO_INDEX |
-		GIT_STATUS_OPT_SORT_CASE_SENSITIVELY;
+    opt.include_untracked().renames_head_to_index();
 
 	for (int i = 1; i < argc; ++i) {
 		if (argv[i][0] != '-') {
@@ -357,19 +354,18 @@ int main(int argc, char *argv[])
 				format = FORMAT_PORCELAIN;
 		}
 		else if (!strcmp(argv[i], "--ignored"))
-			opt.flags |= GIT_STATUS_OPT_INCLUDE_IGNORED;
+            opt.include_ignored();
 		else if (!strcmp(argv[i], "-uno") ||
 				 !strcmp(argv[i], "--untracked-files=no"))
-			opt.flags &= ~GIT_STATUS_OPT_INCLUDE_UNTRACKED;
+            opt.exclude_untracked();
 		else if (!strcmp(argv[i], "-unormal") ||
 				 !strcmp(argv[i], "--untracked-files=normal"))
-			opt.flags |= GIT_STATUS_OPT_INCLUDE_UNTRACKED;
+            opt.include_untracked();
 		else if (!strcmp(argv[i], "-uall") ||
 				 !strcmp(argv[i], "--untracked-files=all"))
-			opt.flags |= GIT_STATUS_OPT_INCLUDE_UNTRACKED |
-				GIT_STATUS_OPT_RECURSE_UNTRACKED_DIRS;
+            opt.include_untracked().recurse_untracked_dirs();
 		else if (!strcmp(argv[i], "--ignore-submodules=all"))
-			opt.flags |= GIT_STATUS_OPT_EXCLUDE_SUBMODULES;
+            opt.exclude_submodules();
 		else if (!strncmp(argv[i], "--git-dir=", strlen("--git-dir=")))
 			repodir = argv[i] + strlen("--git-dir=");
 		else
@@ -383,10 +379,8 @@ int main(int argc, char *argv[])
 		format = FORMAT_LONG;
 	if (format == FORMAT_LONG)
 		showbranch = 1;
-	if (npaths > 0) {
-		opt.pathspec.strings = pathspec;
-		opt.pathspec.count   = npaths;
-	}
+    if (npaths > 0)
+        opt.set_pathspec(pathspec, npaths);
 
 	Repository repo(repodir);
 

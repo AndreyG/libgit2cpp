@@ -16,9 +16,81 @@ namespace git
             throw error_t("status entry index out of bounds: " + std::to_string(i));
     }
 
-    Status::Status(git_repository * repo, git_status_options const & opts)
+    namespace
     {
-        if (git_status_list_new(&status_, repo, &opts))
+        git_status_show_t convert(Status::Options::Show show)
+        {
+            switch (show)
+            {
+            case Status::Options::Show::IndexOnly:      return GIT_STATUS_SHOW_INDEX_ONLY;
+            case Status::Options::Show::WorkdirOnly:    return GIT_STATUS_SHOW_INDEX_ONLY;
+            default:
+                return GIT_STATUS_SHOW_INDEX_AND_WORKDIR;
+            }
+        }
+    }
+
+    Status::Options::Options(Show show, Sort sort)
+        : opts_(GIT_STATUS_OPTIONS_INIT)
+    {
+        opts_.show = convert(show);
+
+        switch (sort)
+        {
+        case Sort::CaseSensitively:
+            opts_.flags |= GIT_STATUS_OPT_SORT_CASE_SENSITIVELY;
+            break;
+        case Sort::CaseInsensitively:
+            opts_.flags |= GIT_STATUS_OPT_SORT_CASE_INSENSITIVELY;
+            break;
+        }
+    }
+
+    void Status::Options::set_pathspec(char ** ptr, size_t size)
+    {
+        opts_.pathspec.strings = ptr;
+        opts_.pathspec.count = size;
+    }
+
+    Status::Options& Status::Options::include_untracked()
+    {
+        opts_.flags |= GIT_STATUS_OPT_INCLUDE_UNTRACKED;
+        return *this;
+    }
+
+    Status::Options& Status::Options::exclude_untracked()
+    {
+        opts_.flags &= ~GIT_STATUS_OPT_INCLUDE_UNTRACKED;
+        return *this;
+    }
+
+    Status::Options& Status::Options::recurse_untracked_dirs()
+    {
+        opts_.flags |= GIT_STATUS_OPT_RECURSE_UNTRACKED_DIRS;
+        return *this;
+    }
+
+    Status::Options& Status::Options::exclude_submodules()
+    {
+        opts_.flags |= GIT_STATUS_OPT_EXCLUDE_SUBMODULES;
+        return *this;
+    }
+
+    Status::Options& Status::Options::include_ignored()
+    {
+        opts_.flags |= GIT_STATUS_OPT_INCLUDE_IGNORED;
+        return *this;
+    }
+
+    Status::Options& Status::Options::renames_head_to_index()
+    {
+        opts_.flags |= GIT_STATUS_OPT_RENAMES_HEAD_TO_INDEX;
+		return *this;
+    }
+
+    Status::Status(git_repository * repo, Options const & opts)
+    {
+        if (git_status_list_new(&status_, repo, opts.raw()))
             throw get_status_error();
     }
 

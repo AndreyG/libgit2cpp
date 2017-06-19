@@ -1,3 +1,8 @@
+#include "git2cpp/repo.h"
+
+#include "git2cpp/error.h"
+#include "git2cpp/internal/optional.h"
+
 #include <git2/commit.h>
 #include <git2/branch.h>
 #include <git2/types.h>
@@ -9,11 +14,6 @@
 #include <git2/blob.h>
 
 #include <cassert>
-
-#include "git2cpp/repo.h"
-#include "git2cpp/error.h"
-
-#include "git2cpp/internal/optional.h"
 
 namespace git
 {
@@ -257,7 +257,7 @@ namespace git
         return Reference(ref);
     }
 
-    Status Repository::status(git_status_options const & opts) const
+    Status Repository::status(Status::Options const & opts) const
     {
         return Status(repo_, opts);
     }
