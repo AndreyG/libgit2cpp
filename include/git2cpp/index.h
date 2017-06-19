@@ -1,5 +1,7 @@
 #pragma once
 
+#include <git2/oid.h>
+
 #include <functional>
 
 struct git_index;
@@ -23,6 +25,9 @@ namespace git
         
         void update_all (git_strarray const & pathspec, matched_path_callback_t cb);
         void add_all    (git_strarray const & pathspec, matched_path_callback_t cb, unsigned int flags = 0);
+
+        void add_path(const char *);
+        void add_path(std::string const &);
 
         git_oid write_tree() const;
 

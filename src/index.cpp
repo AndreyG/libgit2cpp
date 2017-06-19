@@ -71,6 +71,17 @@ namespace git
         assert(res == 0);
     }
 
+    void Index::add_path(const char * path)
+    {
+        int res = git_index_add_bypath(index_, path);
+        assert(res == 0);
+    }
+
+    void Index::add_path(std::string const & path)
+    {
+        add_path(path.c_str());
+    }
+
     void Index::write() const
     {
         if (git_index_write(index_))
