@@ -127,11 +127,8 @@ void add_revision(struct log_state *s, const char *revstr)
 static void print_time(const git_time *intime, const char *prefix)
 {
    char sign, out[32];
-   struct tm intm;
-   int offset, hours, minutes;
-   time_t t;
 
-   offset = intime->offset;
+   int offset = intime->offset;
    if (offset < 0) {
       sign = '-';
       offset = -offset;
@@ -139,13 +136,13 @@ static void print_time(const git_time *intime, const char *prefix)
       sign = '+';
    }
 
-   hours   = offset / 60;
-   minutes = offset % 60;
+   int hours = offset / 60;
+   int minutes = offset % 60;
 
-   t = (time_t)intime->time + (intime->offset * 60);
+   time_t t = static_cast<time_t>(intime->time) + (intime->offset * 60);
 
-   gmtime_r(&t, &intm);
-   strftime(out, sizeof(out), "%a %b %e %T %Y", &intm);
+   auto intm = gmtime(&t);
+   strftime(out, sizeof(out), "%a %b %e %T %Y", intm);
 
    printf("%s%s %c%02d%02d\n", prefix, out, sign, hours, minutes);
 }

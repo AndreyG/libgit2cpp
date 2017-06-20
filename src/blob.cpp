@@ -21,7 +21,7 @@ namespace git
 
     std::size_t Blob::size() const
     {
-        return git_blob_rawsize(blob_);
+        return static_cast<std::size_t>(git_blob_rawsize(blob_));
     }
 
     const void * Blob::content() const

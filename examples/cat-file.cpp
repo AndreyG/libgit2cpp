@@ -64,7 +64,7 @@ static void print_signature(const char *header, const git_signature *sig)
 static void show_blob(const git_blob *blob)
 {
 	/* ? Does this need crlf filtering? */
-	fwrite(git_blob_rawcontent(blob), git_blob_rawsize(blob), 1, stdout);
+	fwrite(git_blob_rawcontent(blob), static_cast<size_t>(git_blob_rawsize(blob)), 1, stdout);
 }
 
 static void show_tree(const git_tree *tree)

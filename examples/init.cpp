@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 	const char *templ = NULL, *gitdir = NULL, *dir = NULL;
 	size_t pfxlen;
 
-    Initializer threads_initializer;
+    auto_git_initializer;
 
 	/* Process arguments */
 

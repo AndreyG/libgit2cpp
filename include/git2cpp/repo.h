@@ -93,14 +93,14 @@ namespace git
         explicit Repository(std::string const & dir);
 
         struct init_tag {};
-        static init_tag init;
+        static const init_tag init;
         Repository(const char * dir, init_tag);
         Repository(const char * dir, init_tag, git_repository_init_options opts);
 
         Repository              (Repository const &) = delete;
         Repository& operator =  (Repository const &) = delete; 
 
-        Repository(Repository &&);
+        Repository(Repository &&) noexcept;
 
         ~Repository();
 

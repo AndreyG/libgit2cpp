@@ -27,6 +27,8 @@ namespace git
         }
     }
 
+    const Repository::init_tag Repository::init;
+
     Repository::Repository(const char * dir)
     {
         if (git_repository_open_ext(&repo_, dir, 0, NULL))
@@ -49,6 +51,12 @@ namespace git
     {
         if (git_repository_init_ext(&repo_, dir, &opts) < 0)
             throw repository_init_error(dir);
+    }
+
+    Repository::Repository(Repository&& other) noexcept
+        : repo_(other.repo_)
+    {
+        other.repo_ = nullptr;
     }
 
     Repository::~Repository()
