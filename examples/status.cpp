@@ -4,8 +4,6 @@
  * This file is part of libgit2, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include <iostream>
@@ -65,19 +63,21 @@ void show_branch(Repository const & repo, int format)
     }
 
     if (format == FORMAT_LONG)
-        printf("# On branch %s\n", branch.value_or("Not currently on any branch."));
+        std::cout << "# On branch " << branch.value_or("Not currently on any branch.");
     else
-        printf("## %s\n", branch.value_or("HEAD (no branch)"));
+        std::cout<< "## ", branch.value_or("HEAD (no branch)");
+    std::cout << "\n";
 }
 
 void print_long(Status const & status)
 {
 	size_t maxi = status.entrycount();
-	int header = 0, changes_in_index = 0;
-	int changed_in_workdir = 0, rm_in_workdir = 0;
+	int rm_in_workdir = 0;
 	const char *old_path, *new_path;
 
 	/* print index changes */
+
+    bool changes_in_index = false;
 
 	for (size_t i = 0; i < maxi; ++i) {
         auto const & s = status[i];
@@ -104,27 +104,32 @@ void print_long(Status const & status)
 		if (!istatus)
 			continue;
 
-		if (!header) {
-			printf("# Changes to be committed:\n");
-			printf("#   (use \"git reset HEAD <file>...\" to unstage)\n");
-			printf("#\n");
-			header = 1;
-		}
+        if (!changes_in_index) {
+            std::cout   << "# Changes to be committed:\n"
+                        << "#   (use \"git reset HEAD <file>...\" to unstage)\n"
+                        << "#\n";
+            changes_in_index = true;
+        }
+
+        std::cout << "#\t" << istatus << "  ";
 
         old_path = s.head_to_index->old_file.path;
         new_path = s.head_to_index->new_file.path;
 
 		if (old_path && new_path && strcmp(old_path, new_path))
-			printf("#\t%s  %s -> %s\n", istatus, old_path, new_path);
+			std::cout << old_path << " -> " << new_path;
+		else if (old_path)
+			std::cout << old_path;
 		else
-			printf("#\t%s  %s\n", istatus, old_path ? old_path : new_path);
+			std::cout << new_path;
+
+		std::cout << "\n";
 	}
 
-	if (header) {
-		changes_in_index = 1;
-		printf("#\n");
-	}
-	header = 0;
+    if (changes_in_index)
+        std::cout << "#\n";
+
+    bool changed_in_workdir = false;
 
 	/* print workdir changes to tracked files */
 
@@ -145,92 +150,95 @@ void print_long(Status const & status)
         if (s.status & GIT_STATUS_WT_TYPECHANGE)
 			wstatus = "typechange:";
 
-		if (wstatus == NULL)
-			continue;
+        if (!wstatus)
+            continue;
 
-		if (!header) {
-			printf("# Changes not staged for commit:\n");
-			printf("#   (use \"git add%s <file>...\" to update what will be committed)\n", rm_in_workdir ? "/rm" : "");
-			printf("#   (use \"git checkout -- <file>...\" to discard changes in working directory)\n");
-			printf("#\n");
-			header = 1;
-		}
+        if (!changed_in_workdir) {
+            std::cout   << "# Changes not staged for commit:\n"
+                        << "#   (use \"git add" << (rm_in_workdir ? "/rm" : "") << "<file>...\" to update what will be committed)\n"
+                        << "#   (use \"git checkout -- <file>...\" to discard changes in working directory)\n"
+                        << "#\n";
+            changed_in_workdir = true;
+        }
+
+        std::cout << "#\t" << wstatus << "  ";
 
         old_path = s.index_to_workdir->old_file.path;
         new_path = s.index_to_workdir->new_file.path;
 
-		if (old_path && new_path && strcmp(old_path, new_path))
-			printf("#\t%s  %s -> %s\n", wstatus, old_path, new_path);
-		else
-			printf("#\t%s  %s\n", wstatus, old_path ? old_path : new_path);
-	}
+        if (old_path && new_path && strcmp(old_path, new_path))
+            std::cout << old_path << " -> " << new_path;
+        else if (old_path)
+            std::cout << old_path;
+        else
+            std::cout << new_path;
+        std::cout << "\n";
+    }
 
-	if (header) {
-		changed_in_workdir = 1;
-		printf("#\n");
-	}
-	header = 0;
+    if (changed_in_workdir)
+        std::cout << "#\n";
 
-	/* print untracked files */
-
-	header = 0;
-
-	for (size_t i = 0; i < maxi; ++i) {
-        auto const & s = status[i];
-
-        if (s.status == GIT_STATUS_WT_NEW) {
-
-			if (!header) {
-				printf("# Untracked files:\n");
-				printf("#   (use \"git add <file>...\" to include in what will be committed)\n");
-				printf("#\n");
-				header = 1;
-			}
-
-            printf("#\t%s\n", s.index_to_workdir->old_file.path);
-		}
-	}
-
-	header = 0;
-
-	/* print ignored files */
-
-	for (size_t i = 0; i < maxi; ++i) {
-        auto const & s = status[i];
-
-        if (s.status == GIT_STATUS_IGNORED) {
-
-			if (!header) {
-				printf("# Ignored files:\n");
-				printf("#   (use \"git add -f <file>...\" to include in what will be committed)\n");
-				printf("#\n");
-				header = 1;
-			}
-
-            printf("#\t%s\n", s.index_to_workdir->old_file.path);
-		}
-	}
-
-	if (!changes_in_index && changed_in_workdir)
-		printf("no changes added to commit (use \"git add\" and/or \"git commit -a\")\n");
-}
-
-void print_short(Repository const & repo, Status const & status)
-{
-	size_t maxi = status.entrycount();
-	char istatus, wstatus;
-	const char *extra, *a, *b, *c;
-
+    /* print untracked files */
+    bool were_untracked_files = false;
 	for (size_t i = 0; i < maxi; ++i) 
     {
         auto const & s = status[i];
 
-        if (s.status == GIT_STATUS_CURRENT)
-			continue;
+        if (s.status == GIT_STATUS_WT_NEW)
+        {
+            if (!were_untracked_files)
+            {
+                std::cout   << "# Untracked files:\n"
+                            << "#   (use \"git add <file>...\" to include in what will be committed)\n"
+                            << "#\n";
+                were_untracked_files = true;
+            }
 
-		a = b = c = NULL;
-		istatus = wstatus = ' ';
-		extra = "";
+            std::cout << "#\t" << s.index_to_workdir->old_file.path << "\n";
+        }
+    }
+
+    /* print ignored files */
+    bool were_ignored_files = false;
+
+    for (size_t i = 0; i < maxi; ++i) {
+        auto const & s = status[i];
+
+        if (s.status == GIT_STATUS_IGNORED) 
+        {
+            if (!were_ignored_files)
+            {
+                std::cout   << "# Ignored files:\n"
+                            << "#   (use \"git add -f <file>...\" to include in what will be committed)\n"
+                            << "#\n";
+                were_ignored_files = true;
+            }
+
+            std::cout << "#\t" << s.index_to_workdir->old_file.path << "\n";
+        }
+    }
+
+    if (!changes_in_index && changed_in_workdir)
+        std::cout << "no changes added to commit (use \"git add\" and/or \"git commit -a\")\n";
+}
+
+void print_short(Repository const & repo, Status const & status)
+{
+    size_t maxi = status.entrycount();
+
+    for (size_t i = 0; i < maxi; ++i) 
+    {
+        auto const & s = status[i];
+
+        if (s.status == GIT_STATUS_CURRENT)
+            continue;
+
+        const char *a = nullptr;
+        const char *b = nullptr;
+        const char *c = nullptr;
+        char istatus = ' ';
+        char wstatus = ' ';
+        const char *extra = "";
 
         if (s.status & GIT_STATUS_INDEX_NEW)
 			istatus = 'A';
@@ -294,25 +302,21 @@ void print_short(Repository const & repo, Status const & status)
             c = s.index_to_workdir->new_file.path;
 		}
 
-		if (istatus == 'R') {
-			if (wstatus == 'R')
-				printf("%c%c %s %s %s%s\n", istatus, wstatus, a, b, c, extra);
-			else
-				printf("%c%c %s %s%s\n", istatus, wstatus, a, b, extra);
-		} else {
-			if (wstatus == 'R')
-				printf("%c%c %s %s%s\n", istatus, wstatus, a, c, extra);
-			else
-				printf("%c%c %s%s\n", istatus, wstatus, a, extra);
-		}
-	}
+        std::cout << istatus << wstatus << ' ' << a;
+        if (istatus == 'R')
+            std::cout << ' ' << b;
+        if (wstatus == 'R')
+            std::cout << ' ' << c;
+        std::cout << extra << "\n";
+    }
 
-	for (size_t i = 0; i < maxi; ++i) {
+    for (size_t i = 0; i < maxi; ++i)
+    {
         auto const & s = status[i];
 
         if (s.status == GIT_STATUS_WT_NEW)
-            printf("?? %s\n", s.index_to_workdir->old_file.path);
-	}
+            std::cout << "?? " << s.index_to_workdir->old_file.path << "\n";
+    }
 }
 
 int main(int argc, char *argv[])
