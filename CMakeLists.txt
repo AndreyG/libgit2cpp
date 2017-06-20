@@ -2,20 +2,30 @@ project (libgit2cpp)
 cmake_minimum_required(VERSION 2.8)
 
 # Build options
-OPTION( USE_BOOST       "Enable use of boost header libraries" OFF )
-
-file(GLOB_RECURSE lib_sources
-    src/*.cpp
-    include/git2cpp/*.h
-)
+OPTION(USE_BOOST "Enable use of boost header libraries" OFF)
 
 IF(USE_BOOST)
-    add_definitions(-DUSE_BOOST=1)
-    find_package(Boost REQUIRED)
-    include_directories(${BOOST_INCLUDEDIR})
+  add_definitions(-DUSE_BOOST=1)
+  find_package(Boost REQUIRED)
+  include_directories(${BOOST_INCLUDEDIR})
 ENDIF()
 
-add_library(git2cpp ${lib_sources})
+if (MSVC)
+  OPTION(BUNDLE_LIBGIT2 "use bundled libgit2" ON)
+else()
+  OPTION(BUNDLE_LIBGIT2 "use bundled libgit2" OFF)
+endif()
+
+if (BUNDLE_LIBGIT2)
+  add_subdirectory(libs/libgit2)
+endif()
+
+file(GLOB_RECURSE lib_sources
+  src/*.cpp
+  include/git2cpp/*.h
+)
+
+add_library(git2cpp STATIC ${lib_sources})
 
 target_include_directories(git2cpp
   PRIVATE
@@ -26,28 +36,34 @@ target_include_directories(git2cpp
 
 target_link_libraries(git2cpp git2)
 
-target_compile_features(git2cpp PUBLIC cxx_std_17)
+set_target_properties(git2cpp PROPERTIES
+  CXX_STANDARD 17
+  CXX_STANDARD_REQUIRED YES
+  INTERFACE_COMPILE_FEATURES cxx_std_17
+)
 
-install_targets(/lib git2cpp)
+if (MSVC)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
+endif()
 
 set(examples
-    add
-    branch
-    cat-file
-    diff
-    log
-    rev-list
-    showindex
-    status
-    init
-    rev-parse
-    general
-    commit-graph-generator
+  add
+  branch
+  cat-file
+  diff
+  log
+  rev-list
+  showindex
+  status
+  init
+  rev-parse
+  general
+  commit-graph-generator
 )
 
 foreach (example ${examples})
-    add_executable(${example} examples/${example}.cpp)
-    target_link_libraries(${example} git2cpp)
+  add_executable("${example}-cpp" examples/${example}.cpp)
+  target_link_libraries("${example}-cpp" git2cpp)
 endforeach(example)
 
 file(COPY test.sh DESTINATION . FILE_PERMISSIONS ${EXE_PERM})
