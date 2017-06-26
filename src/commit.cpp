@@ -10,7 +10,7 @@ namespace git
    Commit Commit::parent(size_t i) const
    {
       git_commit * parent;
-      if (git_commit_parent(&parent, commit_, i))
+      if (git_commit_parent(&parent, commit_, static_cast<unsigned int>(i)))
          throw commit_parent_error(id());
       return Commit(parent, *repo_);
    }
@@ -35,7 +35,7 @@ namespace git
 
    git_oid const & Commit::parent_id(size_t i) const
    {
-      return *git_commit_parent_id(commit_, i);
+      return *git_commit_parent_id(commit_, static_cast<unsigned int>(i));
    }
 
    git_signature const * Commit::author() const
