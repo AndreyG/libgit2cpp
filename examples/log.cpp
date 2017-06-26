@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
    opt.max_parents = -1;
    opt.limit = -1;
 
-   git::Initializer threads_initializer;
+   auto_git_initializer;
 
    log_state s;
 
@@ -302,7 +302,7 @@ int main(int argc, char *argv[])
    int parsed_options_num = parse_options(argc, argv, s, opt, count);
 
    if (!count)
-      add_revision(&s, NULL);
+      add_revision(&s, nullptr);
 
    git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
    diffopts.pathspec.strings = &argv[parsed_options_num];
