@@ -25,6 +25,10 @@ file(GLOB_RECURSE lib_sources
   include/git2cpp/*.h
 )
 
+if (MSVC AND ($MSVC_VERSION VERSION_GREATER 1900))
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
+endif()
+
 add_library(git2cpp STATIC ${lib_sources})
 
 target_include_directories(git2cpp
@@ -41,10 +45,6 @@ set_target_properties(git2cpp PROPERTIES
   CXX_STANDARD_REQUIRED YES
   INTERFACE_COMPILE_FEATURES cxx_std_17
 )
-
-if (MSVC)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
-endif()
 
 set(examples
   add
