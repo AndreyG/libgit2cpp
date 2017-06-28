@@ -38,6 +38,10 @@ target_include_directories(git2cpp
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 
+if (USE_BOOST)
+  target_include_directories(git2cpp PUBLIC ${Boost_INCLUDE_DIRS})
+endif()
+
 target_link_libraries(git2cpp git2)
 
 set_target_properties(git2cpp PROPERTIES
