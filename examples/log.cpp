@@ -4,8 +4,6 @@
 
 #include <memory>
 
-#include <git2/revwalk.h>
-
 #include "git2cpp/repo.h"
 #include "git2cpp/pathspec.h"
 #include "git2cpp/initializer.h"
@@ -294,7 +292,7 @@ int main(int argc, char *argv[])
    opt.max_parents = -1;
    opt.limit = -1;
 
-   auto_git_initializer;
+   git::Initializer threads_initializer;
 
    log_state s;
 
@@ -302,7 +300,7 @@ int main(int argc, char *argv[])
    int parsed_options_num = parse_options(argc, argv, s, opt, count);
 
    if (!count)
-      add_revision(&s, nullptr);
+      add_revision(&s, NULL);
 
    git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
    diffopts.pathspec.strings = &argv[parsed_options_num];

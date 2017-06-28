@@ -2,10 +2,7 @@
 
 #include <string>
 
-extern "C"
-{
 #include <git2/oid.h>
-}
 
 namespace git
 {
