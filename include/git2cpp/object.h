@@ -38,7 +38,7 @@ namespace git
       Object              (Object const &) = delete;
       Object& operator =  (Object const &) = delete;
 
-      Object(Object && other);
+      Object(Object && other) noexcept;
 
    private:
       git_object * obj_          = nullptr;

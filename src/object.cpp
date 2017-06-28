@@ -19,7 +19,7 @@ namespace git
         git_object_free(obj_);
     }
 
-    Object::Object(Object && other)
+    Object::Object(Object && other) noexcept
         : obj_(other.obj_)
         , repo_(other.repo_)
     {
