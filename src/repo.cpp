@@ -59,6 +59,12 @@ namespace git
         other.repo_ = nullptr;
     }
 
+    Repository& Repository::operator=(Repository&& other) noexcept
+    {
+        std::swap(repo_, other.repo_);
+        return *this;
+    }
+
     Repository::~Repository()
     {
         git_repository_free(repo_);

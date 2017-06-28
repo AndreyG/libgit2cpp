@@ -100,7 +100,8 @@ namespace git
         Repository              (Repository const &) = delete;
         Repository& operator =  (Repository const &) = delete; 
 
-        Repository(Repository &&) noexcept;
+        Repository              (Repository &&) noexcept;
+        Repository& operator =  (Repository &&) noexcept;
 
         ~Repository();
 
