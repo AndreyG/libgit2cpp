@@ -7,11 +7,27 @@
 #include <string.h>
 
 #include <iostream>
-#include <string_view>
-#include <optional>
 
 #include "git2cpp/initializer.h"
 #include "git2cpp/repo.h"
+
+#ifdef USE_BOOST
+	#include <boost/optional.hpp>
+#include <boost/utility/string_view.hpp>
+
+	template<typename T>
+	using Optional = boost::optional<T>;
+
+	using StringView = boost::string_view;
+#else
+	#include <string_view>
+	#include <optional>
+
+	template<typename T>
+	using Optional = std::optional<T>;
+
+	using StringView = std::string_view;
+#endif
 
 using namespace git;
 
@@ -40,18 +56,18 @@ enum {
  * - A sample status formatter that matches the "short" format
  */
 
-bool starts_with(std::string_view str, std::string_view prefix)
+bool starts_with(StringView str, StringView prefix)
 {
     return str.size() >= prefix.size() && std::equal(prefix.begin(), prefix.end(), str.begin());
 }
 
 void show_branch(Repository const & repo, int format)
 {
-    std::optional<std::string_view> branch;
+    Optional<StringView> branch;
     try
     {
         branch = repo.head().name();
-        static const std::string_view refs_heads = "refs/heads/";
+        static const StringView refs_heads = "refs/heads/";
         if (starts_with(*branch, refs_heads))
             branch->remove_prefix(refs_heads.length());
     }
