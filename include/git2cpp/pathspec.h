@@ -2,10 +2,7 @@
 
 #include "error.h"
 
-extern "C" 
-{
-    #include <git2/pathspec.h>
-}
+#include <git2/pathspec.h>
 
 namespace git
 {

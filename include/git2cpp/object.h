@@ -3,8 +3,12 @@
 #include "commit.h"
 #include "blob.h"
 
+#include <git2/types.h>
+
 struct git_object;
 struct git_oid;
+struct git_tree;
+struct git_tag;
 
 namespace git
 {

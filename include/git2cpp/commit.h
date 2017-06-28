@@ -2,6 +2,8 @@
 
 #include "tree.h"
 
+#include <git2/types.h>
+
 struct git_commit;
 struct git_oid;
 struct git_repository;
