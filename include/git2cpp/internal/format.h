@@ -36,7 +36,7 @@ namespace internal
     std::string format(const char * fmt_str, Args&& ... args)
     {
         boost::format fmt(fmt_str);
-        str(format_apply(fmt, std::forward<Args>(args)...));
+        return str(format_apply(fmt, std::forward<Args>(args)...));
     }
 #endif
 
