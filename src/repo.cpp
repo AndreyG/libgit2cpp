@@ -66,7 +66,7 @@ namespace git
 
     bool Repository::is_bare() const
     {
-        return git_repository_is_bare(repo_);
+        return git_repository_is_bare(repo_) != 0;
     }
 
     Signature Repository::signature() const

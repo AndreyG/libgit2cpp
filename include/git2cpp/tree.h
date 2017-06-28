@@ -76,7 +76,7 @@ namespace git
         Tree            (Tree const &) = delete;
         Tree& operator =(Tree const &) = delete;
 
-        explicit operator bool() const { return tree_; }
+        explicit operator bool() const { return tree_ != nullptr; }
 
     private:
         git_tree * tree_;

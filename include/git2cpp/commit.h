@@ -20,7 +20,7 @@ namespace git
 
       Repository const & owner() const { return *repo_; }
 
-      explicit operator bool () const { return commit_; }
+      explicit operator bool () const { return commit_ != nullptr; }
 
       git_oid const & id() const;
 

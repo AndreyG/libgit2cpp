@@ -17,7 +17,7 @@ namespace git
       Object(git_object * obj, Repository const &);
       ~Object();
 
-      explicit operator bool() const { return obj_; }
+      explicit operator bool() const { return obj_ != nullptr; }
 
       git_otype       type()  const;
       git_oid const & id()    const;
