@@ -12,6 +12,7 @@
 #include <git2/tag.h>
 #include <git2/revwalk.h>
 #include <git2/blob.h>
+#include <git2/reset.h>
 
 #include <cassert>
 
@@ -403,4 +404,11 @@ namespace git
         assert(op_res == 0);
         return Diff(diff);
     }
+
+    void Repository::reset_default(Commit const& commit, git_strarray const& pathspecs)
+    {
+        auto op_res = git_reset_default(repo_, reinterpret_cast<git_object*>(const_cast<git_commit*>(commit.ptr())), const_cast<git_strarray*>(&pathspecs));
+        assert(op_res == GIT_OK);
+    }
+
 }

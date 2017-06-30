@@ -89,6 +89,8 @@ namespace git
                               Tree const & tree,
                               Commit const & parent);
 
+        void reset_default(Commit const &, git_strarray const & pathspecs);
+
         explicit Repository(const char * dir);
         explicit Repository(std::string const & dir);
 
