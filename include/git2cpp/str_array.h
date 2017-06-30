@@ -1,9 +1,6 @@
 #pragma once
 
-extern "C"
-{
 #include <git2/strarray.h>
-}
 
 namespace git
 {

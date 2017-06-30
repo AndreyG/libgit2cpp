@@ -40,7 +40,10 @@ namespace git
          , repo_(&repo)
       {}
 
-      Commit() {}
+      Commit()
+         : commit_(nullptr)
+         , repo_(nullptr)
+      {}
 
       Commit(Commit && other)
          : commit_(other.commit_)
@@ -60,8 +63,8 @@ namespace git
       git_commit const * ptr() const { return commit_; }
 
    private:
-      git_commit * commit_       = nullptr;
-      Repository const * repo_   = nullptr;
+      git_commit * commit_;
+      Repository const * repo_;
    };
 }
 
