@@ -29,6 +29,9 @@ namespace git
         void add_path(const char *);
         void add_path(std::string const &);
 
+        void remove_path(const char *);
+        void remove_path(std::string const &);
+
         git_oid write_tree() const;
 
         void write() const;

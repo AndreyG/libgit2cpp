@@ -82,6 +82,17 @@ namespace git
         add_path(path.c_str());
     }
 
+    void Index::remove_path(const char * path)
+    {
+        int res = git_index_remove_bypath(index_, path);
+        assert(res == 0);
+    }
+
+    void Index::remove_path(std::string const & path)
+    {
+        remove_path(path.c_str());
+    }
+
     void Index::write() const
     {
         if (git_index_write(index_))
