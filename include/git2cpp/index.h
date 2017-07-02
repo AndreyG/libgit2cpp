@@ -39,7 +39,8 @@ namespace git
         Index               (Index const &) = delete;
         Index& operator =   (Index const &) = delete;
 
-        Index(Index && other);
+        Index               (Index &&) noexcept;
+        Index& operator =   (Index &&) noexcept;
 
     private:
         git_index * index_;

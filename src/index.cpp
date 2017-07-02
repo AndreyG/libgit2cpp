@@ -26,14 +26,19 @@ namespace git
 
     Index::~Index()
     {
-        if (index_)
-            git_index_free(index_);
+        git_index_free(index_);
     }
 
-    Index::Index(Index && other)
+    Index::Index(Index && other) noexcept
         : index_(other.index_)
     {
         other.index_ = nullptr;
+    }
+
+    Index& Index::operator =(Index && other) noexcept
+    {
+        std::swap(index_, other.index_);
+        return *this;
     }
 
     size_t Index::entrycount() const
