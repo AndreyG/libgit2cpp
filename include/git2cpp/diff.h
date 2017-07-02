@@ -38,7 +38,7 @@ namespace git
             Stats               (Stats const &) = delete;
             Stats& operator =   (Stats const &) = delete;
 
-            Stats(Stats &&);
+            Stats(Stats &&) noexcept;
 
             Buffer to_buf(diff::stats::format::type, size_t width) const;
 
@@ -74,7 +74,7 @@ namespace git
         Diff              (Diff const &) = delete;
         Diff& operator =  (Diff const &) = delete;
 
-        Diff(Diff && other)
+        Diff(Diff && other) noexcept
             : diff_(other.diff_)
         {
             other.diff_ = nullptr;

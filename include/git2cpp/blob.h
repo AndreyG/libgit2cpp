@@ -19,7 +19,7 @@ namespace git
         Blob& operator =    (Blob const &) = delete;
         Blob                (Blob const &) = delete;
 
-        Blob(Blob &&);
+        Blob(Blob &&) noexcept;
 
     private:
         git_blob * blob_;

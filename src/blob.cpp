@@ -8,8 +8,8 @@ namespace git
        : blob_(blob)
     {}
 
-    Blob::Blob(Blob && other)
-       : blob_(other.blob_)
+    Blob::Blob(Blob && other) noexcept
+        : blob_(other.blob_)
     {
        other.blob_ = nullptr;
     }
