@@ -411,4 +411,20 @@ namespace git
         assert(op_res == GIT_OK);
     }
 
+    void Repository::file_diff(std::string const& old_path, git_oid const& old_id,
+                               std::string const& new_path, git_oid const& new_id,
+                               FileDiffHandler & diff_handler) const
+    {
+        auto old_file = blob_lookup(old_id);
+        auto new_file = blob_lookup(new_id);
+        git_diff_options options = GIT_DIFF_OPTIONS_INIT;
+        auto data_callback = [] (git_diff_delta const *, git_diff_hunk const *, git_diff_line const * line, void * payload) {
+            auto handler = reinterpret_cast<FileDiffHandler *>(payload);
+            handler->line(*line);
+            return 0;
+        };
+        auto op_res = git_diff_blobs(old_file.ptr(), old_path.c_str(), new_file.ptr(), new_path.c_str(),
+                                     &options, nullptr, nullptr, nullptr, data_callback, &diff_handler);
+        assert(op_res == GIT_OK);
+    }
 }

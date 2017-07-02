@@ -22,6 +22,11 @@ namespace git
         Blob(Blob &&) noexcept;
 
     private:
+        friend struct Repository;
+
+        git_blob const * ptr() const { return blob_; }
+
+    private:
         git_blob * blob_;
     };
 }

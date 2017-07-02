@@ -27,6 +27,14 @@ namespace git
         LOCAL, REMOTE, ALL
     };
 
+    struct FileDiffHandler
+    {
+        virtual void line(git_diff_line const &) = 0;
+
+    protected:
+        ~FileDiffHandler() = default;
+    };
+
     struct Repository
     {
         Commit commit_lookup(git_oid const & oid) const;
@@ -90,6 +98,9 @@ namespace git
                               Commit const & parent);
 
         void reset_default(Commit const &, git_strarray const & pathspecs);
+
+        void file_diff(std::string const & old_path, git_oid const & old_id,
+                       std::string const & new_path, git_oid const & new_id, FileDiffHandler &) const;
 
         explicit Repository(const char * dir);
         explicit Repository(std::string const & dir);
