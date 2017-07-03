@@ -109,6 +109,7 @@ namespace git
         static const init_tag init;
         Repository(const char * dir, init_tag);
         Repository(const char * dir, init_tag, git_repository_init_options opts);
+        Repository(std::string const & dir, init_tag);
 
         Repository              (Repository const &) = delete;
         Repository& operator =  (Repository const &) = delete; 

@@ -44,7 +44,13 @@ namespace git
 
     Repository::Repository(const char * dir, init_tag)
     {
-        if (git_repository_init(&repo_, dir, 0) < 0)
+        if (git_repository_init(&repo_, dir, false) < 0)
+            throw repository_init_error(dir);
+    }
+
+    Repository::Repository(std::string const & dir, init_tag tag)
+    {
+        if (git_repository_init(&repo_, dir.c_str(), false) < 0)
             throw repository_init_error(dir);
     }
 
