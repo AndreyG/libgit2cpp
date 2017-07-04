@@ -1,7 +1,7 @@
 libgit2cpp
 ==========
 
-C++ wrapper for libgit2
+C++ wrapper for libgit2. It contains libgit2 as submodule (libs/libgit2).
 
 Building libgit2cpp - Using CMake
 =================================
@@ -9,6 +9,8 @@ Building libgit2cpp - Using CMake
     $ mkdir build && cd build
     $ cmake ..
     $ make
+    
+Supporting CMake options: `USE_BOOST`, `BUNDLE_LIBGIT2`.
 
 Testing 
 =======
@@ -21,5 +23,4 @@ e.g.
     $ mkdir build && cd build
     $ cmake ..
     $ make
-    $ ./test.sh .. ../../libgit2/tests/resources/testrepo.git
-
+    $ ./test.sh .. ../libs/libgit2/tests/resources/testrepo.git
