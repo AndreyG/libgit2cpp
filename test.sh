@@ -40,6 +40,7 @@ function test()
 pushd $REPO
 
 test branch-cpp
+test diff-cpp
 test commit-graph-generator . "$CWD/commit-graph.dot"
 test log-cpp
 test rev-list-cpp --topo-order HEAD
