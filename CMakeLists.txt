@@ -62,12 +62,14 @@ set(examples
   init
   rev-parse
   general
-  commit-graph-generator
 )
 
 foreach (example ${examples})
   add_executable("${example}-cpp" examples/${example}.cpp)
   target_link_libraries("${example}-cpp" git2cpp)
 endforeach(example)
+
+add_executable(commit-graph-generator examples/commit-graph-generator.cpp)
+target_link_libraries(commit-graph-generator git2cpp)
 
 file(COPY test.sh DESTINATION . FILE_PERMISSIONS ${EXE_PERM})
