@@ -39,13 +39,13 @@ function test()
 # read-only tests (repo shouldn't be bare)
 pushd $REPO
 
-test branch
+test branch-cpp
 test commit-graph-generator . "$CWD/commit-graph.dot"
-test log
-test rev-list --topo-order HEAD
-test rev-parse HEAD
-test showindex
-test status
+test log-cpp
+test rev-list-cpp --topo-order HEAD
+test rev-parse-cpp HEAD
+test showindex-cpp
+test status-cpp
 
 popd
 
@@ -60,8 +60,8 @@ fi
 
 pushd $RW_REPO
 
-test cat-file -t a8233120f6ad708f843d861ce2b7228ec4e3dec6
-test cat-file -p a8233120f6ad708f843d861ce2b7228ec4e3dec6
-test general .
+test cat-file-cpp -t a8233120f6ad708f843d861ce2b7228ec4e3dec6
+test cat-file-cpp -p a8233120f6ad708f843d861ce2b7228ec4e3dec6
+test general-cpp .
 
 popd
