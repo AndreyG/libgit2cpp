@@ -15,6 +15,7 @@
 #include "str_array.h"
 #include "diff.h"
 #include "submodule.h"
+#include "remote.h"
 
 #include <string>
 #include <vector>
@@ -103,6 +104,9 @@ namespace git
 
         void file_diff(std::string const & old_path, git_oid const & old_id,
                        std::string const & new_path, git_oid const & new_id, FileDiffHandler &) const;
+
+        StrArray remotes()                  const;
+        Remote   remote(const char * name)  const;
 
         explicit Repository(const char * dir);
         explicit Repository(std::string const & dir);

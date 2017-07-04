@@ -72,6 +72,13 @@ namespace git
        {}
    };
 
+   struct remote_lookup_error : error_t
+   {
+      explicit remote_lookup_error(std::string const & name)
+         : error_t("Could not lookup remote " + name)
+      {}
+   };
+
    struct commit_parent_error : error_t
    {
       explicit commit_parent_error(git_oid const & id)

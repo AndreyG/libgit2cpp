@@ -433,4 +433,21 @@ namespace git
                                      &options, nullptr, nullptr, nullptr, data_callback, &diff_handler);
         assert(op_res == GIT_OK);
     }
+
+    StrArray Repository::remotes() const
+    {
+        git_strarray result;
+        auto op_res = git_remote_list(&result, repo_);
+        assert(op_res == GIT_OK);
+        return StrArray(result);
+    }
+
+    Remote Repository::remote(const char * name) const
+    {
+       git_remote * remote;
+       if (git_remote_lookup(&remote, repo_, name))
+          throw remote_lookup_error(name);
+       else
+          return Remote(remote);
+    }
 }
