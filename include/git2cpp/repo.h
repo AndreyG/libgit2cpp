@@ -1,7 +1,6 @@
 #pragma once
 
-#include <string>
-#include <vector>
+#include "repo_fwd.h"
 
 #include "commit.h"
 #include "index.h"
@@ -16,6 +15,9 @@
 #include "str_array.h"
 #include "diff.h"
 #include "submodule.h"
+
+#include <string>
+#include <vector>
 
 namespace git
 {
