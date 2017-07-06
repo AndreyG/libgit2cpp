@@ -12,19 +12,11 @@ enum print_options {
 	UPDATE = 4,
 };
 
-void init_array(git_strarray *array, int argc, char **argv)
+void init_array(git_strarray & arr, int argc, char **argv)
 {
-	unsigned int i;
-
-	array->count = argc;
-	array->strings = reinterpret_cast<char **>(malloc(sizeof(char*) * array->count));
-	assert(array->strings!=NULL);
-
-	for(i=0; i<array->count; i++) {
-		array->strings[i]=argv[i];
-	}
-
-	return;
+    arr.count = argc;
+    arr.strings = reinterpret_cast<char **>(malloc(sizeof(char*) * argc));
+    std::copy_n(argv, argc, arr.strings);
 }
 
 int print_matched_cb(   const char *path, const char * /*matched_pathspec*/,
@@ -60,8 +52,6 @@ int main (int argc, char** argv)
 {
     using namespace std::placeholders;
 
-	git_strarray array = {0};
-
 	int i = 1, options = 0;
 	for (; i < argc; ++i) {
 		if (argv[i][0] != '-') {
@@ -91,30 +81,31 @@ int main (int argc, char** argv)
 		}
 	}
 
-	if (argc<=i) {
-		print_usage();
-		return 1;
-	}
+    if (argc <= i)
+    {
+        print_usage();
+        return EXIT_FAILURE;
+    }
 
-	init_array(&array, argc-i, argv+i);
+    git_strarray arr;
+    init_array(arr, argc - i, argv + i);
 
     auto_git_initializer;
 
-	git::Repository repo(".");
+    git::Repository repo(".");
 
     git::Index::matched_path_callback_t cb;
-	if (options&VERBOSE || options&SKIP) {
-        cb = std::bind(&print_matched_cb, _1, _2, std::cref(repo), static_cast<print_options>(options)); 
-	}
+    if (options & VERBOSE || options & SKIP)
+        cb = std::bind(&print_matched_cb, _1, _2, std::cref(repo), static_cast<print_options>(options));
 
-	git::Index index = repo.index();
-	if (options&UPDATE) {
-		index.update_all(array, cb);
-	} else {
-		index.add_all(array, cb);
-	}
+    git::Index index = repo.index();
+    if (options & UPDATE)
+        index.update_all(arr, cb);
+    else
+        index.add_all(arr, cb);
 
-	index.write();
+    index.write();
+    free(arr.strings);
 
-	return 0;
+    return 0;
 }
