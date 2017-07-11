@@ -226,7 +226,6 @@ int main (int argc, char** argv)
                         nullptr, /* do not update the HEAD */
                         author,
                         cmtter,
-                        nullptr, /* use default message encoding */
                         "example commit",
                         tree,
                         parent);

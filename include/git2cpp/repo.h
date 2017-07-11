@@ -88,17 +88,17 @@ namespace git
         git_oid create_commit(const char * update_ref,
                               Signature const & author,
                               Signature const & commiter,
-                              const char * message_encoding,
                               const char * message,
-                              Tree const & tree);
+                              Tree const & tree,
+                              const char * message_encoding = nullptr);
 
         git_oid create_commit(const char * update_ref,
                               Signature const & author,
                               Signature const & commiter,
-                              const char * message_encoding,
                               const char * message,
                               Tree const & tree,
-                              Commit const & parent);
+                              Commit const & parent,
+                              const char * message_encoding = nullptr);
 
         void reset_default(Commit const &, git_strarray const & pathspecs);
 

@@ -312,9 +312,9 @@ namespace git
     git_oid Repository::create_commit(const char * update_ref,
                                       Signature const & author,
                                       Signature const & commiter,
-                                      const char * message_encoding,
                                       const char * message,
-                                      Tree const & tree)
+                                      Tree const & tree,
+                                      const char * message_encoding)
     {
         git_oid res;
         if (git_commit_create_v(&res, repo_, update_ref, 
@@ -330,10 +330,10 @@ namespace git
     git_oid Repository::create_commit(const char * update_ref,
                                       Signature const & author,
                                       Signature const & commiter,
-                                      const char * message_encoding,
                                       const char * message,
                                       Tree const & tree,
-                                      Commit const & parent)
+                                      Commit const & parent,
+                                      const char * message_encoding)
     {
         git_oid res;
         if (git_commit_create_v(&res, repo_, update_ref,
