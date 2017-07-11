@@ -94,6 +94,18 @@ namespace git
             throw get_status_error();
     }
 
+    Status::Status(Status && other) noexcept
+        : status_(other.status_)
+    {
+        other.status_ = nullptr;
+    }
+
+    Status& Status::operator =(Status && other) noexcept
+    {
+        std::swap(status_, other.status_);
+        return *this;
+    }
+
     Status::~Status()
     {
         git_status_list_free(status_);

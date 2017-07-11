@@ -49,7 +49,8 @@ namespace git
         Status              (Status const &) = delete;
         Status& operator =  (Status const &) = delete;
 
-        Status(Status &&);
+        Status              (Status &&) noexcept;
+        Status& operator =  (Status &&) noexcept;
 
     private:
         git_status_list * status_;
