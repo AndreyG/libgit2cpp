@@ -1,6 +1,7 @@
 #pragma once
 
 #include "tree.h"
+#include "repo_fwd.h"
 
 #include <git2/types.h>
 
@@ -10,8 +11,6 @@ struct git_repository;
 
 namespace git
 {
-   struct Repository;
-
    struct Commit
    {
       size_t parents_num() const;
