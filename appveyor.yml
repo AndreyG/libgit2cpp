@@ -9,9 +9,11 @@ environment:
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     GENERATOR: "Visual Studio 14 2015"
     ARCH: 32
+    BOOST: 1_63_0
   - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     GENERATOR: "Visual Studio 15 2017"
     ARCH: 32
+    BOOST: 1_65_1
 
 clone_script:
 - cmd: git clone --branch=%APPVEYOR_REPO_BRANCH% https://github.com/%APPVEYOR_REPO_NAME%.git %APPVEYOR_BUILD_FOLDER%
@@ -23,5 +25,5 @@ build_script:
 - ps: |
     mkdir build
     cd build
-    cmake -D BUILD_CLAR=OFF -D BUILD_EXAMPLES=OFF -D USE_BOOST=ON -D BOOST_ROOT=C:\Libraries\boost_1_65_1 .. -G"$env:GENERATOR"
+    cmake -D BUILD_CLAR=OFF -D BUILD_EXAMPLES=OFF -D USE_BOOST=ON -D BOOST_ROOT="C:\Libraries\boost_$env:BOOST" .. -G"$env:GENERATOR"
     cmake --build . --config Debug
