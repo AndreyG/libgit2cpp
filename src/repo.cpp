@@ -213,7 +213,7 @@ namespace git
             {
             case branch_type::LOCAL :   return GIT_BRANCH_LOCAL;
             case branch_type::REMOTE:   return GIT_BRANCH_REMOTE;
-            case branch_type::ALL:      return GIT_BRANCH_REMOTE;
+            case branch_type::ALL:      return GIT_BRANCH_ALL;
             default:
                 throw std::logic_error("invalid branch type");
             }
