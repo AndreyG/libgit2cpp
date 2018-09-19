@@ -1,9 +1,6 @@
 #pragma once
 
-extern "C"
-{
 #include <git2/types.h>
-}
 
 struct git_reference;
 struct git_oid;
@@ -23,7 +20,7 @@ namespace git
         Reference& operator =   (Reference const &) = delete;
         Reference               (Reference const &) = delete;
 
-        Reference(Reference &&);
+        Reference(Reference &&) noexcept;
 
     private:
         git_reference * ref_;
