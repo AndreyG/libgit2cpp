@@ -189,7 +189,7 @@ namespace git
             switch (git_branch_next(&ref, &type, base_))
             {
             case GIT_OK:
-                assert(type == type_);
+                assert(type & type_);
                 internal::emplace(ref_, ref);
                 break;
             case GIT_ITEROVER:
