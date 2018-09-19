@@ -1,9 +1,8 @@
 #include "git2cpp/reference.h"
 
-extern "C"
-{
-    #include <git2/refs.h>
-}
+#include <git2/refs.h>
+
+#include <cassert>
 
 namespace git
 {
@@ -28,6 +27,7 @@ namespace git
 
     git_oid const & Reference::target() const
     {
+        assert(type() != GIT_REF_SYMBOLIC);
         return *git_reference_target(ref_);
     }
 
