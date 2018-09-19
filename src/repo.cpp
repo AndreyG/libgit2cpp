@@ -229,7 +229,7 @@ namespace git
     {
         std::vector<std::string> res;
         for (branch_iterator it(repo_, type); it; ++it)
-            res.push_back(it->name());
+            res.emplace_back(it->name());
         return res;
     }
 
