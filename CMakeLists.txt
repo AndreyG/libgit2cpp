@@ -42,6 +42,12 @@ if (USE_BOOST)
   target_include_directories(git2cpp PUBLIC ${Boost_INCLUDE_DIRS})
 endif()
 
+if (BUNDLE_LIBGIT2)
+  target_include_directories(git2cpp
+    PUBLIC libs/libgit2/include
+  )
+endif()
+
 target_link_libraries(git2cpp git2)
 
 set_target_properties(git2cpp PROPERTIES
