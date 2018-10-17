@@ -204,7 +204,7 @@ static int match_with_parent(git::Commit const & commit, int i, git_diff_options
    auto parent = commit.parent(i);
    auto c_tree = commit.tree();
    auto p_tree = parent.tree();
-   auto diff = commit.owner().diff(p_tree, c_tree, opts);
+   auto diff = commit.repo().diff(p_tree, c_tree, opts);
 
    return diff.deltas_num() > 0;
 }

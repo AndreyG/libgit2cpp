@@ -19,8 +19,6 @@ namespace git
 
       Tree tree() const;
 
-      Repository const & owner() const { return *repo_; }
-
       explicit operator bool () const { return commit_ != nullptr; }
 
       git_oid const & id() const;
@@ -33,6 +31,8 @@ namespace git
       git_time_t     time()      const;
 
       git_oid merge_base(size_t p1, size_t p2) const;
+
+      Repository const & repo() const { return *repo_; }
 
       Commit(git_commit * commit, Repository const & repo)
          : commit_(commit)
