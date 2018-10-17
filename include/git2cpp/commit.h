@@ -44,12 +44,10 @@ namespace git
          , repo_(nullptr)
       {}
 
-      Commit(Commit && other)
-         : commit_(other.commit_)
+      Commit(Commit && other) noexcept
+          : commit_(std::exchange(other.commit_, nullptr))
          , repo_(other.repo_)
-      {
-         other.commit_ = nullptr;
-      }
+      {}
 
       Commit              (Commit const &) = delete;
       Commit& operator =  (Commit const &) = delete;
