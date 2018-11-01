@@ -45,9 +45,16 @@ namespace git
       {}
 
       Commit(Commit && other) noexcept
-          : commit_(std::exchange(other.commit_, nullptr))
+         : commit_(std::exchange(other.commit_, nullptr))
          , repo_(other.repo_)
       {}
+
+      Commit& operator = (Commit && other) noexcept
+      {
+          std::swap(commit_, other.commit_);
+          std::swap(repo_,   other.repo_);
+          return *this;
+      }
 
       Commit              (Commit const &) = delete;
       Commit& operator =  (Commit const &) = delete;
