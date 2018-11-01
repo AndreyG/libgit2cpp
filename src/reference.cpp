@@ -3,6 +3,7 @@
 #include <git2/refs.h>
 
 #include <cassert>
+#include <utility>
 
 namespace git
 {
@@ -34,5 +35,11 @@ namespace git
     const char * Reference::symbolic_target() const
     {
         return git_reference_symbolic_target(ref_);
+    }
+
+    Reference& Reference::operator=(Reference&& other) noexcept
+    {
+        std::swap(ref_, other.ref_);
+        return *this;
     }
 }
