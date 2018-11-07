@@ -201,9 +201,9 @@ namespace git
             }
         }
 
-        Reference const * operator -> () const
+        Reference& operator * ()
         {
-            return &ref_.value();
+            return *ref_;
         }
 
     private:
@@ -225,11 +225,11 @@ namespace git
         internal::optional<Reference> ref_;
     };
 
-    std::vector<std::string> Repository::branches(branch_type type) const
+    std::vector<Reference> Repository::branches(branch_type type) const
     {
-        std::vector<std::string> res;
+        std::vector<Reference> res;
         for (branch_iterator it(repo_, type); it; ++it)
-            res.emplace_back(it->name());
+            res.emplace_back(std::move(*it));
         return res;
     }
 

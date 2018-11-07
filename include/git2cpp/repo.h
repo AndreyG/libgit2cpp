@@ -73,7 +73,7 @@ namespace git
 
         StrArray reference_list() const;
 
-        std::vector<std::string> branches(branch_type) const;
+        std::vector<Reference> branches(branch_type) const;
 
         bool is_bare() const;
 

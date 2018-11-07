@@ -9,6 +9,6 @@ int main()
     
     git::Repository repo(".");
     auto branches = repo.branches(git::branch_type::ALL);
-    for (auto b : branches)
-        std::cout << b << std::endl;
+    for (auto const & b : branches)
+        std::cout << b.name() << std::endl;
 }
