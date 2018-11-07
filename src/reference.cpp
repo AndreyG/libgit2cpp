@@ -37,6 +37,11 @@ namespace git
         return git_reference_symbolic_target(ref_);
     }
 
+    Reference::Reference(Reference&& other) noexcept
+        : ref_(std::exchange(other.ref_, nullptr))
+    {
+    }
+
     Reference& Reference::operator=(Reference&& other) noexcept
     {
         std::swap(ref_, other.ref_);
