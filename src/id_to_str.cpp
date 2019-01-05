@@ -1,8 +1,6 @@
 #include "git2cpp/id_to_str.h"
 
-extern "C" {
 #include <git2/oid.h>
-}
 
 namespace git
 {

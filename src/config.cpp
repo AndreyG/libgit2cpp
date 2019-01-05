@@ -1,9 +1,7 @@
 #include "git2cpp/config.h"
 #include "git2cpp/error.h"
 
-extern "C" {
 #include <git2/config.h>
-}
 
 namespace git
 {

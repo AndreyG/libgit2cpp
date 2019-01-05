@@ -1,8 +1,6 @@
 #include "git2cpp/initializer.h"
 
-extern "C" {
 #include <git2/global.h>
-}
 
 namespace git
 {

@@ -1,8 +1,6 @@
 #include "git2cpp/odb_object.h"
 
-extern "C" {
 #include <git2/odb.h>
-}
 
 namespace git
 {

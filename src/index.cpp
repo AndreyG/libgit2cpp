@@ -1,9 +1,7 @@
 #include <cassert>
 
-extern "C" {
 #include <git2/index.h>
 #include <git2/repository.h>
-}
 
 #include "git2cpp/error.h"
 #include "git2cpp/index.h"

@@ -2,9 +2,7 @@
 
 #include <cassert>
 
-extern "C" {
 #include <git2/object.h>
-}
 
 namespace git
 {

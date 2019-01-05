@@ -1,7 +1,5 @@
-extern "C" {
 #include <git2/odb.h>
 #include <git2/repository.h>
-}
 
 #include "git2cpp/error.h"
 #include "git2cpp/odb.h"
