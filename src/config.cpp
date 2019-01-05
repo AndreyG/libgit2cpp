@@ -1,8 +1,7 @@
 #include "git2cpp/config.h"
 #include "git2cpp/error.h"
 
-extern "C"
-{
+extern "C" {
 #include <git2/config.h>
 }
 
@@ -19,7 +18,7 @@ namespace git
         git_config_free(cfg_);
     }
 
-    std::string Config::operator [] (const char * key) const
+    std::string Config::operator[](const char * key) const
     {
         const char * res;
         if (git_config_get_string(&res, cfg_, key))

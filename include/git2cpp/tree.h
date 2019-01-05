@@ -10,34 +10,34 @@ namespace git
     {
         struct BorrowedEntry
         {
-           const char *    name()   const;
-           git_oid const & id()     const;
+            const char * name() const;
+            git_oid const & id() const;
 
         private:
-           friend struct Tree;
-           friend struct Repository;
+            friend struct Tree;
+            friend struct Repository;
 
-           explicit BorrowedEntry(git_tree_entry const * entry)
-              : entry_(entry)
-           {}
+            explicit BorrowedEntry(git_tree_entry const * entry)
+                : entry_(entry)
+            {}
 
-           git_tree_entry const * ptr() const { return entry_; }
+            git_tree_entry const * ptr() const { return entry_; }
 
         private:
-           git_tree_entry const * entry_;
+            git_tree_entry const * entry_;
         };
 
         struct OwnedEntry
         {
-           ~OwnedEntry();
+            ~OwnedEntry();
 
-           OwnedEntry               (OwnedEntry const &) = delete;
-           OwnedEntry&  operator =  (OwnedEntry const &) = delete;
+            OwnedEntry(OwnedEntry const &) = delete;
+            OwnedEntry & operator=(OwnedEntry const &) = delete;
 
-           OwnedEntry               (OwnedEntry &&);
-           OwnedEntry&  operator =  (OwnedEntry &&);
+            OwnedEntry(OwnedEntry &&);
+            OwnedEntry & operator=(OwnedEntry &&);
 
-           Tree to_tree() /*&&*/;
+            Tree to_tree() /*&&*/;
 
         private:
             friend struct Tree;
@@ -52,16 +52,16 @@ namespace git
             Repository const * repo_;
         };
 
-        git_tree const  * ptr() const   { return tree_; }
-        git_tree        * ptr()         { return tree_; }
+        git_tree const * ptr() const { return tree_; }
+        git_tree * ptr() { return tree_; }
 
         int pathspec_match(uint32_t flags, Pathspec const & ps);
 
         size_t entrycount() const;
 
-        BorrowedEntry operator[] (size_t) const;
+        BorrowedEntry operator[](size_t) const;
 
-        BorrowedEntry operator[] (std::string const & filename) const;
+        BorrowedEntry operator[](std::string const & filename) const;
 
         OwnedEntry find(const char * path) const;
 
@@ -70,11 +70,11 @@ namespace git
         Tree();
         ~Tree();
 
-        Tree            (Tree &&);
-        Tree& operator =(Tree &&);
+        Tree(Tree &&);
+        Tree & operator=(Tree &&);
 
-        Tree            (Tree const &) = delete;
-        Tree& operator =(Tree const &) = delete;
+        Tree(Tree const &) = delete;
+        Tree & operator=(Tree const &) = delete;
 
         explicit operator bool() const { return tree_ != nullptr; }
 
@@ -83,4 +83,3 @@ namespace git
         Repository const * repo_;
     };
 }
-

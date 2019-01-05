@@ -1,15 +1,16 @@
 #include <git2/tag.h>
 
-#include "git2cpp/tag.h"
 #include "git2cpp/error.h"
 #include "git2cpp/repo.h"
+#include "git2cpp/tag.h"
 
 namespace git
 {
     Tag::Tag(git_tag * tag, Repository const & repo)
-       : tag_(tag)
-       , repo_(repo)
-    {}
+        : tag_(tag)
+        , repo_(repo)
+    {
+    }
 
     Tag::~Tag()
     {

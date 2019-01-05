@@ -1,8 +1,8 @@
 #pragma once
 
-#include <git2/strarray.h>
 #include <git2/diff.h>
 #include <git2/status.h>
+#include <git2/strarray.h>
 
 namespace git
 {
@@ -25,12 +25,12 @@ namespace git
 
             Options(Show = Show::IndexAndWorkdir, Sort = Sort::CaseSensitively);
 
-            Options& include_untracked();
-            Options& exclude_untracked();
-            Options& renames_head_to_index();
-            Options& include_ignored();
-            Options& recurse_untracked_dirs();
-            Options& exclude_submodules();
+            Options & include_untracked();
+            Options & exclude_untracked();
+            Options & renames_head_to_index();
+            Options & include_ignored();
+            Options & recurse_untracked_dirs();
+            Options & exclude_submodules();
 
             void set_pathspec(char ** ptr, size_t size);
 
@@ -44,16 +44,15 @@ namespace git
         ~Status();
 
         size_t entrycount() const;
-        git_status_entry const & operator[] (size_t i) const;
+        git_status_entry const & operator[](size_t i) const;
 
-        Status              (Status const &) = delete;
-        Status& operator =  (Status const &) = delete;
+        Status(Status const &) = delete;
+        Status & operator=(Status const &) = delete;
 
-        Status              (Status &&) noexcept;
-        Status& operator =  (Status &&) noexcept;
+        Status(Status &&) noexcept;
+        Status & operator=(Status &&) noexcept;
 
     private:
         git_status_list * status_;
     };
 }
-

@@ -3,16 +3,16 @@
 #include "git2cpp/error.h"
 #include "git2cpp/internal/optional.h"
 
-#include <git2/commit.h>
-#include <git2/branch.h>
-#include <git2/types.h>
-#include <git2/merge.h>
-#include <git2/submodule.h>
-#include <git2/errors.h>
-#include <git2/tag.h>
-#include <git2/revwalk.h>
 #include <git2/blob.h>
+#include <git2/branch.h>
+#include <git2/commit.h>
+#include <git2/errors.h>
+#include <git2/merge.h>
 #include <git2/reset.h>
+#include <git2/revwalk.h>
+#include <git2/submodule.h>
+#include <git2/tag.h>
+#include <git2/types.h>
 
 #include <cassert>
 
@@ -60,13 +60,13 @@ namespace git
             throw repository_init_error(dir);
     }
 
-    Repository::Repository(Repository&& other) noexcept
+    Repository::Repository(Repository && other) noexcept
         : repo_(other.repo_)
     {
         other.repo_ = nullptr;
     }
 
-    Repository& Repository::operator=(Repository&& other) noexcept
+    Repository & Repository::operator=(Repository && other) noexcept
     {
         std::swap(repo_, other.repo_);
         return *this;
@@ -89,11 +89,11 @@ namespace git
 
     Commit Repository::commit_lookup(git_oid const & oid) const
     {
-       git_commit * commit;
-       if (git_commit_lookup(&commit, repo_, &oid))
-          throw commit_lookup_error(oid);
-       else
-          return { commit, *this };
+        git_commit * commit;
+        if (git_commit_lookup(&commit, repo_, &oid))
+            throw commit_lookup_error(oid);
+        else
+            return {commit, *this};
     }
 
     Tree Repository::tree_lookup(git_oid const & oid) const
@@ -102,16 +102,16 @@ namespace git
         if (git_tree_lookup(&tree, repo_, &oid))
             throw tree_lookup_error(oid);
         else
-            return { tree, *this };
+            return {tree, *this};
     }
 
     Tag Repository::tag_lookup(git_oid const & oid) const
     {
-       git_tag * tag;
-       if (git_tag_lookup(&tag, repo_, &oid))
-           throw tag_lookup_error(oid);
-       else
-          return { tag, *this };
+        git_tag * tag;
+        if (git_tag_lookup(&tag, repo_, &oid))
+            throw tag_lookup_error(oid);
+        else
+            return {tag, *this};
     }
 
     Blob Repository::blob_lookup(git_oid const & oid) const
@@ -129,7 +129,7 @@ namespace git
         if (git_revparse(&revspec, repo_, spec))
             throw revparse_error(spec);
         else
-            return { revspec, *this };
+            return {revspec, *this};
     }
 
     Revspec Repository::revparse_single(const char * spec) const
@@ -180,9 +180,9 @@ namespace git
             git_branch_iterator_free(base_);
         }
 
-        explicit operator bool () const { return internal::has_value(ref_); }
+        explicit operator bool() const { return internal::has_value(ref_); }
 
-        void operator ++ ()
+        void operator++()
         {
             git_branch_t type;
             git_reference * ref;
@@ -201,7 +201,7 @@ namespace git
             }
         }
 
-        Reference& operator * ()
+        Reference & operator*()
         {
             return *ref_;
         }
@@ -211,9 +211,12 @@ namespace git
         {
             switch (t)
             {
-            case branch_type::LOCAL :   return GIT_BRANCH_LOCAL;
-            case branch_type::REMOTE:   return GIT_BRANCH_REMOTE;
-            case branch_type::ALL:      return GIT_BRANCH_ALL;
+            case branch_type::LOCAL:
+                return GIT_BRANCH_LOCAL;
+            case branch_type::REMOTE:
+                return GIT_BRANCH_REMOTE;
+            case branch_type::ALL:
+                return GIT_BRANCH_ALL;
             default:
                 throw std::logic_error("invalid branch type");
             }
@@ -239,7 +242,7 @@ namespace git
         if (git_revwalk_new(&walker, repo_))
             throw revwalk_new_error();
         else
-            return { walker, *this };
+            return {walker, *this};
     }
 
     git_oid Repository::merge_base(git_oid const & a, git_oid const & b) const
@@ -296,7 +299,7 @@ namespace git
         if (git_submodule_lookup(&sm, repo_, name))
             throw submodule_lookup_error(name);
         else
-            return { sm, repo_ };
+            return {sm, repo_};
     }
 
     const char * Repository::path() const
@@ -317,7 +320,7 @@ namespace git
                                       const char * message_encoding)
     {
         git_oid res;
-        if (git_commit_create_v(&res, repo_, update_ref, 
+        if (git_commit_create_v(&res, repo_, update_ref,
                                 author.ptr(), commiter.ptr(),
                                 message_encoding, message,
                                 tree.ptr(), 0))
@@ -411,20 +414,20 @@ namespace git
         return Diff(diff);
     }
 
-    void Repository::reset_default(Commit const& commit, git_strarray const& pathspecs)
+    void Repository::reset_default(Commit const & commit, git_strarray const & pathspecs)
     {
-        auto op_res = git_reset_default(repo_, reinterpret_cast<git_object*>(const_cast<git_commit*>(commit.ptr())), const_cast<git_strarray*>(&pathspecs));
+        auto op_res = git_reset_default(repo_, reinterpret_cast<git_object *>(const_cast<git_commit *>(commit.ptr())), const_cast<git_strarray *>(&pathspecs));
         assert(op_res == GIT_OK);
     }
 
-    void Repository::file_diff(std::string const& old_path, git_oid const& old_id,
-                               std::string const& new_path, git_oid const& new_id,
+    void Repository::file_diff(std::string const & old_path, git_oid const & old_id,
+                               std::string const & new_path, git_oid const & new_id,
                                FileDiffHandler & diff_handler) const
     {
         auto old_file = blob_lookup(old_id);
         auto new_file = blob_lookup(new_id);
         git_diff_options options = GIT_DIFF_OPTIONS_INIT;
-        auto data_callback = [] (git_diff_delta const *, git_diff_hunk const *, git_diff_line const * line, void * payload) {
+        auto data_callback = [](git_diff_delta const *, git_diff_hunk const *, git_diff_line const * line, void * payload) {
             auto handler = reinterpret_cast<FileDiffHandler *>(payload);
             handler->line(*line);
             return 0;
@@ -444,10 +447,10 @@ namespace git
 
     Remote Repository::remote(const char * name) const
     {
-       git_remote * remote;
-       if (git_remote_lookup(&remote, repo_, name))
-          throw remote_lookup_error(name);
-       else
-          return Remote(remote);
+        git_remote * remote;
+        if (git_remote_lookup(&remote, repo_, name))
+            throw remote_lookup_error(name);
+        else
+            return Remote(remote);
     }
 }

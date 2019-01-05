@@ -1,7 +1,6 @@
 #include "git2cpp/odb_object.h"
 
-extern "C"
-{
+extern "C" {
 #include <git2/odb.h>
 }
 
@@ -28,4 +27,3 @@ namespace git
         return git_odb_object_size(obj_);
     }
 }
-

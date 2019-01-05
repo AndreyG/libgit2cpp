@@ -4,28 +4,34 @@
 
 #include <git2/diff.h>
 
-#include "tagged_mask.h"
 #include "buffer.h"
+#include "tagged_mask.h"
 
 namespace git
 {
     namespace diff
     {
-        namespace stats {
-        namespace format
+        namespace stats
         {
-            typedef tagged_mask_t<struct format_tag> type;
+            namespace format
+            {
+                typedef tagged_mask_t<struct format_tag> type;
 
-            extern const type none;
-            extern const type full;
-            extern const type _short;
-            extern const type number;
-            extern const type include_summary;
-        }}
+                extern const type none;
+                extern const type full;
+                extern const type _short;
+                extern const type number;
+                extern const type include_summary;
+            }
+        }
 
         enum class format
         {
-            patch, patch_header, raw, name_only, name_status
+            patch,
+            patch_header,
+            raw,
+            name_only,
+            name_status
         };
     }
 
@@ -35,8 +41,8 @@ namespace git
         {
             ~Stats();
 
-            Stats               (Stats const &) = delete;
-            Stats& operator =   (Stats const &) = delete;
+            Stats(Stats const &) = delete;
+            Stats & operator=(Stats const &) = delete;
 
             Stats(Stats &&) noexcept;
 
@@ -59,8 +65,7 @@ namespace git
 
         Stats stats() const;
 
-        typedef
-            std::function<void (git_diff_delta const &, git_diff_hunk const &, git_diff_line const &)>
+        typedef std::function<void(git_diff_delta const &, git_diff_hunk const &, git_diff_line const &)>
             print_callback_t;
 
         void print(diff::format, print_callback_t print_callback) const;
@@ -71,8 +76,8 @@ namespace git
 
         ~Diff();
 
-        Diff              (Diff const &) = delete;
-        Diff& operator =  (Diff const &) = delete;
+        Diff(Diff const &) = delete;
+        Diff & operator=(Diff const &) = delete;
 
         Diff(Diff && other) noexcept
             : diff_(other.diff_)
@@ -84,4 +89,3 @@ namespace git
         git_diff * diff_;
     };
 }
-

@@ -12,30 +12,31 @@
 #include "git2cpp/repo.h"
 
 #ifdef USE_BOOST
-	#include <boost/optional.hpp>
+#include <boost/optional.hpp>
 #include <boost/utility/string_view.hpp>
 
-	template<typename T>
-	using Optional = boost::optional<T>;
+template <typename T>
+using Optional = boost::optional<T>;
 
-	using StringView = boost::string_view;
+using StringView = boost::string_view;
 #else
-	#include <string_view>
-	#include <optional>
+#include <string_view>
+#include <optional>
 
-	template<typename T>
-	using Optional = std::optional<T>;
+template <typename T>
+using Optional = std::optional<T>;
 
-	using StringView = std::string_view;
+using StringView = std::string_view;
 #endif
 
 using namespace git;
 
-enum {
-	FORMAT_DEFAULT   = 0,
-	FORMAT_LONG      = 1,
-	FORMAT_SHORT     = 2,
-	FORMAT_PORCELAIN = 3,
+enum
+{
+    FORMAT_DEFAULT = 0,
+    FORMAT_LONG = 1,
+    FORMAT_SHORT = 2,
+    FORMAT_PORCELAIN = 3,
 };
 
 /*
@@ -71,8 +72,12 @@ void show_branch(Repository const & repo, int format)
         if (starts_with(*branch, refs_heads))
             branch->remove_prefix(refs_heads.length());
     }
-    catch (non_existing_branch_error    const &) {}
-    catch (missing_head_error           const &) {}
+    catch (non_existing_branch_error const &)
+    {
+    }
+    catch (missing_head_error const &)
+    {
+    }
     catch (std::exception const & e)
     {
         throw e;
@@ -81,49 +86,51 @@ void show_branch(Repository const & repo, int format)
     if (format == FORMAT_LONG)
         std::cout << "# On branch " << branch.value_or("Not currently on any branch.");
     else
-        std::cout<< "## ", branch.value_or("HEAD (no branch)");
+        std::cout << "## ", branch.value_or("HEAD (no branch)");
     std::cout << "\n";
 }
 
 void print_long(Status const & status)
 {
-	size_t maxi = status.entrycount();
-	int rm_in_workdir = 0;
-	const char *old_path, *new_path;
+    size_t maxi = status.entrycount();
+    int rm_in_workdir = 0;
+    const char *old_path, *new_path;
 
-	/* print index changes */
+    /* print index changes */
 
     bool changes_in_index = false;
 
-	for (size_t i = 0; i < maxi; ++i) {
+    for (size_t i = 0; i < maxi; ++i)
+    {
         auto const & s = status[i];
 
         if (s.status == GIT_STATUS_CURRENT)
-			continue;
+            continue;
 
         if (s.status & GIT_STATUS_WT_DELETED)
-			rm_in_workdir = 1;
+            rm_in_workdir = 1;
 
-		const char *istatus = nullptr;
+        const char * istatus = nullptr;
 
         if (s.status & GIT_STATUS_INDEX_NEW)
-			istatus = "new file: ";
+            istatus = "new file: ";
         if (s.status & GIT_STATUS_INDEX_MODIFIED)
-			istatus = "modified: ";
+            istatus = "modified: ";
         if (s.status & GIT_STATUS_INDEX_DELETED)
-			istatus = "deleted:  ";
+            istatus = "deleted:  ";
         if (s.status & GIT_STATUS_INDEX_RENAMED)
-			istatus = "renamed:  ";
+            istatus = "renamed:  ";
         if (s.status & GIT_STATUS_INDEX_TYPECHANGE)
-			istatus = "typechange:";
+            istatus = "typechange:";
 
-		if (!istatus)
-			continue;
+        if (!istatus)
+            continue;
 
-        if (!changes_in_index) {
-            std::cout   << "# Changes to be committed:\n"
-                        << "#   (use \"git reset HEAD <file>...\" to unstage)\n"
-                        << "#\n";
+        if (!changes_in_index)
+        {
+            std::cout << "# Changes to be committed:\n"
+                      << "#   (use \"git reset HEAD <file>...\" to unstage)\n"
+                      << "#\n";
             changes_in_index = true;
         }
 
@@ -132,48 +139,50 @@ void print_long(Status const & status)
         old_path = s.head_to_index->old_file.path;
         new_path = s.head_to_index->new_file.path;
 
-		if (old_path && new_path && strcmp(old_path, new_path))
-			std::cout << old_path << " -> " << new_path;
-		else if (old_path)
-			std::cout << old_path;
-		else
-			std::cout << new_path;
+        if (old_path && new_path && strcmp(old_path, new_path))
+            std::cout << old_path << " -> " << new_path;
+        else if (old_path)
+            std::cout << old_path;
+        else
+            std::cout << new_path;
 
-		std::cout << "\n";
-	}
+        std::cout << "\n";
+    }
 
     if (changes_in_index)
         std::cout << "#\n";
 
     bool changed_in_workdir = false;
 
-	/* print workdir changes to tracked files */
+    /* print workdir changes to tracked files */
 
-	for (size_t i = 0; i < maxi; ++i) {
+    for (size_t i = 0; i < maxi; ++i)
+    {
         auto const & s = status[i];
 
         if (s.status == GIT_STATUS_CURRENT || !s.index_to_workdir)
-			continue;
+            continue;
 
-		const char *wstatus = nullptr;
+        const char * wstatus = nullptr;
 
         if (s.status & GIT_STATUS_WT_MODIFIED)
-			wstatus = "modified: ";
+            wstatus = "modified: ";
         if (s.status & GIT_STATUS_WT_DELETED)
-			wstatus = "deleted:  ";
+            wstatus = "deleted:  ";
         if (s.status & GIT_STATUS_WT_RENAMED)
-			wstatus = "renamed:  ";
+            wstatus = "renamed:  ";
         if (s.status & GIT_STATUS_WT_TYPECHANGE)
-			wstatus = "typechange:";
+            wstatus = "typechange:";
 
         if (!wstatus)
             continue;
 
-        if (!changed_in_workdir) {
-            std::cout   << "# Changes not staged for commit:\n"
-                        << "#   (use \"git add" << (rm_in_workdir ? "/rm" : "") << "<file>...\" to update what will be committed)\n"
-                        << "#   (use \"git checkout -- <file>...\" to discard changes in working directory)\n"
-                        << "#\n";
+        if (!changed_in_workdir)
+        {
+            std::cout << "# Changes not staged for commit:\n"
+                      << "#   (use \"git add" << (rm_in_workdir ? "/rm" : "") << "<file>...\" to update what will be committed)\n"
+                      << "#   (use \"git checkout -- <file>...\" to discard changes in working directory)\n"
+                      << "#\n";
             changed_in_workdir = true;
         }
 
@@ -196,7 +205,7 @@ void print_long(Status const & status)
 
     /* print untracked files */
     bool were_untracked_files = false;
-	for (size_t i = 0; i < maxi; ++i) 
+    for (size_t i = 0; i < maxi; ++i)
     {
         auto const & s = status[i];
 
@@ -204,9 +213,9 @@ void print_long(Status const & status)
         {
             if (!were_untracked_files)
             {
-                std::cout   << "# Untracked files:\n"
-                            << "#   (use \"git add <file>...\" to include in what will be committed)\n"
-                            << "#\n";
+                std::cout << "# Untracked files:\n"
+                          << "#   (use \"git add <file>...\" to include in what will be committed)\n"
+                          << "#\n";
                 were_untracked_files = true;
             }
 
@@ -217,16 +226,17 @@ void print_long(Status const & status)
     /* print ignored files */
     bool were_ignored_files = false;
 
-    for (size_t i = 0; i < maxi; ++i) {
+    for (size_t i = 0; i < maxi; ++i)
+    {
         auto const & s = status[i];
 
-        if (s.status == GIT_STATUS_IGNORED) 
+        if (s.status == GIT_STATUS_IGNORED)
         {
             if (!were_ignored_files)
             {
-                std::cout   << "# Ignored files:\n"
-                            << "#   (use \"git add -f <file>...\" to include in what will be committed)\n"
-                            << "#\n";
+                std::cout << "# Ignored files:\n"
+                          << "#   (use \"git add -f <file>...\" to include in what will be committed)\n"
+                          << "#\n";
                 were_ignored_files = true;
             }
 
@@ -242,52 +252,54 @@ void print_short(Repository const & repo, Status const & status)
 {
     size_t maxi = status.entrycount();
 
-    for (size_t i = 0; i < maxi; ++i) 
+    for (size_t i = 0; i < maxi; ++i)
     {
         auto const & s = status[i];
 
         if (s.status == GIT_STATUS_CURRENT)
             continue;
 
-        const char *a = nullptr;
-        const char *b = nullptr;
-        const char *c = nullptr;
+        const char * a = nullptr;
+        const char * b = nullptr;
+        const char * c = nullptr;
         char istatus = ' ';
         char wstatus = ' ';
-        const char *extra = "";
+        const char * extra = "";
 
         if (s.status & GIT_STATUS_INDEX_NEW)
-			istatus = 'A';
+            istatus = 'A';
         if (s.status & GIT_STATUS_INDEX_MODIFIED)
-			istatus = 'M';
+            istatus = 'M';
         if (s.status & GIT_STATUS_INDEX_DELETED)
-			istatus = 'D';
+            istatus = 'D';
         if (s.status & GIT_STATUS_INDEX_RENAMED)
-			istatus = 'R';
+            istatus = 'R';
         if (s.status & GIT_STATUS_INDEX_TYPECHANGE)
-			istatus = 'T';
+            istatus = 'T';
 
-        if (s.status & GIT_STATUS_WT_NEW) {
-			if (istatus == ' ')
-				istatus = '?';
-			wstatus = '?';
-		}
+        if (s.status & GIT_STATUS_WT_NEW)
+        {
+            if (istatus == ' ')
+                istatus = '?';
+            wstatus = '?';
+        }
         if (s.status & GIT_STATUS_WT_MODIFIED)
-			wstatus = 'M';
+            wstatus = 'M';
         if (s.status & GIT_STATUS_WT_DELETED)
-			wstatus = 'D';
+            wstatus = 'D';
         if (s.status & GIT_STATUS_WT_RENAMED)
-			wstatus = 'R';
+            wstatus = 'R';
         if (s.status & GIT_STATUS_WT_TYPECHANGE)
-			wstatus = 'T';
+            wstatus = 'T';
 
-        if (s.status & GIT_STATUS_IGNORED) {
-			istatus = '!';
-			wstatus = '!';
-		}
+        if (s.status & GIT_STATUS_IGNORED)
+        {
+            istatus = '!';
+            wstatus = '!';
+        }
 
-		if (istatus == '?' && wstatus == '?')
-			continue;
+        if (istatus == '?' && wstatus == '?')
+            continue;
 
         if (s.index_to_workdir && s.index_to_workdir->new_file.mode == GIT_FILEMODE_COMMIT)
         {
@@ -306,17 +318,19 @@ void print_short(Repository const & repo, Status const & status)
                 extra = " (untracked content)";
         }
 
-        if (s.head_to_index) {
+        if (s.head_to_index)
+        {
             a = s.head_to_index->old_file.path;
             b = s.head_to_index->new_file.path;
-		}
-        if (s.index_to_workdir) {
-			if (!a)
+        }
+        if (s.index_to_workdir)
+        {
+            if (!a)
                 a = s.index_to_workdir->old_file.path;
-			if (!b)
+            if (!b)
                 b = s.index_to_workdir->old_file.path;
             c = s.index_to_workdir->new_file.path;
-		}
+        }
 
         std::cout << istatus << wstatus << ' ' << a;
         if (istatus == 'R')
@@ -335,82 +349,85 @@ void print_short(Repository const & repo, Status const & status)
     }
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char * argv[])
 {
-	auto_git_initializer;
-	
-	int npaths = 0, format = FORMAT_DEFAULT, zterm = 0, showbranch = 0;
+    auto_git_initializer;
+
+    int npaths = 0, format = FORMAT_DEFAULT, zterm = 0, showbranch = 0;
     Status::Options opt;
-	const char *repodir = ".";
+    const char * repodir = ".";
 
     const size_t MAX_PATHSPEC = 8;
     char * pathspec[MAX_PATHSPEC];
 
     opt.include_untracked().renames_head_to_index();
 
-	for (int i = 1; i < argc; ++i) {
-		if (argv[i][0] != '-') {
-			if (npaths < MAX_PATHSPEC)
+    for (int i = 1; i < argc; ++i)
+    {
+        if (argv[i][0] != '-')
+        {
+            if (npaths < MAX_PATHSPEC)
             {
-				pathspec[npaths++] = argv[i];
+                pathspec[npaths++] = argv[i];
             }
-			else
+            else
             {
-				std::cerr << "Example only supports a limited pathspec\n";
+                std::cerr << "Example only supports a limited pathspec\n";
                 return 1;
             }
-		}
-		else if (!strcmp(argv[i], "-s") || !strcmp(argv[i], "--short"))
-			format = FORMAT_SHORT;
-		else if (!strcmp(argv[i], "--long"))
-			format = FORMAT_LONG;
-		else if (!strcmp(argv[i], "--porcelain"))
-			format = FORMAT_PORCELAIN;
-		else if (!strcmp(argv[i], "-b") || !strcmp(argv[i], "--branch"))
-			showbranch = 1;
-		else if (!strcmp(argv[i], "-z")) {
-			zterm = 1;
-			if (format == FORMAT_DEFAULT)
-				format = FORMAT_PORCELAIN;
-		}
-		else if (!strcmp(argv[i], "--ignored"))
+        }
+        else if (!strcmp(argv[i], "-s") || !strcmp(argv[i], "--short"))
+            format = FORMAT_SHORT;
+        else if (!strcmp(argv[i], "--long"))
+            format = FORMAT_LONG;
+        else if (!strcmp(argv[i], "--porcelain"))
+            format = FORMAT_PORCELAIN;
+        else if (!strcmp(argv[i], "-b") || !strcmp(argv[i], "--branch"))
+            showbranch = 1;
+        else if (!strcmp(argv[i], "-z"))
+        {
+            zterm = 1;
+            if (format == FORMAT_DEFAULT)
+                format = FORMAT_PORCELAIN;
+        }
+        else if (!strcmp(argv[i], "--ignored"))
             opt.include_ignored();
-		else if (!strcmp(argv[i], "-uno") ||
-				 !strcmp(argv[i], "--untracked-files=no"))
+        else if (!strcmp(argv[i], "-uno") ||
+                 !strcmp(argv[i], "--untracked-files=no"))
             opt.exclude_untracked();
-		else if (!strcmp(argv[i], "-unormal") ||
-				 !strcmp(argv[i], "--untracked-files=normal"))
+        else if (!strcmp(argv[i], "-unormal") ||
+                 !strcmp(argv[i], "--untracked-files=normal"))
             opt.include_untracked();
-		else if (!strcmp(argv[i], "-uall") ||
-				 !strcmp(argv[i], "--untracked-files=all"))
+        else if (!strcmp(argv[i], "-uall") ||
+                 !strcmp(argv[i], "--untracked-files=all"))
             opt.include_untracked().recurse_untracked_dirs();
-		else if (!strcmp(argv[i], "--ignore-submodules=all"))
+        else if (!strcmp(argv[i], "--ignore-submodules=all"))
             opt.exclude_submodules();
-		else if (!strncmp(argv[i], "--git-dir=", strlen("--git-dir=")))
-			repodir = argv[i] + strlen("--git-dir=");
-		else
+        else if (!strncmp(argv[i], "--git-dir=", strlen("--git-dir=")))
+            repodir = argv[i] + strlen("--git-dir=");
+        else
         {
             std::cerr << "Unsupported option '" << argv[i] << "'\n";
             return 1;
         }
-	}
+    }
 
-	if (format == FORMAT_DEFAULT)
-		format = FORMAT_LONG;
-	if (format == FORMAT_LONG)
-		showbranch = 1;
+    if (format == FORMAT_DEFAULT)
+        format = FORMAT_LONG;
+    if (format == FORMAT_LONG)
+        showbranch = 1;
     if (npaths > 0)
         opt.set_pathspec(pathspec, npaths);
 
-	Repository repo(repodir);
+    Repository repo(repodir);
 
-	if (repo.is_bare())
+    if (repo.is_bare())
     {
-	    std::cerr << "Cannot report status on bare repository\n";
+        std::cerr << "Cannot report status on bare repository\n";
         return 1;
     }
 
-	/*
+    /*
 	 * Run status on the repository
 	 *
 	 * Because we want to simluate a full "git status" run and want to
@@ -421,16 +438,15 @@ int main(int argc, char *argv[])
 	 * enumerate files that are modified) then you probably don't need the
 	 * extended API.
 	 */
-	Status status = repo.status(opt);
+    Status status = repo.status(opt);
 
-	if (showbranch)
-		show_branch(repo, format);
+    if (showbranch)
+        show_branch(repo, format);
 
-	if (format == FORMAT_LONG)
-		print_long(status);
-	else
-		print_short(repo, status);
+    if (format == FORMAT_LONG)
+        print_long(status);
+    else
+        print_short(repo, status);
 
-	return 0;
+    return 0;
 }
-

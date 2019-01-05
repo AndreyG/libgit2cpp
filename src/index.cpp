@@ -1,13 +1,12 @@
 #include <cassert>
 
-extern "C"
-{
-#include <git2/repository.h>
+extern "C" {
 #include <git2/index.h>
+#include <git2/repository.h>
 }
 
-#include "git2cpp/index.h"
 #include "git2cpp/error.h"
+#include "git2cpp/index.h"
 
 namespace git
 {
@@ -35,7 +34,7 @@ namespace git
         other.index_ = nullptr;
     }
 
-    Index& Index::operator =(Index && other) noexcept
+    Index & Index::operator=(Index && other) noexcept
     {
         std::swap(index_, other.index_);
         return *this;
@@ -46,7 +45,7 @@ namespace git
         return git_index_entrycount(index_);
     }
 
-    git_index_entry const * Index::operator[] (size_t i) const
+    git_index_entry const * Index::operator[](size_t i) const
     {
         return git_index_get_byindex(index_, i);
     }
@@ -62,17 +61,17 @@ namespace git
 
     void Index::update_all(git_strarray const & pathspec, matched_path_callback_t cb)
     {
-        int res = cb 
-            ? git_index_update_all(index_, &pathspec, &apply_callback, &cb)
-            : git_index_update_all(index_, &pathspec, nullptr, nullptr);
+        int res = cb
+                      ? git_index_update_all(index_, &pathspec, &apply_callback, &cb)
+                      : git_index_update_all(index_, &pathspec, nullptr, nullptr);
         assert(res == 0);
     }
 
     void Index::add_all(git_strarray const & pathspec, matched_path_callback_t cb, unsigned int flags)
     {
-        int res = cb 
-            ? git_index_add_all(index_, &pathspec, flags, &apply_callback, &cb)
-            : git_index_add_all(index_, &pathspec, flags, nullptr, nullptr);
+        int res = cb
+                      ? git_index_add_all(index_, &pathspec, flags, &apply_callback, &cb)
+                      : git_index_add_all(index_, &pathspec, flags, nullptr, nullptr);
         assert(res == 0);
     }
 

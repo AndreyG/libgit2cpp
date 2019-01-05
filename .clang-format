@@ -1,0 +1,37 @@
+---
+Language:        Cpp
+ColumnLimit: 0
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterNamespace: true
+  AfterClass: true
+  AfterStruct: true
+  AfterEnum: true
+  AfterFunction: true
+  AfterControlStatement: true
+  BeforeElse: true
+  BeforeCatch: true
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+NamespaceIndentation: All
+AccessModifierOffset: -4
+IndentWidth:     4
+TabWidth:        4
+UseTab:          Never
+PointerAlignment: Middle
+BreakConstructorInitializers: BeforeComma
+BreakBeforeTernaryOperators: true
+CompactNamespaces: true
+FixNamespaceComments: false
+IncludeBlocks:   Preserve
+IncludeCategories: 
+  - Regex:           '^"git2cpp/'
+    Priority:        2
+  - Regex:           '^<git2'
+    Priority:        3
+  - Regex:           '^<[[:alnum:].]+>'
+    Priority:        4
+  - Regex:           '.*'
+    Priority:        1
+...
+

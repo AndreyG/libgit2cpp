@@ -1,7 +1,7 @@
 #pragma once
 
-#include "commit.h"
 #include "blob.h"
+#include "commit.h"
 
 #include <git2/types.h>
 
@@ -12,37 +12,36 @@ struct git_tag;
 
 namespace git
 {
-   struct Repository;
+    struct Repository;
 
-   struct Object
-   {
-      Object() {}
+    struct Object
+    {
+        Object() {}
 
-      Object(git_object * obj, Repository const &);
-      ~Object();
+        Object(git_object * obj, Repository const &);
+        ~Object();
 
-      explicit operator bool() const { return obj_ != nullptr; }
+        explicit operator bool() const { return obj_ != nullptr; }
 
-      git_otype       type()  const;
-      git_oid const & id()    const;
+        git_otype type() const;
+        git_oid const & id() const;
 
-      git_blob    const * as_blob()   const;
-      git_commit  const * as_commit() const;
-      git_tree    const * as_tree()   const;
-      git_tag     const * as_tag()    const;
+        git_blob const * as_blob() const;
+        git_commit const * as_commit() const;
+        git_tree const * as_tree() const;
+        git_tag const * as_tag() const;
 
-      Commit  to_commit()  /*&&*/;
-      Tree    to_tree()    /*&&*/;
-      Blob    to_blob()    /*&&*/;
+        Commit to_commit() /*&&*/;
+        Tree to_tree() /*&&*/;
+        Blob to_blob() /*&&*/;
 
-      Object              (Object const &) = delete;
-      Object& operator =  (Object const &) = delete;
+        Object(Object const &) = delete;
+        Object & operator=(Object const &) = delete;
 
-      Object(Object && other) noexcept;
+        Object(Object && other) noexcept;
 
-   private:
-      git_object * obj_          = nullptr;
-      Repository const * repo_   = nullptr;
-   };
+    private:
+        git_object * obj_ = nullptr;
+        Repository const * repo_ = nullptr;
+    };
 }
-

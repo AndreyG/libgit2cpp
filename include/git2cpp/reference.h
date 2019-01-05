@@ -18,19 +18,18 @@ namespace git
 
         explicit operator bool() const { return ref_ != nullptr; }
 
-        const char *    name()              const;
-        git_ref_t       type()              const;
-        git_oid const & target()            const;
-        const char *    symbolic_target()   const;
+        const char * name() const;
+        git_ref_t type() const;
+        git_oid const & target() const;
+        const char * symbolic_target() const;
 
-        Reference& operator =   (Reference const &) = delete;
-        Reference               (Reference const &) = delete;
+        Reference & operator=(Reference const &) = delete;
+        Reference(Reference const &) = delete;
 
         Reference(Reference &&) noexcept;
-        Reference& operator =(Reference && other) noexcept;
+        Reference & operator=(Reference && other) noexcept;
 
     private:
         git_reference * ref_;
     };
 }
-

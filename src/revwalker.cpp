@@ -6,14 +6,16 @@
 
 namespace git
 {
-    namespace revwalker {
-    namespace sorting
+    namespace revwalker
     {
-        const type none         (GIT_SORT_NONE);
-        const type topological  (GIT_SORT_TOPOLOGICAL);
-        const type time         (GIT_SORT_TIME);
-        const type reverse      (GIT_SORT_REVERSE);
-    }}
+        namespace sorting
+        {
+            const type none(GIT_SORT_NONE);
+            const type topological(GIT_SORT_TOPOLOGICAL);
+            const type time(GIT_SORT_TIME);
+            const type reverse(GIT_SORT_REVERSE);
+        }
+    }
 
     RevWalker::~RevWalker()
     {
@@ -27,7 +29,7 @@ namespace git
 
     void RevWalker::simplify_first_parent()
     {
-       git_revwalk_simplify_first_parent(walker_);
+        git_revwalk_simplify_first_parent(walker_);
     }
 
     void RevWalker::push_head() const
@@ -66,4 +68,3 @@ namespace git
         return valid;
     }
 }
-

@@ -2,8 +2,7 @@
 
 #include <cassert>
 
-extern "C"
-{
+extern "C" {
 #include <git2/object.h>
 }
 
@@ -12,7 +11,8 @@ namespace git
     Object::Object(git_object * obj, Repository const & repo)
         : obj_(obj)
         , repo_(&repo)
-    {}
+    {
+    }
 
     Object::~Object()
     {
@@ -36,17 +36,17 @@ namespace git
         return *git_object_id(obj_);
     }
 
-#define DEFINE_METHOD_AS(type_name, enum_element)                   \
-    git_##type_name const * Object::as_##type_name() const          \
-    {                                                               \
-        assert(type() == GIT_OBJ_##enum_element);                   \
-        return reinterpret_cast<git_##type_name const *>(obj_);     \
-    }                                                               \
+#define DEFINE_METHOD_AS(type_name, enum_element)               \
+    git_##type_name const * Object::as_##type_name() const      \
+    {                                                           \
+        assert(type() == GIT_OBJ_##enum_element);               \
+        return reinterpret_cast<git_##type_name const *>(obj_); \
+    }
 
-    DEFINE_METHOD_AS(blob,      BLOB)
-    DEFINE_METHOD_AS(commit,    COMMIT)
-    DEFINE_METHOD_AS(tree,      TREE)
-    DEFINE_METHOD_AS(tag,       TAG)
+    DEFINE_METHOD_AS(blob, BLOB)
+    DEFINE_METHOD_AS(commit, COMMIT)
+    DEFINE_METHOD_AS(tree, TREE)
+    DEFINE_METHOD_AS(tag, TAG)
 
 #undef DEFINE_METHOD_AS
 
@@ -68,10 +68,9 @@ namespace git
 
     Blob Object::to_blob() /*&&*/
     {
-       assert(type() == GIT_OBJ_BLOB);
-       Blob res(reinterpret_cast<git_blob *>(obj_));
-       obj_ = nullptr;
-       return res;
+        assert(type() == GIT_OBJ_BLOB);
+        Blob res(reinterpret_cast<git_blob *>(obj_));
+        obj_ = nullptr;
+        return res;
     }
 }
-

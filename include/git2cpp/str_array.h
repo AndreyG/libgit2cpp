@@ -12,7 +12,7 @@ namespace git
 
         size_t count() const { return str_array_.count; }
 
-        const char * operator [] (size_t i) const
+        const char * operator[](size_t i) const
         {
             return str_array_.strings[i];
         }

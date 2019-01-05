@@ -9,7 +9,8 @@ namespace git
     Submodule::Submodule(git_submodule * sm, git_repository * repo)
         : sm_(sm)
         , repo_(repo)
-    {}
+    {
+    }
 
     Submodule::~Submodule()
     {

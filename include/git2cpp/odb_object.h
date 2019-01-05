@@ -2,8 +2,7 @@
 
 #include <cstddef>
 
-extern "C"
-{
+extern "C" {
 #include <git2/types.h>
 }
 
@@ -17,12 +16,12 @@ namespace git
 
         ~OdbObject();
 
-        git_otype               type() const;
-        unsigned char const *   data() const;
-        size_t                  size() const;
+        git_otype type() const;
+        unsigned char const * data() const;
+        size_t size() const;
 
-        OdbObject               (OdbObject const &) = delete;
-        OdbObject& operator =   (OdbObject const &) = delete;
+        OdbObject(OdbObject const &) = delete;
+        OdbObject & operator=(OdbObject const &) = delete;
 
         OdbObject(OdbObject && other);
 
@@ -30,4 +29,3 @@ namespace git
         git_odb_object * obj_;
     };
 }
-

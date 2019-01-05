@@ -1,11 +1,10 @@
-extern "C"
-{
-#include <git2/repository.h>
+extern "C" {
 #include <git2/odb.h>
+#include <git2/repository.h>
 }
 
-#include "git2cpp/odb.h"
 #include "git2cpp/error.h"
+#include "git2cpp/odb.h"
 
 namespace git
 {
@@ -29,7 +28,7 @@ namespace git
         return OdbObject(obj);
     }
 
-    git_oid Odb::write(const void *data, size_t len, git_otype type)
+    git_oid Odb::write(const void * data, size_t len, git_otype type)
     {
         git_oid res;
         if (git_odb_write(&res, odb_, data, len, type))
@@ -37,4 +36,3 @@ namespace git
         return res;
     }
 }
-

@@ -5,13 +5,14 @@
 namespace git
 {
     Blob::Blob(git_blob * blob)
-       : blob_(blob)
-    {}
+        : blob_(blob)
+    {
+    }
 
     Blob::Blob(Blob && other) noexcept
         : blob_(other.blob_)
     {
-       other.blob_ = nullptr;
+        other.blob_ = nullptr;
     }
 
     Blob::~Blob()

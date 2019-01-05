@@ -28,12 +28,12 @@ namespace git
             std::string key_;
         };
 
-        std::string operator[] (const char * key) const;
+        std::string operator[](const char * key) const;
 
         int get_int(const char * key) const;
 
-        Config              (Config const &) = delete;
-        Config& operator =  (Config const &) = delete;
+        Config(Config const &) = delete;
+        Config & operator=(Config const &) = delete;
 
     private:
         git_config * cfg_;

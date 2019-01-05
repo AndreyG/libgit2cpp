@@ -13,11 +13,11 @@ namespace git
         explicit Blob(git_blob *);
         ~Blob();
 
-        std::size_t     size()      const;
-        const void *    content()   const;
+        std::size_t size() const;
+        const void * content() const;
 
-        Blob& operator =    (Blob const &) = delete;
-        Blob                (Blob const &) = delete;
+        Blob & operator=(Blob const &) = delete;
+        Blob(Blob const &) = delete;
 
         Blob(Blob &&) noexcept;
 

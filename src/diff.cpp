@@ -4,8 +4,8 @@
 #include <cassert>
 
 #ifdef USE_BOOST
-#include <boost/container/flat_map.hpp>
 #include <boost/assign/list_of.hpp>
+#include <boost/container/flat_map.hpp>
 #else
 #include <unordered_map>
 #endif
@@ -14,52 +14,50 @@ namespace git
 {
     namespace diff
     {
-        namespace stats {
-        namespace format
+        namespace stats
         {
-            const type none             (GIT_DIFF_STATS_NONE);
-            const type full             (GIT_DIFF_STATS_FULL);
-            const type _short           (GIT_DIFF_STATS_SHORT);
-            const type number           (GIT_DIFF_STATS_NUMBER);
-            const type include_summary  (GIT_DIFF_STATS_INCLUDE_SUMMARY);
-        }}
+            namespace format
+            {
+                const type none(GIT_DIFF_STATS_NONE);
+                const type full(GIT_DIFF_STATS_FULL);
+                const type _short(GIT_DIFF_STATS_SHORT);
+                const type number(GIT_DIFF_STATS_NUMBER);
+                const type include_summary(GIT_DIFF_STATS_INCLUDE_SUMMARY);
+            }
+        }
 
 #ifdef USE_BOOST
-        template<typename Key, typename Value>
+        template <typename Key, typename Value>
         using map_container = boost::container::flat_map<Key, Value>;
 #else
-        struct EnumHash{
+        struct EnumHash
+        {
             template <typename T>
-            std::size_t operator()(T t) const{
+            std::size_t operator()(T t) const
+            {
                 return static_cast<std::size_t>(t);
             }
         };
 
-        template<typename Key, typename Value>
+        template <typename Key, typename Value>
         using map_container = std::unordered_map<Key, Value, EnumHash>;
 #endif
 
         git_diff_format_t convert(format f)
         {
-            static const map_container<format, git_diff_format_t> converter
-                  = {
-                { format::patch,        GIT_DIFF_FORMAT_PATCH           },
-                { format::patch_header, GIT_DIFF_FORMAT_PATCH_HEADER    },
-                { format::raw,          GIT_DIFF_FORMAT_RAW             },
-                { format::name_only,    GIT_DIFF_FORMAT_NAME_ONLY       },
-                { format::name_status,  GIT_DIFF_FORMAT_NAME_STATUS     }
-                }
-                  ;
+            static const map_container<format, git_diff_format_t> converter = {
+                {format::patch, GIT_DIFF_FORMAT_PATCH},
+                {format::patch_header, GIT_DIFF_FORMAT_PATCH_HEADER},
+                {format::raw, GIT_DIFF_FORMAT_RAW},
+                {format::name_only, GIT_DIFF_FORMAT_NAME_ONLY},
+                {format::name_status, GIT_DIFF_FORMAT_NAME_STATUS}};
             return converter.at(f);
         }
     }
 
     namespace
     {
-        int apply_callback  ( git_diff_delta const * delta
-                            , git_diff_hunk const * hunk
-                            , git_diff_line const * line
-                            , void * payload )
+        int apply_callback(git_diff_delta const * delta, git_diff_hunk const * hunk, git_diff_line const * line, void * payload)
         {
             assert(delta);
             assert(line);
@@ -83,7 +81,7 @@ namespace git
 
     void Diff::print(diff::format f, print_callback_t print_callback) const
     {
-       git_diff_print(diff_, convert(f), &apply_callback, &print_callback);
+        git_diff_print(diff_, convert(f), &apply_callback, &print_callback);
     }
 
     Diff::Stats Diff::stats() const
@@ -109,4 +107,3 @@ namespace git
             return Buffer(buf);
     }
 }
-

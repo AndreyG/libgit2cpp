@@ -1,10 +1,9 @@
-extern "C"
-{
+extern "C" {
 #include <git2/signature.h>
 }
 
-#include "git2cpp/signature.h"
 #include "git2cpp/error.h"
+#include "git2cpp/signature.h"
 
 namespace git
 {

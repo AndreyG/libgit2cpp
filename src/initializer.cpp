@@ -1,7 +1,6 @@
 #include "git2cpp/initializer.h"
 
-extern "C"
-{
+extern "C" {
 #include <git2/global.h>
 }
 
@@ -17,4 +16,3 @@ namespace git
         git_libgit2_shutdown();
     }
 }
-

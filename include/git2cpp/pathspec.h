@@ -21,10 +21,10 @@ namespace git
             git_pathspec_free(ps_);
         }
 
-        Pathspec              (Pathspec const &) = delete;
-        Pathspec& operator =  (Pathspec const &) = delete; 
+        Pathspec(Pathspec const &) = delete;
+        Pathspec & operator=(Pathspec const &) = delete;
 
     private:
-        git_pathspec * ps_; 
+        git_pathspec * ps_;
     };
 }

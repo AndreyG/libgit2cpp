@@ -28,47 +28,47 @@
 #include <git2.h>
 #include <stdio.h>
 
-#include <iostream>
 #include <cassert>
+#include <iostream>
 
+#include "git2cpp/config.h"
 #include "git2cpp/initializer.h"
 #include "git2cpp/repo.h"
-#include "git2cpp/config.h"
 
 using namespace git;
 
 // Almost all libgit2 functions return 0 on success or negative on error.
 // This is not production quality error checking, but should be sufficient
 // as an example.
-static void check_error(int error_code, const char *action)
+static void check_error(int error_code, const char * action)
 {
-	if (!error_code)
-		return;
+    if (!error_code)
+        return;
 
-	const git_error *error = giterr_last();
+    const git_error * error = giterr_last();
 
-	printf("Error %d %s - %s\n", error_code, action,
-		   (error && error->message) ? error->message : "???");
+    printf("Error %d %s - %s\n", error_code, action,
+           (error && error->message) ? error->message : "???");
 
-	exit(1);
+    exit(1);
 }
 
-int main (int argc, char** argv)
+int main(int argc, char ** argv)
 {
-  // ### Opening the Repository
+    // ### Opening the Repository
 
-  // There are a couple of methods for opening a repository, this being the
-  // simplest.  There are also [methods][me] for specifying the index file
-  // and work tree locations, here we assume they are in the normal places.
-	//
-	// (Try running this program against libgit2/tests/resources/testrepo.git/)
-  //
-  // [me]: http://libgit2.github.com/libgit2/#HEAD/group/repository
+    // There are a couple of methods for opening a repository, this being the
+    // simplest.  There are also [methods][me] for specifying the index file
+    // and work tree locations, here we assume they are in the normal places.
+    //
+    // (Try running this program against libgit2/tests/resources/testrepo.git/)
+    //
+    // [me]: http://libgit2.github.com/libgit2/#HEAD/group/repository
     assert(argc >= 2);
-    const char *repo_path = argv[1];
+    const char * repo_path = argv[1];
 
     git::Initializer threads_initializer;
-	
+
     try
     {
         Repository repo(repo_path);
@@ -223,12 +223,12 @@ int main (int argc, char** argv)
             // the values we need to create the commit.  The SHA key is written to the
             // `commit_id` variable here.
             git_oid commit_id = repo.create_commit(
-                        nullptr, /* do not update the HEAD */
-                        author,
-                        cmtter,
-                        "example commit",
-                        tree,
-                        parent);
+                nullptr, /* do not update the HEAD */
+                author,
+                cmtter,
+                "example commit",
+                tree,
+                parent);
 
             // Now we can take a look at the commit SHA we've generated.
             std::cout << "New Commit: " << id_to_str(commit_id) << std::endl;
@@ -254,9 +254,9 @@ int main (int argc, char** argv)
             // the target object (usually 'commit'), the name ('v1.0'), the tagger (a
             // git_signature - name, email, timestamp), and the tag message.
             Object commit = tag.target();
-            const char * tname = tag.name();		// "test"
-            git_otype ttype = tag.target_type();	// GIT_OBJ_COMMIT (otype enum)
-            const char * tmessage = tag.message();// "tag message\n"
+            const char * tname = tag.name();       // "test"
+            git_otype ttype = tag.target_type();   // GIT_OBJ_COMMIT (otype enum)
+            const char * tmessage = tag.message(); // "tag message\n"
             std::cout << "Tag Message: " << tmessage << std::endl;
         }
 
@@ -327,7 +327,7 @@ int main (int argc, char** argv)
             // string, and use the `git_blob_rawsize` attribute to find out its exact
             // size in bytes
             printf("Blob Size: %ld\n", (long)blob.size()); // 8
-            blob.content(); // "content"
+            blob.content();                                // "content"
         }
 
         {
@@ -364,7 +364,7 @@ int main (int argc, char** argv)
             // since the raw contents of the commit object will be cached in memory
             while (auto commit = walk.next())
             {
-                char const *          cmsg  = commit.message();
+                char const * cmsg = commit.message();
                 git_signature const * cauth = commit.author();
                 printf("%s (%s)\n", cmsg, cauth->email);
             }
@@ -394,7 +394,7 @@ int main (int argc, char** argv)
             // the `git_index_entry` struct
             for (size_t i = 0, ecount = index.entrycount(); i < ecount; ++i)
             {
-                const git_index_entry *e = index[i];
+                const git_index_entry * e = index[i];
 
                 printf("path: %s\n", e->path);
                 printf("mtime: %d\n", (int)e->mtime.seconds);
@@ -483,4 +483,3 @@ int main (int argc, char** argv)
         return 1;
     }
 }
-

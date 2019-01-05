@@ -19,12 +19,12 @@ namespace git
         ~Index();
 
         size_t entrycount() const;
-        git_index_entry const * operator[] (size_t i) const;
+        git_index_entry const * operator[](size_t i) const;
 
-        typedef std::function<int (const char * path, const char * mathched_pathspec)> matched_path_callback_t;
-        
-        void update_all (git_strarray const & pathspec, matched_path_callback_t cb);
-        void add_all    (git_strarray const & pathspec, matched_path_callback_t cb, unsigned int flags = 0);
+        typedef std::function<int(const char * path, const char * mathched_pathspec)> matched_path_callback_t;
+
+        void update_all(git_strarray const & pathspec, matched_path_callback_t cb);
+        void add_all(git_strarray const & pathspec, matched_path_callback_t cb, unsigned int flags = 0);
         void clear();
 
         void add_path(const char *);
@@ -37,11 +37,11 @@ namespace git
 
         void write() const;
 
-        Index               (Index const &) = delete;
-        Index& operator =   (Index const &) = delete;
+        Index(Index const &) = delete;
+        Index & operator=(Index const &) = delete;
 
-        Index               (Index &&) noexcept;
-        Index& operator =   (Index &&) noexcept;
+        Index(Index &&) noexcept;
+        Index & operator=(Index &&) noexcept;
 
     private:
         git_index * index_;

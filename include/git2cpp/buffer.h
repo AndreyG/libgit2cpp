@@ -6,8 +6,8 @@ namespace git
 {
     struct Buffer
     {
-        Buffer              (Buffer const &) = delete;
-        Buffer& operator =  (Buffer const &) = delete;
+        Buffer(Buffer const &) = delete;
+        Buffer & operator=(Buffer const &) = delete;
 
         Buffer(Buffer &&);
 

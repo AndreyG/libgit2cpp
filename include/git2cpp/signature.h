@@ -18,4 +18,3 @@ namespace git
         git_signature * sig_;
     };
 }
-

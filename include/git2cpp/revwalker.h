@@ -1,22 +1,24 @@
 #pragma once
 
-#include "tagged_mask.h"
 #include "commit.h"
+#include "tagged_mask.h"
 
 namespace git
 {
     struct Repository;
 
-    namespace revwalker {
-    namespace sorting
+    namespace revwalker
     {
-        typedef tagged_mask_t<struct tag> type;
+        namespace sorting
+        {
+            typedef tagged_mask_t<struct tag> type;
 
-        extern const type none;
-        extern const type topological;
-        extern const type time;
-        extern const type reverse;
-    }}
+            extern const type none;
+            extern const type topological;
+            extern const type time;
+            extern const type reverse;
+        }
+    }
 
     struct RevWalker
     {
@@ -34,11 +36,11 @@ namespace git
         void hide(git_oid const &) const;
         void push(git_oid const &) const;
 
-        Commit  next()                 const;
-        bool    next(char * id_buffer) const;
+        Commit next() const;
+        bool next(char * id_buffer) const;
 
-        RevWalker               (RevWalker const &) = delete;
-        RevWalker& operator =   (RevWalker const &) = delete;
+        RevWalker(RevWalker const &) = delete;
+        RevWalker & operator=(RevWalker const &) = delete;
 
         RevWalker(RevWalker && other)
             : walker_(other.walker_)
@@ -47,10 +49,10 @@ namespace git
             other.walker_ = nullptr;
         }
 
-        RevWalker& operator = (RevWalker && other)
+        RevWalker & operator=(RevWalker && other)
         {
             walker_ = other.walker_;
-            repo_   = other.repo_;
+            repo_ = other.repo_;
             other.walker_ = nullptr;
             return *this;
         }
