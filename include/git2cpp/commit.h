@@ -34,28 +34,11 @@ namespace git
 
       Repository const & repo() const { return *repo_; }
 
-      Commit(git_commit * commit, Repository const & repo)
-         : commit_(commit)
-         , repo_(&repo)
-      {}
+      Commit(git_commit *, Repository const &);
 
-      Commit()
-         : commit_(nullptr)
-         , repo_(nullptr)
-      {}
-
-      Commit(Commit && other) noexcept
-         : commit_(std::exchange(other.commit_, nullptr))
-         , repo_(other.repo_)
-      {}
-
-      Commit& operator = (Commit && other) noexcept
-      {
-          std::swap(commit_, other.commit_);
-          std::swap(repo_,   other.repo_);
-          return *this;
-      }
-
+      Commit();
+      Commit              (Commit &&) noexcept;
+      Commit& operator =  (Commit &&) noexcept;
       Commit              (Commit const &) = delete;
       Commit& operator =  (Commit const &) = delete;
 
