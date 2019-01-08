@@ -23,7 +23,19 @@
 #include "git2cpp/initializer.h"
 #include "git2cpp/repo.h"
 
-static void usage(const char * error, const char * arg)
+#ifdef USE_BOOST
+#include <boost/utility/string_view.hpp>
+
+using StringView = boost::string_view;
+#else
+#include <string_view>
+
+using StringView = std::string_view;
+#endif
+
+namespace {
+
+[[noreturn]] void usage(const char * error, const char * arg)
 {
     fprintf(stderr, "error: %s '%s'\n", error, arg);
     fprintf(stderr, "usage: init [-q | --quiet] [--bare] "
@@ -32,14 +44,13 @@ static void usage(const char * error, const char * arg)
 }
 
 /* simple string prefix test used in argument parsing */
-static size_t is_prefixed(const char * arg, const char * pfx)
+size_t is_prefixed(StringView arg, StringView pfx)
 {
-    size_t len = strlen(pfx);
-    return !strncmp(arg, pfx, len) ? len : 0;
+    return arg == pfx ? pfx.size() : 0;
 }
 
 /* parse the tail of the --shared= argument */
-static uint32_t parse_shared(const char * shared)
+uint32_t parse_shared(const char * shared)
 {
     if (!strcmp(shared, "false") || !strcmp(shared, "umask"))
         return GIT_REPOSITORY_INIT_SHARED_UMASK;
@@ -53,9 +64,8 @@ static uint32_t parse_shared(const char * shared)
 
     else if (shared[0] == '0')
     {
-        long val;
-        char * end = NULL;
-        val = strtol(shared + 1, &end, 8);
+        char * end = nullptr;
+        long val = strtol(shared + 1, &end, 8);
         if (end == shared + 1 || *end != 0)
             usage("invalid octal value for --shared", shared);
         return (uint32_t)val;
@@ -63,14 +73,38 @@ static uint32_t parse_shared(const char * shared)
 
     else
         usage("unknown value for --shared", shared);
-
-    return 0;
 }
 
 using namespace git;
 
-/* forward declaration of helper to make an empty parent-less commit */
-static void create_initial_commit(Repository & repo);
+/* Unlike regular "git init", this example shows how to create an initial
+ * empty commit in the repository.  This is the helper function that does
+ * that.
+ */
+static void create_initial_commit(Repository & repo)
+{
+    /* First use the config to initialize a commit signature for the user */
+    Signature sig = repo.signature();
+
+    /* Now let's create an empty tree for this commit */
+    Index index = repo.index();
+
+    /* Outside of this example, you could call git_index_add_bypath()
+     * here to put actual files into the index.  For our purposes, we'll
+     * leave it empty for now.
+     */
+
+    git_oid tree_id = index.write_tree();
+    Tree tree = repo.tree_lookup(tree_id);
+
+    /* Ready to create the initial commit
+     *
+     * Normally creating a commit would involve looking up the current
+     * HEAD commit and making that be the parent of the initial commit,
+     * but here this is the first commit so there will be no parent.
+     */
+    repo.create_commit("HEAD", sig, sig, "Initial commit", tree);
+}
 
 git_repository_init_options make_opts(bool bare, const char * templ,
                                       uint32_t shared,
@@ -104,52 +138,54 @@ git_repository_init_options make_opts(bool bare, const char * templ,
     return opts;
 }
 
+}
+
 int main(int argc, char * argv[])
 {
-    int no_options = 1, quiet = 0, bare = 0, initial_commit = 0, i;
+    bool no_options = true, quiet = false, bare = false, initial_commit = false;
     uint32_t shared = GIT_REPOSITORY_INIT_SHARED_UMASK;
-    const char *templ = NULL, *gitdir = NULL, *dir = NULL;
-    size_t pfxlen;
+    const char *templ = nullptr, *gitdir = nullptr, *dir = nullptr;
 
     auto_git_initializer;
 
     /* Process arguments */
 
-    for (i = 1; i < argc; ++i)
+    for (int i = 1; i < argc; ++i)
     {
-        char * a = argv[i];
+        auto arg = argv[i];
+        StringView a = arg;
 
-        if (a[0] == '-')
-            no_options = 0;
+        if (arg[0] == '-')
+            no_options = false;
 
-        if (a[0] != '-')
+        if (arg[0] != '-')
         {
-            if (dir != NULL)
-                usage("extra argument", a);
-            dir = a;
+            if (dir)
+                usage("extra argument", arg);
+            dir = arg;
         }
-        else if (!strcmp(a, "-q") || !strcmp(a, "--quiet"))
-            quiet = 1;
-        else if (!strcmp(a, "--bare"))
-            bare = 1;
-        else if ((pfxlen = is_prefixed(a, "--template=")) > 0)
-            templ = a + pfxlen;
-        else if (!strcmp(a, "--separate-git-dir"))
+        else if (a == "-q" || a == "--quiet")
+            quiet = true;
+        else if (a == "--bare")
+            bare = true;
+        else if (auto pfxlen = is_prefixed(a, "--template="))
+            templ = arg + pfxlen;
+        else if (a == "--separate-git-dir")
             gitdir = argv[++i];
-        else if ((pfxlen = is_prefixed(a, "--separate-git-dir=")) > 0)
-            gitdir = a + pfxlen;
-        else if (!strcmp(a, "--shared"))
+        else if (auto pfxlen = is_prefixed(a, "--separate-git-dir="))
+            gitdir = arg + pfxlen;
+        else if (a == "--shared")
             shared = GIT_REPOSITORY_INIT_SHARED_GROUP;
-        else if ((pfxlen = is_prefixed(a, "--shared=")) > 0)
-            shared = parse_shared(a + pfxlen);
-        else if (!strcmp(a, "--initial-commit"))
-            initial_commit = 1;
+        else if (auto pfxlen = is_prefixed(a, "--shared="))
+            shared = parse_shared(arg + pfxlen);
+        else if (a == "--initial-commit")
+            initial_commit = true;
         else
-            usage("unknown option", a);
+            usage("unknown option", arg);
     }
 
     if (!dir)
-        usage("must specify directory to init", NULL);
+        usage("must specify directory to init", nullptr);
 
     /* Initialize repository */
 
@@ -177,33 +213,4 @@ int main(int argc, char * argv[])
     }
 
     return 0;
-}
-
-/* Unlike regular "git init", this example shows how to create an initial
- * empty commit in the repository.  This is the helper function that does
- * that.
- */
-static void create_initial_commit(Repository & repo)
-{
-    /* First use the config to initialize a commit signature for the user */
-    Signature sig = repo.signature();
-
-    /* Now let's create an empty tree for this commit */
-    Index index = repo.index();
-
-    /* Outside of this example, you could call git_index_add_bypath()
-	 * here to put actual files into the index.  For our purposes, we'll
-	 * leave it empty for now.
-	 */
-
-    git_oid tree_id = index.write_tree();
-    Tree tree = repo.tree_lookup(tree_id);
-
-    /* Ready to create the initial commit
-	 *
-	 * Normally creating a commit would involve looking up the current
-	 * HEAD commit and making that be the parent of the initial commit,
-	 * but here this is the first commit so there will be no parent.
-	 */
-    repo.create_commit("HEAD", sig, sig, "Initial commit", tree);
 }
