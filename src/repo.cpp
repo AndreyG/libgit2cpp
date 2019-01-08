@@ -18,27 +18,17 @@
 
 namespace git
 {
-    namespace
-    {
-        int write_branch_name(const char * name, git_branch_t, void * payload)
-        {
-            std::vector<std::string> * out = reinterpret_cast<std::vector<std::string> *>(payload);
-            out->emplace_back(name);
-            return 0;
-        }
-    }
-
     const Repository::init_tag Repository::init;
 
     Repository::Repository(const char * dir)
     {
-        if (git_repository_open_ext(&repo_, dir, 0, NULL))
+        if (git_repository_open_ext(&repo_, dir, 0, nullptr))
             throw repository_open_error(dir);
     }
 
     Repository::Repository(std::string const & dir)
     {
-        if (git_repository_open_ext(&repo_, dir.c_str(), 0, NULL))
+        if (git_repository_open_ext(&repo_, dir.c_str(), 0, nullptr))
             throw repository_open_error(dir);
     }
 
@@ -48,7 +38,7 @@ namespace git
             throw repository_init_error(dir);
     }
 
-    Repository::Repository(std::string const & dir, init_tag tag)
+    Repository::Repository(std::string const & dir, init_tag)
     {
         if (git_repository_init(&repo_, dir.c_str(), false) < 0)
             throw repository_init_error(dir);
@@ -61,9 +51,8 @@ namespace git
     }
 
     Repository::Repository(Repository && other) noexcept
-        : repo_(other.repo_)
+        : repo_(std::exchange(other.repo_, nullptr))
     {
-        other.repo_ = nullptr;
     }
 
     Repository & Repository::operator=(Repository && other) noexcept
@@ -217,9 +206,8 @@ namespace git
                 return GIT_BRANCH_REMOTE;
             case branch_type::ALL:
                 return GIT_BRANCH_ALL;
-            default:
-                throw std::logic_error("invalid branch type");
             }
+            throw std::logic_error("invalid branch type");
         }
 
     private:

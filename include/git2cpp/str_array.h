@@ -10,6 +10,9 @@ namespace git
             : str_array_(str_array)
         {}
 
+        StrArray(StrArray const &) = delete;
+        StrArray& operator =(StrArray const &) = delete;
+
         size_t count() const { return str_array_.count; }
 
         const char * operator[](size_t i) const
