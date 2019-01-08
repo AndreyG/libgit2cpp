@@ -11,6 +11,8 @@
 
 using namespace git;
 
+namespace {
+
 Tree resolve_to_tree(Repository const & repo, const char * identifier)
 {
     Object obj = revparse_single(repo, identifier);
@@ -19,10 +21,8 @@ Tree resolve_to_tree(Repository const & repo, const char * identifier)
     {
     case GIT_OBJ_TREE:
         return obj.to_tree();
-        break;
     case GIT_OBJ_COMMIT:
         return obj.to_commit().tree();
-        break;
     }
 
     std::ostringstream ss;
@@ -42,7 +42,7 @@ const char * colors[] = {
     "\033[36m"  /* cyan */
 };
 
-static void usage(const char * message, const char * arg)
+[[noreturn]] void usage(const char * message, const char * arg)
 {
     if (message && arg)
         fprintf(stderr, "%s: %s\n", message, arg);
@@ -392,6 +392,8 @@ void diff_print_stats(Diff const & diff, output::type output)
     auto stats = diff.stats();
     if (Buffer buf = stats.to_buf(format, 80))
         fputs(buf.ptr(), stdout);
+}
+
 }
 
 int main(int argc, char * argv[])
