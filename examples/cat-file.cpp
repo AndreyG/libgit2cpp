@@ -1,24 +1,18 @@
+#include "git2cpp/id_to_str.h"
+#include "git2cpp/initializer.h"
+#include "git2cpp/repo.h"
+
 #include <git2.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include <cassert>
 #include <iostream>
 
-#include "git2cpp/id_to_str.h"
-#include "git2cpp/initializer.h"
-#include "git2cpp/repo.h"
+namespace {
 
-static void check(int error, const char * message)
-{
-    if (error)
-    {
-        fprintf(stderr, "%s (%d)\n", message, error);
-        exit(1);
-    }
-}
-
-static void usage(const char * message, const char * arg)
+[[noreturn]] void usage(const char * message, const char * arg)
 {
     if (message && arg)
         fprintf(stderr, "%s: %s\n", message, arg);
@@ -28,25 +22,22 @@ static void usage(const char * message, const char * arg)
     exit(1);
 }
 
-static int check_str_param(
-    const char * arg, const char * pattern, const char ** val)
+bool check_str_param(const char * arg, const char * pattern, const char ** val)
 {
     size_t len = strlen(pattern);
     if (strncmp(arg, pattern, len))
-        return 0;
-    *val = (const char *)(arg + len);
-    return 1;
+        return false;
+    *val = arg + len;
+    return true;
 }
 
-static void print_signature(const char * header, const git_signature * sig)
+void print_signature(const char * header, const git_signature * sig)
 {
-    char sign;
-    int offset, hours, minutes;
-
     if (!sig)
         return;
 
-    offset = sig->when.offset;
+    int offset = sig->when.offset;
+    char sign;
     if (offset < 0)
     {
         sign = '-';
@@ -57,88 +48,85 @@ static void print_signature(const char * header, const git_signature * sig)
         sign = '+';
     }
 
-    hours = offset / 60;
-    minutes = offset % 60;
+    const int hours = offset / 60;
+    const int minutes = offset % 60;
 
     printf("%s %s <%s> %ld %c%02d%02d\n",
            header, sig->name, sig->email, (long)sig->when.time,
            sign, hours, minutes);
 }
 
-static void show_blob(const git_blob * blob)
+void show_blob(git::Blob const & blob)
 {
     /* ? Does this need crlf filtering? */
-    fwrite(git_blob_rawcontent(blob), static_cast<size_t>(git_blob_rawsize(blob)), 1, stdout);
+    fwrite(blob.content(), blob.size(), 1, stdout);
 }
 
-static void show_tree(const git_tree * tree)
+void show_tree(git::Tree const & tree)
 {
-    size_t i, max_i = (int)git_tree_entrycount(tree);
     char oidstr[GIT_OID_HEXSZ + 1];
-    const git_tree_entry * te;
 
-    for (i = 0; i < max_i; ++i)
+    for (size_t i = 0, n = tree.entrycount(); i < n; ++i)
     {
-        te = git_tree_entry_byindex(tree, i);
+        auto te = tree[i];
 
-        git_oid_tostr(oidstr, sizeof(oidstr), git_tree_entry_id(te));
+        git_oid_tostr(oidstr, sizeof(oidstr), &te.id());
 
         printf("%06o %s %s\t%s\n",
-               git_tree_entry_filemode(te),
-               git_object_type2string(git_tree_entry_type(te)),
-               oidstr, git_tree_entry_name(te));
+               te.filemode(),
+               git_object_type2string(te.type()),
+               oidstr, te.name());
     }
 }
 
-static void show_commit(const git_commit * commit)
+void show_commit(git::Commit const & commit)
 {
-    unsigned int i, max_i;
     char oidstr[GIT_OID_HEXSZ + 1];
 
-    git_oid_tostr(oidstr, sizeof(oidstr), git_commit_tree_id(commit));
+    git_oid_tostr(oidstr, sizeof(oidstr), &commit.tree_id());
     printf("tree %s\n", oidstr);
 
-    max_i = (unsigned int)git_commit_parentcount(commit);
-    for (i = 0; i < max_i; ++i)
+    for (size_t i = 0, n = commit.parents_num(); i != n; ++i)
     {
-        git_oid_tostr(oidstr, sizeof(oidstr), git_commit_parent_id(commit, i));
+        git_oid_tostr(oidstr, sizeof(oidstr), &commit.parent_id(i));
         printf("parent %s\n", oidstr);
     }
 
-    print_signature("author", git_commit_author(commit));
-    print_signature("committer", git_commit_committer(commit));
+    print_signature("author", commit.author());
+    print_signature("committer", commit.commiter());
 
-    if (git_commit_message(commit))
-        printf("\n%s\n", git_commit_message(commit));
+    if (auto message = commit.message())
+        printf("\n%s\n", message);
 }
 
-static void show_tag(const git_tag * tag)
+void show_tag(git::Tag const & tag)
 {
-    char oidstr[GIT_OID_HEXSZ + 1];
+    std::cout   << "object " << git::id_to_str(tag.target_id()) << "\n"
+                << "\ntype " << git_object_type2string(tag.target_type())
+                << "\ntag "  << tag.name()
+                << std::endl;
+    print_signature("tagger", tag.tagger());
 
-    git_oid_tostr(oidstr, sizeof(oidstr), git_tag_target_id(tag));
-    ;
-    printf("object %s\n", oidstr);
-    printf("type %s\n", git_object_type2string(git_tag_target_type(tag)));
-    printf("tag %s\n", git_tag_name(tag));
-    print_signature("tagger", git_tag_tagger(tag));
-
-    if (git_tag_message(tag))
-        printf("\n%s\n", git_tag_message(tag));
+    if (auto message = tag.message())
+        printf("\n%s\n", message);
 }
 
-enum
+enum class Action
 {
+    NONE = 0,
     SHOW_TYPE = 1,
     SHOW_SIZE = 2,
     SHOW_NONE = 3,
     SHOW_PRETTY = 4
 };
 
+}
+
 int main(int argc, char * argv[])
 {
-    const char *dir = ".", *rev = NULL;
-    int i, action = 0, verbose = 0;
+    const char *dir = ".", *rev = nullptr;
+    int i, verbose = 0;
+    Action action = Action::NONE;
     char oidstr[GIT_OID_HEXSZ + 1];
 
     for (i = 1; i < argc; ++i)
@@ -147,31 +135,31 @@ int main(int argc, char * argv[])
 
         if (a[0] != '-')
         {
-            if (rev != NULL)
-                usage("Only one rev should be provided", NULL);
+            if (rev)
+                usage("Only one rev should be provided", nullptr);
             else
                 rev = a;
         }
         else if (!strcmp(a, "-t"))
-            action = SHOW_TYPE;
+            action = Action::SHOW_TYPE;
         else if (!strcmp(a, "-s"))
-            action = SHOW_SIZE;
+            action = Action::SHOW_SIZE;
         else if (!strcmp(a, "-e"))
-            action = SHOW_NONE;
+            action = Action::SHOW_NONE;
         else if (!strcmp(a, "-p"))
-            action = SHOW_PRETTY;
+            action = Action::SHOW_PRETTY;
         else if (!strcmp(a, "-q"))
             verbose = 0;
         else if (!strcmp(a, "-v"))
             verbose = 1;
         else if (!strcmp(a, "--help") || !strcmp(a, "-h"))
-            usage(NULL, NULL);
+            usage(nullptr, nullptr);
         else if (!check_str_param(a, "--git-dir=", &dir))
             usage("Unknown option", a);
     }
 
-    if (!action || !rev)
-        usage(NULL, NULL);
+    if (action == Action::NONE || !rev)
+        usage(nullptr, nullptr);
 
     git::Initializer threads_initializer;
 
@@ -189,41 +177,43 @@ int main(int argc, char * argv[])
 
     switch (action)
     {
-    case SHOW_TYPE:
+    case Action::SHOW_TYPE:
         printf("%s\n", git_object_type2string(obj.type()));
         break;
-    case SHOW_SIZE:
+    case Action::SHOW_SIZE:
     {
         git::Odb odb = repo.odb();
         git::OdbObject odbobj = odb.read(obj.id());
 
-        printf("%ld\n", (long)odbobj.size());
+        printf("%zu\n", odbobj.size());
+        break;
     }
-    break;
-    case SHOW_NONE:
+    case Action::SHOW_NONE:
         /* just want return result */
         break;
-    case SHOW_PRETTY:
+    case Action::SHOW_PRETTY:
 
         switch (obj.type())
         {
         case GIT_OBJ_BLOB:
-            show_blob(obj.as_blob());
+            show_blob(obj.to_blob());
             break;
         case GIT_OBJ_COMMIT:
-            show_commit(obj.as_commit());
+            show_commit(obj.to_commit());
             break;
         case GIT_OBJ_TREE:
-            show_tree(obj.as_tree());
+            show_tree(obj.to_tree());
             break;
         case GIT_OBJ_TAG:
-            show_tag(obj.as_tag());
+            show_tag(obj.to_tag());
             break;
         default:
             printf("unknown %s\n", oidstr);
             break;
         }
         break;
+    default:
+        assert("unexpected action" && static_cast<int>(action));
     }
 
     return 0;
