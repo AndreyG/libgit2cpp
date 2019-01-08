@@ -60,6 +60,11 @@ namespace git
         return *git_commit_id(commit_);
     }
 
+    git_oid const & Commit::tree_id() const
+    {
+        return *git_commit_tree_id(commit_);
+    }
+
     git_oid const & Commit::parent_id(size_t i) const
     {
         return *git_commit_parent_id(commit_, static_cast<unsigned int>(i));

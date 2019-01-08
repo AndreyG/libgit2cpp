@@ -22,6 +22,7 @@ namespace git
         explicit operator bool() const { return commit_ != nullptr; }
 
         git_oid const & id() const;
+        git_oid const & tree_id() const;
 
         git_signature const * author() const;
         git_signature const * commiter() const;
