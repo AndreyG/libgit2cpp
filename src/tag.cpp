@@ -3,10 +3,17 @@
 
 #include <git2/tag.h>
 
+#include <utility>
+
 namespace git
 {
     Tag::Tag(git_tag * tag)
         : tag_(tag)
+    {
+    }
+
+    Tag::Tag(Tag && other) noexcept
+        : tag_(std::exchange(other.tag_, nullptr))
     {
     }
 
