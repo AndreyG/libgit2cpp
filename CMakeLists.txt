@@ -68,6 +68,7 @@ set(examples
   init
   rev-parse
   general
+  remote
 )
 
 foreach (example ${examples})

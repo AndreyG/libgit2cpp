@@ -8,4 +8,9 @@ namespace git
     {
         return git_remote_url(remote_);
     }
+
+    const char * Remote::pushurl() const
+    {
+        return git_remote_pushurl(remote_);
+    }
 }

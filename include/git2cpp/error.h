@@ -85,6 +85,34 @@ namespace git
         {}
     };
 
+    struct remote_delete_error : error_t
+    {
+        explicit remote_delete_error(std::string const & name)
+            : error_t("Could not delete remote " + name)
+        {}
+    };
+
+    struct remote_create_error : error_t
+    {
+        explicit remote_create_error(const char * name, const char * url)
+            : error_t(internal::format("Could not create remote '%s', url='%s'", name, url))
+        {}
+    };
+
+    struct remote_set_url_error : error_t
+    {
+        explicit remote_set_url_error(const char * name, const char * url)
+            : error_t(internal::format("Could not set url '%s' for remote '%s'", url, name))
+        {}
+    };
+
+    struct remote_set_pushurl_error : error_t
+    {
+        explicit remote_set_pushurl_error(const char * name, const char * url)
+            : error_t(internal::format("Could not set pushurl '%s' for remote '%s'", url, name))
+        {}
+    };
+
     struct commit_parent_error : error_t
     {
         explicit commit_parent_error(git_oid const & id)

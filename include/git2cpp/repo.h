@@ -16,6 +16,7 @@
 #include "str_array.h"
 #include "submodule.h"
 #include "tag.h"
+#include "internal/optional.h"
 
 #include <string>
 #include <vector>
@@ -111,6 +112,11 @@ namespace git
 
         StrArray remotes() const;
         Remote remote(const char * name) const;
+        Remote create_remote(const char * name, const char * url);
+        void delete_remote(const char * name);
+        internal::optional<StrArray> rename_remote(const char * old_name, const char * new_name);
+        void set_url    (const char * name, const char * url);
+        void set_pushurl(const char * name, const char * url);
 
         explicit Repository(const char * dir);
         explicit Repository(std::string const & dir);
@@ -129,6 +135,8 @@ namespace git
         Repository & operator=(Repository &&) noexcept;
 
         ~Repository();
+
+        static internal::optional<std::string> discover(const char * start_path);
 
     private:
         git_repository * repo_;

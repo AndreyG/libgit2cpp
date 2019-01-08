@@ -6,7 +6,8 @@ namespace git
 {
     struct Remote
     {
-        const char * url() const;
+        const char * url()      const;
+        const char * pushurl()  const;
 
     private:
         friend struct Repository;

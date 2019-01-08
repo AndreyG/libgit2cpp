@@ -441,4 +441,48 @@ namespace git
         else
             return Remote(remote);
     }
+
+    Remote Repository::create_remote(const char * name, const char * url)
+    {
+        git_remote * remote;
+        if (git_remote_create(&remote, repo_, name, url))
+            throw remote_create_error(name, url);
+        else
+            return Remote(remote);
+    }
+
+    void Repository::delete_remote(const char * name)
+    {
+        if (git_remote_delete(repo_, name))
+            throw remote_delete_error(name);
+    }
+
+    internal::optional<StrArray> Repository::rename_remote(const char * old_name, const char * new_name)
+    {
+        git_strarray problems {};
+        if (git_remote_rename(&problems, repo_, old_name, new_name))
+            return StrArray(problems);
+        else
+            return internal::none;
+    }
+
+    void Repository::set_url(const char * name, const char * url)
+    {
+        if (git_remote_set_url(repo_, name, url))
+            throw remote_set_url_error(name, url);
+    }
+
+    void Repository::set_pushurl(const char * name, const char * url)
+    {
+        if (git_remote_set_pushurl(repo_, name, url))
+            throw remote_set_pushurl_error(name, url);
+    }
+
+    internal::optional<std::string> Repository::discover(const char * start_path)
+    {
+        git_buf buf = GIT_BUF_INIT_CONST(nullptr, 0);
+        if (git_repository_discover(&buf, start_path, 0, nullptr))
+            return internal::none;
+        return std::string(buf.ptr, buf.size);
+    }
 }
