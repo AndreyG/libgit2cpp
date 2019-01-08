@@ -2,6 +2,8 @@
 
 #include <git2/strarray.h>
 
+#include <cstring>
+
 namespace git
 {
     struct StrArray
@@ -12,6 +14,12 @@ namespace git
 
         StrArray(StrArray const &) = delete;
         StrArray& operator =(StrArray const &) = delete;
+
+        StrArray(StrArray && other) noexcept
+            : str_array_(other.str_array_)
+        {
+            std::memset(&other.str_array_, 0, sizeof(git_strarray));
+        }
 
         size_t count() const { return str_array_.count; }
 
