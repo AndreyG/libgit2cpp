@@ -12,6 +12,8 @@ namespace git
         {
             const char * name() const;
             git_oid const & id() const;
+            git_otype type() const;
+            git_filemode_t filemode() const;
 
         private:
             friend struct Tree;
