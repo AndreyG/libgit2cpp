@@ -86,7 +86,7 @@ void show_branch(Repository const & repo, int format)
     if (format == FORMAT_LONG)
         std::cout << "# On branch " << branch.value_or("Not currently on any branch.");
     else
-        std::cout << "## ", branch.value_or("HEAD (no branch)");
+        std::cout << "## " << branch.value_or("HEAD (no branch)");
     std::cout << "\n";
 }
 
