@@ -18,20 +18,16 @@ namespace git
     {
     }
 
-    Tree::Tree(Tree && other)
-        : tree_(other.tree_)
-        , repo_(other.repo_)
+    Tree::Tree(Tree && other) noexcept
+        : tree_(std::exchange(other.tree_, nullptr))
+        , repo_(std::exchange(other.repo_, nullptr))
     {
-        other.tree_ = nullptr;
-        other.repo_ = nullptr;
     }
 
-    Tree & Tree::operator=(Tree && other)
+    Tree & Tree::operator=(Tree && other) noexcept
     {
-        tree_ = other.tree_;
-        repo_ = other.repo_;
-        other.tree_ = nullptr;
-        other.repo_ = nullptr;
+        std::swap(tree_, other.tree_);
+        std::swap(repo_, other.repo_);
         return *this;
     }
 
@@ -42,7 +38,7 @@ namespace git
 
     int Tree::pathspec_match(uint32_t flags, Pathspec const & ps)
     {
-        return git_pathspec_match_tree(NULL, tree_, flags, ps.ptr());
+        return git_pathspec_match_tree(nullptr, tree_, flags, ps.ptr());
     }
 
     size_t Tree::entrycount() const
@@ -89,12 +85,10 @@ namespace git
         git_tree_entry_free(entry_);
     }
 
-    Tree::OwnedEntry::OwnedEntry(OwnedEntry && other)
-        : entry_(other.entry_)
-        , repo_(other.repo_)
+    Tree::OwnedEntry::OwnedEntry(OwnedEntry && other) noexcept
+        : entry_(std::exchange(other.entry_, nullptr))
+        , repo_(std::exchange(other.repo_, nullptr))
     {
-        other.entry_ = nullptr;
-        other.repo_ = nullptr;
     }
 
     Tree Tree::OwnedEntry::to_tree() /* && */

@@ -34,8 +34,8 @@ namespace git
             OwnedEntry(OwnedEntry const &) = delete;
             OwnedEntry & operator=(OwnedEntry const &) = delete;
 
-            OwnedEntry(OwnedEntry &&);
-            OwnedEntry & operator=(OwnedEntry &&);
+            OwnedEntry(OwnedEntry &&) noexcept;
+            OwnedEntry & operator=(OwnedEntry &&) noexcept;
 
             Tree to_tree() /*&&*/;
 
@@ -70,8 +70,8 @@ namespace git
         Tree();
         ~Tree();
 
-        Tree(Tree &&);
-        Tree & operator=(Tree &&);
+        Tree(Tree &&) noexcept;
+        Tree & operator=(Tree &&) noexcept;
 
         Tree(Tree const &) = delete;
         Tree & operator=(Tree const &) = delete;
