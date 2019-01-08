@@ -31,12 +31,14 @@ using StringView = std::string_view;
 
 using namespace git;
 
-enum
+namespace {
+
+enum class Format
 {
-    FORMAT_DEFAULT = 0,
-    FORMAT_LONG = 1,
-    FORMAT_SHORT = 2,
-    FORMAT_PORCELAIN = 3,
+    DEFAULT,
+    LONG,
+    SHORT,
+    PORCELAIN,
 };
 
 /*
@@ -62,7 +64,7 @@ bool starts_with(StringView str, StringView prefix)
     return str.size() >= prefix.size() && std::equal(prefix.begin(), prefix.end(), str.begin());
 }
 
-void show_branch(Repository const & repo, int format)
+void show_branch(Repository const & repo, Format format)
 {
     Optional<StringView> branch;
     try
@@ -83,7 +85,7 @@ void show_branch(Repository const & repo, int format)
         throw e;
     }
 
-    if (format == FORMAT_LONG)
+    if (format == Format::LONG)
         std::cout << "# On branch " << branch.value_or("Not currently on any branch.");
     else
         std::cout << "## " << branch.value_or("HEAD (no branch)");
@@ -349,11 +351,15 @@ void print_short(Repository const & repo, Status const & status)
     }
 }
 
+}
+
 int main(int argc, char * argv[])
 {
     auto_git_initializer;
 
-    int npaths = 0, format = FORMAT_DEFAULT, zterm = 0, showbranch = 0;
+    size_t npaths = 0;
+    Format format = Format::DEFAULT;
+    bool showbranch = false;
     Status::Options opt;
     const char * repodir = ".";
 
@@ -377,18 +383,17 @@ int main(int argc, char * argv[])
             }
         }
         else if (!strcmp(argv[i], "-s") || !strcmp(argv[i], "--short"))
-            format = FORMAT_SHORT;
+            format = Format::SHORT;
         else if (!strcmp(argv[i], "--long"))
-            format = FORMAT_LONG;
+            format = Format::LONG;
         else if (!strcmp(argv[i], "--porcelain"))
-            format = FORMAT_PORCELAIN;
+            format = Format::PORCELAIN;
         else if (!strcmp(argv[i], "-b") || !strcmp(argv[i], "--branch"))
             showbranch = 1;
         else if (!strcmp(argv[i], "-z"))
         {
-            zterm = 1;
-            if (format == FORMAT_DEFAULT)
-                format = FORMAT_PORCELAIN;
+            if (format == Format::DEFAULT)
+                format = Format::PORCELAIN;
         }
         else if (!strcmp(argv[i], "--ignored"))
             opt.include_ignored();
@@ -412,10 +417,10 @@ int main(int argc, char * argv[])
         }
     }
 
-    if (format == FORMAT_DEFAULT)
-        format = FORMAT_LONG;
-    if (format == FORMAT_LONG)
-        showbranch = 1;
+    if (format == Format::DEFAULT)
+        format = Format::LONG;
+    if (format == Format::LONG)
+        showbranch = true;
     if (npaths > 0)
         opt.set_pathspec(pathspec, npaths);
 
@@ -443,7 +448,7 @@ int main(int argc, char * argv[])
     if (showbranch)
         show_branch(repo, format);
 
-    if (format == FORMAT_LONG)
+    if (format == Format::LONG)
         print_long(status);
     else
         print_short(repo, status);
