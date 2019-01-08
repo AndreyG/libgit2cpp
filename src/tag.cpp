@@ -1,14 +1,12 @@
-#include <git2/tag.h>
-
-#include "git2cpp/error.h"
-#include "git2cpp/repo.h"
 #include "git2cpp/tag.h"
+#include "git2cpp/object.h"
+
+#include <git2/tag.h>
 
 namespace git
 {
-    Tag::Tag(git_tag * tag, Repository const & repo)
+    Tag::Tag(git_tag * tag)
         : tag_(tag)
-        , repo_(repo)
     {
     }
 
@@ -17,11 +15,16 @@ namespace git
         git_tag_free(tag_);
     }
 
-    Object Tag::target() const
+    Object Tag::target(Repository const & repo) const
     {
         git_object * obj;
         git_tag_target(&obj, tag_);
-        return Object(obj, repo_);
+        return Object(obj, repo);
+    }
+
+    git_oid const & Tag::target_id() const
+    {
+        return *git_tag_target_id(tag_);
     }
 
     git_otype Tag::target_type() const
@@ -37,5 +40,10 @@ namespace git
     const char * Tag::message() const
     {
         return git_tag_message(tag_);
+    }
+
+    git_signature const * Tag::tagger() const
+    {
+        return git_tag_tagger(tag_);
     }
 }

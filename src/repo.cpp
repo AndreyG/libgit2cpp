@@ -111,7 +111,7 @@ namespace git
         if (git_tag_lookup(&tag, repo_, &oid))
             throw tag_lookup_error(oid);
         else
-            return {tag, *this};
+            return { tag };
     }
 
     Blob Repository::blob_lookup(git_oid const & oid) const

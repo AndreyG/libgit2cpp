@@ -253,7 +253,7 @@ int main(int argc, char ** argv)
             // generally contains: the target (usually a commit object), the type of
             // the target object (usually 'commit'), the name ('v1.0'), the tagger (a
             // git_signature - name, email, timestamp), and the tag message.
-            Object commit = tag.target();
+            Object commit = tag.target(repo);
             const char * tname = tag.name();       // "test"
             git_otype ttype = tag.target_type();   // GIT_OBJ_COMMIT (otype enum)
             const char * tmessage = tag.message(); // "tag message\n"
