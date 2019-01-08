@@ -1,4 +1,8 @@
 #include "git2cpp/object.h"
+#include "git2cpp/blob.h"
+#include "git2cpp/commit.h"
+#include "git2cpp/tree.h"
+#include "git2cpp/tag.h"
 
 #include <cassert>
 
@@ -68,6 +72,14 @@ namespace git
     {
         assert(type() == GIT_OBJ_BLOB);
         Blob res(reinterpret_cast<git_blob *>(obj_));
+        obj_ = nullptr;
+        return res;
+    }
+
+    Tag Object::to_tag() /*&&*/
+    {
+        assert(type() == GIT_OBJ_TAG);
+        Tag res(reinterpret_cast<git_tag *>(obj_));
         obj_ = nullptr;
         return res;
     }

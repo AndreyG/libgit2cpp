@@ -1,8 +1,5 @@
 #pragma once
 
-#include "blob.h"
-#include "commit.h"
-
 #include <git2/types.h>
 
 struct git_object;
@@ -13,6 +10,11 @@ struct git_tag;
 namespace git
 {
     struct Repository;
+
+    struct Blob;
+    struct Commit;
+    struct Tree;
+    struct Tag;
 
     struct Object
     {
@@ -34,6 +36,7 @@ namespace git
         Commit to_commit() /*&&*/;
         Tree to_tree() /*&&*/;
         Blob to_blob() /*&&*/;
+        Tag  to_tag()  /*&&*/;
 
         Object(Object const &) = delete;
         Object & operator=(Object const &) = delete;
