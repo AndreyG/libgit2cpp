@@ -100,7 +100,7 @@ namespace git
         if (git_tag_lookup(&tag, repo_, &oid))
             throw tag_lookup_error(oid);
         else
-            return { tag };
+            return Tag(tag);
     }
 
     Blob Repository::blob_lookup(git_oid const & oid) const
@@ -141,6 +141,7 @@ namespace git
 
     git_status_t Repository::file_status(const char * filepath) const
     {
+        static_assert(sizeof(git_status_t) == sizeof(unsigned int));
         git_status_t res;
         switch (git_status_file(reinterpret_cast<unsigned int *>(&res), repo_, filepath))
         {
@@ -196,7 +197,7 @@ namespace git
         }
 
     private:
-        git_branch_t convert(branch_type t) const
+        static git_branch_t convert(branch_type t)
         {
             switch (t)
             {

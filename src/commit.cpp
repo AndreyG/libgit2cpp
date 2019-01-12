@@ -1,9 +1,9 @@
 #include "git2cpp/commit.h"
 #include "git2cpp/error.h"
 #include "git2cpp/repo.h"
+#include "git2cpp/tree.h"
 
 #include <git2/commit.h>
-#include <git2/merge.h>
 
 #include <utility>
 

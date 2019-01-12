@@ -12,7 +12,7 @@ namespace git
 
     struct Tag
     {
-        Tag(git_tag *);
+        explicit Tag(git_tag *);
         ~Tag();
 
         Tag & operator=(Tag const &) = delete;

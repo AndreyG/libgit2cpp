@@ -13,7 +13,7 @@ namespace internal
 
 #ifndef USE_BOOST
     template<typename... Args>
-    inline std::string format(const char * fmt, Args&& ... args)
+    std::string format(const char * fmt, Args&& ... args)
     {
         auto size = std::snprintf(nullptr, 0, fmt, args...);
         std::string result(size, 0);

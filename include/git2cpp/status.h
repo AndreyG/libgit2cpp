@@ -1,8 +1,6 @@
 #pragma once
 
-#include <git2/diff.h>
 #include <git2/status.h>
-#include <git2/strarray.h>
 
 namespace git
 {

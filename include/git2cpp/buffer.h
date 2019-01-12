@@ -9,7 +9,7 @@ namespace git
         Buffer(Buffer const &) = delete;
         Buffer & operator=(Buffer const &) = delete;
 
-        Buffer(Buffer &&);
+        Buffer(Buffer &&) noexcept;
 
         explicit Buffer(git_buf buf)
             : buf_(buf)

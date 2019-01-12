@@ -15,8 +15,8 @@ namespace git
         Submodule(Submodule const &) = delete;
         Submodule & operator=(Submodule const &) = delete;
 
-        Submodule(Submodule &&);
-        Submodule & operator=(Submodule &&);
+        Submodule(Submodule &&) noexcept;
+        Submodule & operator=(Submodule &&) noexcept;
 
         enum class status : unsigned int
         {

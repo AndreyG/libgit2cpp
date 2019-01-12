@@ -19,7 +19,7 @@ namespace git
         Odb(Odb const &) = delete;
         Odb & operator=(Odb const &) = delete;
 
-        Odb(Odb && other);
+        Odb(Odb && other) noexcept;
 
     private:
         git_odb * odb_;

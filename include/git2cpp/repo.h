@@ -16,6 +16,8 @@
 #include "str_array.h"
 #include "submodule.h"
 #include "tag.h"
+#include "tree.h"
+
 #include "internal/optional.h"
 
 #include <string>

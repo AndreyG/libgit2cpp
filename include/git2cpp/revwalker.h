@@ -2,6 +2,7 @@
 
 #include "commit.h"
 #include "tagged_mask.h"
+#include <utility>
 
 namespace git
 {
@@ -42,18 +43,15 @@ namespace git
         RevWalker(RevWalker const &) = delete;
         RevWalker & operator=(RevWalker const &) = delete;
 
-        RevWalker(RevWalker && other)
-            : walker_(other.walker_)
-            , repo_(other.repo_)
-        {
-            other.walker_ = nullptr;
-        }
+        RevWalker(RevWalker && other) noexcept
+            : walker_(std::exchange(other.walker_, nullptr))
+            , repo_(std::exchange(other.repo_, nullptr))
+        {}
 
-        RevWalker & operator=(RevWalker && other)
+        RevWalker & operator=(RevWalker && other) noexcept
         {
-            walker_ = other.walker_;
-            repo_ = other.repo_;
-            other.walker_ = nullptr;
+            std::swap(walker_, other.walker_);
+            std::swap(repo_, other.repo_);
             return *this;
         }
 

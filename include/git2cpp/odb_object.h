@@ -23,7 +23,7 @@ namespace git
         OdbObject(OdbObject const &) = delete;
         OdbObject & operator=(OdbObject const &) = delete;
 
-        OdbObject(OdbObject && other);
+        OdbObject(OdbObject && other) noexcept;
 
     private:
         git_odb_object * obj_;

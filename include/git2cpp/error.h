@@ -74,7 +74,7 @@ namespace git
     struct submodule_lookup_error : error_t
     {
         explicit submodule_lookup_error(std::string const & name)
-            : error_t("Counld not lookup submodule " + name)
+            : error_t("Could not lookup submodule " + name)
         {}
     };
 

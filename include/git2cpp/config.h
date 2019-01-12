@@ -17,7 +17,7 @@ namespace git
                 : key_(std::move(key))
             {}
 
-            virtual const char * what() const noexcept override
+            const char * what() const noexcept override
             {
                 return "no such key in config";
             }
