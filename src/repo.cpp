@@ -141,7 +141,7 @@ namespace git
 
     git_status_t Repository::file_status(const char * filepath) const
     {
-        static_assert(sizeof(git_status_t) == sizeof(unsigned int));
+        static_assert(sizeof(git_status_t) == sizeof(unsigned int), "sizeof(git_status_t) != sizeof(unsigned int)");
         git_status_t res;
         switch (git_status_file(reinterpret_cast<unsigned int *>(&res), repo_, filepath))
         {
