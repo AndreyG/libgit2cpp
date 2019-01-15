@@ -30,6 +30,10 @@ namespace git
         Reference & operator=(Reference && other) noexcept;
 
     private:
+        friend struct Repository;
+        git_reference * ptr() const { return ref_; }
+
+    private:
         git_reference * ref_;
     };
 }

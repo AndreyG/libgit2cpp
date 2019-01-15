@@ -45,6 +45,8 @@ namespace git
         ~FileDiffHandler() = default;
     };
 
+    struct AnnotatedCommit;
+
     struct Repository
     {
         Commit commit_lookup(git_oid const & oid) const;
@@ -78,9 +80,17 @@ namespace git
 
         Status status(Status::Options const &) const;
 
+        git_repository_state_t state() const;
+
         StrArray reference_list() const;
 
         std::vector<Reference> branches(branch_type) const;
+
+        /// @return can be empty
+        Reference dwim(const char * shorthand) const;
+
+        AnnotatedCommit annotated_commit_from_ref(Reference const &) const;
+        AnnotatedCommit annotated_commit_lookup(git_oid const &) const;
 
         bool is_bare() const;
 
@@ -119,6 +129,13 @@ namespace git
         internal::optional<StrArray> rename_remote(const char * old_name, const char * new_name);
         void set_url    (const char * name, const char * url);
         void set_pushurl(const char * name, const char * url);
+
+        /// @return raw error code
+        int checkout_tree(Commit const &, git_checkout_options const &);
+
+        /// @return raw error code
+        int set_head(char const* ref);
+        int set_head_detached(AnnotatedCommit const&);
 
         explicit Repository(const char * dir);
         explicit Repository(std::string const & dir);

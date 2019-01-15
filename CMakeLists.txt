@@ -69,6 +69,7 @@ set(examples
   rev-parse
   general
   remote
+  checkout
 )
 
 foreach (example ${examples})

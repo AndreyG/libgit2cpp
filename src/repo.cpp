@@ -1,5 +1,6 @@
 #include "git2cpp/repo.h"
 
+#include "git2cpp/annotated_commit.h"
 #include "git2cpp/error.h"
 #include "git2cpp/internal/optional.h"
 
@@ -225,6 +226,31 @@ namespace git
         return res;
     }
 
+    Reference Repository::dwim(const char* shorthand) const
+    {
+        git_reference * ref;
+        if (git_reference_dwim(&ref, repo_, shorthand) == GIT_OK)
+            return Reference(ref);
+        else
+            return Reference();
+    }
+
+    AnnotatedCommit Repository::annotated_commit_from_ref(Reference const& ref) const
+    {
+        git_annotated_commit * commit;
+        const auto err = git_annotated_commit_from_ref(&commit, repo_, ref.ptr());
+        assert(err == GIT_OK);
+        return AnnotatedCommit(commit);
+    }
+
+    AnnotatedCommit Repository::annotated_commit_lookup(git_oid const& id) const
+    {
+        git_annotated_commit * commit;
+        const auto err = git_annotated_commit_lookup(&commit, repo_, &id);
+        assert(err == GIT_OK);
+        return AnnotatedCommit(commit);
+    }
+
     RevWalker Repository::rev_walker() const
     {
         git_revwalk * walker;
@@ -273,6 +299,11 @@ namespace git
     Status Repository::status(Status::Options const & opts) const
     {
         return Status(repo_, opts);
+    }
+
+    git_repository_state_t Repository::state() const
+    {
+        return static_cast<git_repository_state_t>(git_repository_state(repo_));
     }
 
     StrArray Repository::reference_list() const
@@ -477,6 +508,21 @@ namespace git
     {
         if (git_remote_set_pushurl(repo_, name, url))
             throw remote_set_pushurl_error(name, url);
+    }
+
+    int Repository::checkout_tree(Commit const& commit, git_checkout_options const& options)
+    {
+        return git_checkout_tree(repo_, reinterpret_cast<git_object const *>(commit.ptr()), &options);
+    }
+
+    int Repository::set_head(char const* ref)
+    {
+        return git_repository_set_head(repo_, ref);
+    }
+
+    int Repository::set_head_detached(AnnotatedCommit const& commit)
+    {
+        return git_repository_set_head_detached_from_annotated(repo_, commit.ptr());
     }
 
     internal::optional<std::string> Repository::discover(const char * start_path)
