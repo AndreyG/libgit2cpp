@@ -21,6 +21,12 @@ namespace git
             std::memset(&other.str_array_, 0, sizeof(git_strarray));
         }
 
+        StrArray& operator =(StrArray && other) noexcept
+        {
+            std::swap(str_array_, other.str_array_);
+            return *this;
+        }
+
         size_t count() const { return str_array_.count; }
 
         const char * operator[](size_t i) const
