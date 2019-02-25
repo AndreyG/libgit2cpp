@@ -7,9 +7,9 @@
 
 namespace git
 {
-    Reference::~Reference()
+    void Reference::Destroy::operator()(git_reference* ref) const
     {
-        git_reference_free(ref_);
+        git_reference_free(ref);
     }
 
     Reference::Reference(git_reference * ref)
@@ -19,33 +19,22 @@ namespace git
 
     const char * Reference::name() const
     {
-        return git_reference_name(ref_);
+        return git_reference_name(ptr());
     }
 
     git_ref_t Reference::type() const
     {
-        return git_reference_type(ref_);
+        return git_reference_type(ptr());
     }
 
     git_oid const & Reference::target() const
     {
         assert(type() != GIT_REF_SYMBOLIC);
-        return *git_reference_target(ref_);
+        return *git_reference_target(ptr());
     }
 
     const char * Reference::symbolic_target() const
     {
-        return git_reference_symbolic_target(ref_);
-    }
-
-    Reference::Reference(Reference && other) noexcept
-        : ref_(std::exchange(other.ref_, nullptr))
-    {
-    }
-
-    Reference & Reference::operator=(Reference && other) noexcept
-    {
-        std::swap(ref_, other.ref_);
-        return *this;
+        return git_reference_symbolic_target(ptr());
     }
 }

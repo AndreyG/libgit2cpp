@@ -1,6 +1,7 @@
 #pragma once
 
 #include <git2/types.h>
+#include <memory>
 
 struct git_tag;
 struct git_oid;
@@ -13,12 +14,6 @@ namespace git
     struct Tag
     {
         explicit Tag(git_tag *);
-        ~Tag();
-
-        Tag & operator=(Tag const &) = delete;
-        Tag(Tag const &) = delete;
-
-        Tag(Tag &&) noexcept;
 
         Object target(Repository const &) const;
 
@@ -30,6 +25,7 @@ namespace git
         git_signature const * tagger() const;
 
     private:
-        git_tag * tag_;
+        struct Destroy { void operator() (git_tag*) const; };
+        std::unique_ptr<git_tag, Destroy> tag_;
     };
 }

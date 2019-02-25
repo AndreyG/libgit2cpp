@@ -16,8 +16,6 @@ namespace git
         explicit Index(git_repository * repo);
         explicit Index(const char * dir);
 
-        ~Index();
-
         size_t entrycount() const;
         git_index_entry const * operator[](size_t i) const;
 
@@ -37,13 +35,8 @@ namespace git
 
         void write() const;
 
-        Index(Index const &) = delete;
-        Index & operator=(Index const &) = delete;
-
-        Index(Index &&) noexcept;
-        Index & operator=(Index &&) noexcept;
-
     private:
-        git_index * index_;
+        struct Destroy { void operator() (git_index*) const; };
+        std::unique_ptr<git_index, Destroy> index_;
     };
 }

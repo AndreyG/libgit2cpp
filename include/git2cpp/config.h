@@ -1,6 +1,8 @@
 #pragma once
 
+#include <memory>
 #include <string>
+#include <stdexcept>
 
 struct git_config;
 
@@ -9,7 +11,6 @@ namespace git
     struct Config
     {
         explicit Config(std::string const & filename);
-        ~Config();
 
         struct no_such_key_error : std::exception
         {
@@ -32,10 +33,8 @@ namespace git
 
         int get_int(const char * key) const;
 
-        Config(Config const &) = delete;
-        Config & operator=(Config const &) = delete;
-
     private:
-        git_config * cfg_;
+        struct Destroy { void operator() (git_config*) const; };
+        std::unique_ptr<git_config, Destroy> cfg_;
     };
 }

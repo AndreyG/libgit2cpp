@@ -4,6 +4,8 @@
 
 #include <git2/types.h>
 
+#include <memory>
+
 struct git_commit;
 struct git_oid;
 struct git_repository;
@@ -37,22 +39,16 @@ namespace git
         Repository const & repo() const { return *repo_; }
 
         Commit(git_commit *, Repository const &);
-
-        Commit();
-        Commit(Commit &&) noexcept;
-        Commit & operator=(Commit &&) noexcept;
-        Commit(Commit const &) = delete;
-        Commit & operator=(Commit const &) = delete;
-
-        ~Commit();
+        Commit() = default;
 
     private:
         friend struct Repository;
 
-        git_commit const * ptr() const { return commit_; }
+        git_commit const * ptr() const { return commit_.get(); }
 
     private:
-        git_commit * commit_;
-        Repository const * repo_;
+        struct Destroy { void operator() (git_commit*) const; };
+        std::unique_ptr<git_commit, Destroy> commit_;
+        Repository const * repo_ = nullptr;
     };
 }

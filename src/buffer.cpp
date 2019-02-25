@@ -4,6 +4,6 @@ namespace git
 {
     Buffer::~Buffer()
     {
-        git_buf_free(&buf_);
+        git_buf_dispose(&buf_);
     }
 }

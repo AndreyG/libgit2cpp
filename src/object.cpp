@@ -16,33 +16,26 @@ namespace git
     {
     }
 
-    Object::~Object()
+    void Object::Destroy::operator()(git_object* obj) const
     {
-        git_object_free(obj_);
-    }
-
-    Object::Object(Object && other) noexcept
-        : obj_(other.obj_)
-        , repo_(other.repo_)
-    {
-        other.obj_ = nullptr;
+       git_object_free(obj);
     }
 
     git_otype Object::type() const
     {
-        return git_object_type(obj_);
+        return git_object_type(obj_.get());
     }
 
     git_oid const & Object::id() const
     {
-        return *git_object_id(obj_);
+        return *git_object_id(obj_.get());
     }
 
 #define DEFINE_METHOD_AS(type_name, enum_element)               \
     git_##type_name const * Object::as_##type_name() const      \
     {                                                           \
         assert(type() == GIT_OBJ_##enum_element);               \
-        return reinterpret_cast<git_##type_name const *>(obj_); \
+        return reinterpret_cast<git_##type_name const *>(obj_.get()); \
     }
 
     DEFINE_METHOD_AS(blob, BLOB)
@@ -55,7 +48,7 @@ namespace git
     Tree Object::to_tree() /*&&*/
     {
         assert(type() == GIT_OBJ_TREE);
-        Tree res(reinterpret_cast<git_tree *>(obj_), *repo_);
+        Tree res(reinterpret_cast<git_tree *>(obj_.get()), *repo_);
         obj_ = nullptr;
         return res;
     }
@@ -63,7 +56,7 @@ namespace git
     Commit Object::to_commit() /*&&*/
     {
         assert(type() == GIT_OBJ_COMMIT);
-        Commit res(reinterpret_cast<git_commit *>(obj_), *repo_);
+        Commit res(reinterpret_cast<git_commit *>(obj_.get()), *repo_);
         obj_ = nullptr;
         return res;
     }
@@ -71,7 +64,7 @@ namespace git
     Blob Object::to_blob() /*&&*/
     {
         assert(type() == GIT_OBJ_BLOB);
-        Blob res(reinterpret_cast<git_blob *>(obj_));
+        Blob res(reinterpret_cast<git_blob *>(obj_.get()));
         obj_ = nullptr;
         return res;
     }
@@ -79,7 +72,7 @@ namespace git
     Tag Object::to_tag() /*&&*/
     {
         assert(type() == GIT_OBJ_TAG);
-        Tag res(reinterpret_cast<git_tag *>(obj_));
+        Tag res(reinterpret_cast<git_tag *>(obj_.get()));
         obj_ = nullptr;
         return res;
     }

@@ -2,6 +2,8 @@
 
 #include <git2/status.h>
 
+#include <memory>
+
 namespace git
 {
     struct Status
@@ -38,19 +40,15 @@ namespace git
             git_status_options opts_;
         };
 
-        Status(git_repository * repo, Options const & opts);
-        ~Status();
-
         size_t entrycount() const;
         git_status_entry const & operator[](size_t i) const;
 
-        Status(Status const &) = delete;
-        Status & operator=(Status const &) = delete;
-
-        Status(Status &&) noexcept;
-        Status & operator=(Status &&) noexcept;
+    private:
+        friend struct Repository;
+        Status(git_repository * repo, Options const & opts);
 
     private:
-        git_status_list * status_;
+        struct Destroy { void operator() (git_status_list*) const; };
+        std::unique_ptr<git_status_list, Destroy> status_;
     };
 }

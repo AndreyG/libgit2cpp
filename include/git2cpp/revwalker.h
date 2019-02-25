@@ -28,8 +28,6 @@ namespace git
             , repo_(&repo)
         {}
 
-        ~RevWalker();
-
         void sort(revwalker::sorting::type);
         void simplify_first_parent();
 
@@ -40,23 +38,9 @@ namespace git
         Commit next() const;
         bool next(char * id_buffer) const;
 
-        RevWalker(RevWalker const &) = delete;
-        RevWalker & operator=(RevWalker const &) = delete;
-
-        RevWalker(RevWalker && other) noexcept
-            : walker_(std::exchange(other.walker_, nullptr))
-            , repo_(std::exchange(other.repo_, nullptr))
-        {}
-
-        RevWalker & operator=(RevWalker && other) noexcept
-        {
-            std::swap(walker_, other.walker_);
-            std::swap(repo_, other.repo_);
-            return *this;
-        }
-
     private:
-        git_revwalk * walker_;
+        struct Destroy { void operator() (git_revwalk*) const; };
+        std::unique_ptr<git_revwalk, Destroy> walker_;
         Repository const * repo_;
     };
 }

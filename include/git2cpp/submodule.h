@@ -1,6 +1,7 @@
 #pragma once
 
 #include <git2/submodule.h>
+#include <memory>
 
 struct git_submodule;
 struct git_repository;
@@ -9,15 +10,6 @@ namespace git
 {
     struct Submodule
     {
-        Submodule(git_submodule *, git_repository *);
-        ~Submodule();
-
-        Submodule(Submodule const &) = delete;
-        Submodule & operator=(Submodule const &) = delete;
-
-        Submodule(Submodule &&) noexcept;
-        Submodule & operator=(Submodule &&) noexcept;
-
         enum class status : unsigned int
         {
             in_head = GIT_SUBMODULE_STATUS_IN_HEAD,
@@ -41,7 +33,12 @@ namespace git
         status get_status() const;
 
     private:
-        git_submodule * sm_;
+        friend struct Repository;
+        Submodule(git_submodule *, git_repository *);
+
+    private:
+        struct Destroy { void operator() (git_submodule*) const; };
+        std::unique_ptr<git_submodule, Destroy> sm_;
         git_repository * repo_;
     };
 }

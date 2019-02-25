@@ -10,42 +10,34 @@ namespace git
 {
     Index::Index(git_repository * repo)
     {
-        if (git_repository_index(&index_, repo) < 0)
+        git_index * index;
+        if (git_repository_index(&index, repo) < 0)
             throw index_open_error();
+        index_.reset(index);
     }
 
     Index::Index(const char * dir)
     {
-        if (git_index_open(&index_, dir))
+        git_index * index;
+        if (git_index_open(&index, dir))
             throw index_open_error();
-        git_index_read(index_, true);
+        index_.reset(index);
+        git_index_read(index, true);
     }
 
-    Index::~Index()
+    void Index::Destroy::operator()(git_index* index) const
     {
-        git_index_free(index_);
-    }
-
-    Index::Index(Index && other) noexcept
-        : index_(other.index_)
-    {
-        other.index_ = nullptr;
-    }
-
-    Index & Index::operator=(Index && other) noexcept
-    {
-        std::swap(index_, other.index_);
-        return *this;
+        git_index_free(index);
     }
 
     size_t Index::entrycount() const
     {
-        return git_index_entrycount(index_);
+        return git_index_entrycount(index_.get());
     }
 
     git_index_entry const * Index::operator[](size_t i) const
     {
-        return git_index_get_byindex(index_, i);
+        return git_index_get_byindex(index_.get(), i);
     }
 
     namespace
@@ -60,28 +52,28 @@ namespace git
     void Index::update_all(git_strarray const & pathspec, matched_path_callback_t cb)
     {
         int res = cb
-                      ? git_index_update_all(index_, &pathspec, &apply_callback, &cb)
-                      : git_index_update_all(index_, &pathspec, nullptr, nullptr);
+                      ? git_index_update_all(index_.get(), &pathspec, &apply_callback, &cb)
+                      : git_index_update_all(index_.get(), &pathspec, nullptr, nullptr);
         assert(res == 0);
     }
 
     void Index::add_all(git_strarray const & pathspec, matched_path_callback_t cb, unsigned int flags)
     {
         int res = cb
-                      ? git_index_add_all(index_, &pathspec, flags, &apply_callback, &cb)
-                      : git_index_add_all(index_, &pathspec, flags, nullptr, nullptr);
+                      ? git_index_add_all(index_.get(), &pathspec, flags, &apply_callback, &cb)
+                      : git_index_add_all(index_.get(), &pathspec, flags, nullptr, nullptr);
         assert(res == 0);
     }
 
     void Index::clear()
     {
-        int res = git_index_clear(index_);
+        int res = git_index_clear(index_.get());
         assert(res == 0);
     }
 
     void Index::add_path(const char * path)
     {
-        int res = git_index_add_bypath(index_, path);
+        int res = git_index_add_bypath(index_.get(), path);
         assert(res == 0);
     }
 
@@ -92,7 +84,7 @@ namespace git
 
     void Index::remove_path(const char * path)
     {
-        int res = git_index_remove_bypath(index_, path);
+        int res = git_index_remove_bypath(index_.get(), path);
         assert(res == 0);
     }
 
@@ -103,14 +95,14 @@ namespace git
 
     void Index::write() const
     {
-        if (git_index_write(index_))
+        if (git_index_write(index_.get()))
             throw index_write_error();
     }
 
     git_oid Index::write_tree() const
     {
         git_oid res;
-        if (git_index_write_tree(&res, index_) < 0)
+        if (git_index_write_tree(&res, index_.get()) < 0)
             throw index_write_tree_error();
         return res;
     }

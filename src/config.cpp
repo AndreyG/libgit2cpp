@@ -7,19 +7,21 @@ namespace git
 {
     Config::Config(std::string const & filename)
     {
-        if (git_config_open_ondisk(&cfg_, filename.c_str()))
+        git_config * cfg;
+        if (git_config_open_ondisk(&cfg, filename.c_str()))
             throw config_open_error();
+        cfg_.reset(cfg);
     }
 
-    Config::~Config()
+    void Config::Destroy::operator()(git_config* cfg) const
     {
-        git_config_free(cfg_);
+        git_config_free(cfg);
     }
 
     std::string Config::operator[](const char * key) const
     {
         const char * res;
-        if (git_config_get_string(&res, cfg_, key))
+        if (git_config_get_string(&res, cfg_.get(), key))
             throw no_such_key_error(key);
         return res;
     }
@@ -27,7 +29,7 @@ namespace git
     int Config::get_int(const char * key) const
     {
         int res;
-        if (git_config_get_int32(&res, cfg_, key))
+        if (git_config_get_int32(&res, cfg_.get(), key))
             throw no_such_key_error(key);
         return res;
     }

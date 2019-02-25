@@ -7,14 +7,16 @@ namespace git
 {
     struct Signature
     {
-        git_signature const * ptr() const { return sig_; }
-
-        explicit Signature(git_repository * repo);
         Signature(const char * name, const char * email, git_time_t time, int offset);
 
-        ~Signature();
+    private:
+        friend struct Repository;
+        explicit Signature(git_repository * repo);
+
+        git_signature const * ptr() const { return sig_.get(); }
 
     private:
-        git_signature * sig_;
+        struct Destroy { void operator() (git_signature*) const; };
+        std::unique_ptr<git_signature, Destroy> sig_;
     };
 }

@@ -1,10 +1,7 @@
 #pragma once
 
-#include <cstddef>
-
-extern "C" {
 #include <git2/types.h>
-}
+#include <memory>
 
 namespace git
 {
@@ -14,18 +11,12 @@ namespace git
             : obj_(obj)
         {}
 
-        ~OdbObject();
-
-        git_otype type() const;
+        git_object_t type() const;
         unsigned char const * data() const;
         size_t size() const;
 
-        OdbObject(OdbObject const &) = delete;
-        OdbObject & operator=(OdbObject const &) = delete;
-
-        OdbObject(OdbObject && other) noexcept;
-
     private:
-        git_odb_object * obj_;
+        struct Destroy { void operator() (git_odb_object *) const; };
+        std::unique_ptr<git_odb_object, Destroy> obj_;
     };
 }

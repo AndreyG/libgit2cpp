@@ -12,48 +12,29 @@ namespace git
     {
     }
 
-    Tree::Tree()
-        : tree_(nullptr)
-        , repo_(nullptr)
+    void Tree::Destroy::operator()(git_tree* tree) const
     {
-    }
-
-    Tree::Tree(Tree && other) noexcept
-        : tree_(std::exchange(other.tree_, nullptr))
-        , repo_(std::exchange(other.repo_, nullptr))
-    {
-    }
-
-    Tree & Tree::operator=(Tree && other) noexcept
-    {
-        std::swap(tree_, other.tree_);
-        std::swap(repo_, other.repo_);
-        return *this;
-    }
-
-    Tree::~Tree()
-    {
-        git_tree_free(tree_);
+        git_tree_free(tree);
     }
 
     int Tree::pathspec_match(uint32_t flags, Pathspec const & ps)
     {
-        return git_pathspec_match_tree(nullptr, tree_, flags, ps.ptr());
+        return git_pathspec_match_tree(nullptr, ptr(), flags, ps.ptr());
     }
 
     size_t Tree::entrycount() const
     {
-        return git_tree_entrycount(tree_);
+        return git_tree_entrycount(ptr());
     }
 
     Tree::BorrowedEntry Tree::operator[](size_t i) const
     {
-        return BorrowedEntry(git_tree_entry_byindex(tree_, i));
+        return BorrowedEntry(git_tree_entry_byindex(ptr(), i));
     }
 
     Tree::BorrowedEntry Tree::operator[](std::string const & filename) const
     {
-        if (auto entry = git_tree_entry_byname(tree_, filename.c_str()))
+        if (auto entry = git_tree_entry_byname(ptr(), filename.c_str()))
             return BorrowedEntry(entry);
         else
             throw file_not_found_error(filename.c_str());
@@ -62,7 +43,7 @@ namespace git
     Tree::OwnedEntry Tree::find(const char * path) const
     {
         git_tree_entry * res;
-        const auto status = git_tree_entry_bypath(&res, tree_, path);
+        const auto status = git_tree_entry_bypath(&res, ptr(), path);
         switch (status)
         {
         case GIT_OK:
@@ -80,15 +61,9 @@ namespace git
     {
     }
 
-    Tree::OwnedEntry::~OwnedEntry()
+    void Tree::OwnedEntry::Destroy::operator()(git_tree_entry* entry) const
     {
-        git_tree_entry_free(entry_);
-    }
-
-    Tree::OwnedEntry::OwnedEntry(OwnedEntry && other) noexcept
-        : entry_(std::exchange(other.entry_, nullptr))
-        , repo_(std::exchange(other.repo_, nullptr))
-    {
+        git_tree_entry_free(entry);
     }
 
     Tree Tree::OwnedEntry::to_tree() /* && */

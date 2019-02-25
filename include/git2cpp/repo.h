@@ -147,18 +147,11 @@ namespace git
         Repository(const char * dir, init_tag, git_repository_init_options opts);
         Repository(std::string const & dir, init_tag);
 
-        Repository(Repository const &) = delete;
-        Repository & operator=(Repository const &) = delete;
-
-        Repository(Repository &&) noexcept;
-        Repository & operator=(Repository &&) noexcept;
-
-        ~Repository();
-
         static internal::optional<std::string> discover(const char * start_path);
 
     private:
-        git_repository * repo_;
+        struct Destroy { void operator() (git_repository *) const; };
+        std::unique_ptr<git_repository, Destroy> repo_;
     };
 
     Object revparse_single(Repository const & repo, const char * spec);

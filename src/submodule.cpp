@@ -12,15 +12,15 @@ namespace git
     {
     }
 
-    Submodule::~Submodule()
+    void Submodule::Destroy::operator()(git_submodule* sm) const
     {
-        git_submodule_free(sm_);
+        git_submodule_free(sm);
     }
 
     Submodule::status Submodule::get_status() const
     {
         unsigned int res;
-        if (auto err = git_submodule_status(&res, repo_, git_submodule_name(sm_), git_submodule_ignore(sm_)))
+        if (auto err = git_submodule_status(&res, repo_, git_submodule_name(sm_.get()), git_submodule_ignore(sm_.get())))
             throw error_t("git_submodule_status failed with error code " + std::to_string(err));
         else
             return static_cast<status>(res);

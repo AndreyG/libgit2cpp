@@ -23,64 +23,51 @@ namespace git
 
     Repository::Repository(const char * dir)
     {
-        if (git_repository_open_ext(&repo_, dir, 0, nullptr))
+        git_repository * repo;
+        if (git_repository_open_ext(&repo, dir, 0, nullptr))
             throw repository_open_error(dir);
+        repo_.reset(repo);
     }
 
     Repository::Repository(std::string const & dir)
+        : Repository(dir.c_str())
     {
-        if (git_repository_open_ext(&repo_, dir.c_str(), 0, nullptr))
-            throw repository_open_error(dir);
     }
 
     Repository::Repository(const char * dir, init_tag)
     {
-        if (git_repository_init(&repo_, dir, false) < 0)
+        git_repository * repo;
+        if (git_repository_init(&repo, dir, false) < 0)
             throw repository_init_error(dir);
+        repo_.reset(repo);
     }
 
-    Repository::Repository(std::string const & dir, init_tag)
-    {
-        if (git_repository_init(&repo_, dir.c_str(), false) < 0)
-            throw repository_init_error(dir);
-    }
+    Repository::Repository(std::string const & dir, init_tag tag)
+        : Repository(dir.c_str(), tag)
+    {}
 
     Repository::Repository(const char * dir, init_tag, git_repository_init_options opts)
     {
-        if (git_repository_init_ext(&repo_, dir, &opts) < 0)
+        git_repository * repo;
+        if (git_repository_init_ext(&repo, dir, &opts) < 0)
             throw repository_init_error(dir);
-    }
-
-    Repository::Repository(Repository && other) noexcept
-        : repo_(std::exchange(other.repo_, nullptr))
-    {
-    }
-
-    Repository & Repository::operator=(Repository && other) noexcept
-    {
-        std::swap(repo_, other.repo_);
-        return *this;
-    }
-
-    Repository::~Repository()
-    {
-        git_repository_free(repo_);
+        repo_.reset(repo);
     }
 
     bool Repository::is_bare() const
     {
-        return git_repository_is_bare(repo_) != 0;
+        return git_repository_is_bare(repo_.get()) != 0;
     }
 
     Signature Repository::signature() const
     {
-        return Signature(repo_);
+        return Signature(repo_.get());
     }
 
     Commit Repository::commit_lookup(git_oid const & oid) const
     {
         git_commit * commit;
-        if (git_commit_lookup(&commit, repo_, &oid))
+        if (git_commit_lookup(&commit, repo_.get(), &oid))
             throw commit_lookup_error(oid);
         else
             return {commit, *this};
@@ -89,7 +76,7 @@ namespace git
     Tree Repository::tree_lookup(git_oid const & oid) const
     {
         git_tree * tree;
-        if (git_tree_lookup(&tree, repo_, &oid))
+        if (git_tree_lookup(&tree, repo_.get(), &oid))
             throw tree_lookup_error(oid);
         else
             return {tree, *this};
@@ -98,7 +85,7 @@ namespace git
     Tag Repository::tag_lookup(git_oid const & oid) const
     {
         git_tag * tag;
-        if (git_tag_lookup(&tag, repo_, &oid))
+        if (git_tag_lookup(&tag, repo_.get(), &oid))
             throw tag_lookup_error(oid);
         else
             return Tag(tag);
@@ -107,7 +94,7 @@ namespace git
     Blob Repository::blob_lookup(git_oid const & oid) const
     {
         git_blob * blob;
-        if (git_blob_lookup(&blob, repo_, &oid))
+        if (git_blob_lookup(&blob, repo_.get(), &oid))
             throw blob_lookup_error(oid);
         else
             return Blob(blob);
@@ -116,7 +103,7 @@ namespace git
     Revspec Repository::revparse(const char * spec) const
     {
         git_revspec revspec;
-        if (git_revparse(&revspec, repo_, spec))
+        if (git_revparse(&revspec, repo_.get(), spec))
             throw revparse_error(spec);
         else
             return {revspec, *this};
@@ -125,26 +112,26 @@ namespace git
     Revspec Repository::revparse_single(const char * spec) const
     {
         git_object * obj;
-        if (git_revparse_single(&obj, repo_, spec) < 0)
+        if (git_revparse_single(&obj, repo_.get(), spec) < 0)
             throw revparse_error(spec);
         return Revspec(obj, *this);
     }
 
     Index Repository::index() const
     {
-        return Index(repo_);
+        return Index(repo_.get());
     }
 
     Odb Repository::odb() const
     {
-        return Odb(repo_);
+        return Odb(repo_.get());
     }
 
     git_status_t Repository::file_status(const char * filepath) const
     {
         static_assert(sizeof(git_status_t) == sizeof(unsigned int), "sizeof(git_status_t) != sizeof(unsigned int)");
         git_status_t res;
-        switch (git_status_file(reinterpret_cast<unsigned int *>(&res), repo_, filepath))
+        switch (git_status_file(reinterpret_cast<unsigned int *>(&res), repo_.get(), filepath))
         {
         case GIT_ENOTFOUND:
             throw file_not_found_error(filepath);
@@ -221,7 +208,7 @@ namespace git
     std::vector<Reference> Repository::branches(branch_type type) const
     {
         std::vector<Reference> res;
-        for (branch_iterator it(repo_, type); it; ++it)
+        for (branch_iterator it(repo_.get(), type); it; ++it)
             res.emplace_back(std::move(*it));
         return res;
     }
@@ -229,7 +216,7 @@ namespace git
     Reference Repository::dwim(const char* shorthand) const
     {
         git_reference * ref;
-        if (git_reference_dwim(&ref, repo_, shorthand) == GIT_OK)
+        if (git_reference_dwim(&ref, repo_.get(), shorthand) == GIT_OK)
             return Reference(ref);
         else
             return Reference();
@@ -238,7 +225,7 @@ namespace git
     AnnotatedCommit Repository::annotated_commit_from_ref(Reference const& ref) const
     {
         git_annotated_commit * commit;
-        const auto err = git_annotated_commit_from_ref(&commit, repo_, ref.ptr());
+        const auto err = git_annotated_commit_from_ref(&commit, repo_.get(), ref.ptr());
         assert(err == GIT_OK);
         return AnnotatedCommit(commit);
     }
@@ -246,7 +233,7 @@ namespace git
     AnnotatedCommit Repository::annotated_commit_lookup(git_oid const& id) const
     {
         git_annotated_commit * commit;
-        const auto err = git_annotated_commit_lookup(&commit, repo_, &id);
+        const auto err = git_annotated_commit_lookup(&commit, repo_.get(), &id);
         assert(err == GIT_OK);
         return AnnotatedCommit(commit);
     }
@@ -254,7 +241,7 @@ namespace git
     RevWalker Repository::rev_walker() const
     {
         git_revwalk * walker;
-        if (git_revwalk_new(&walker, repo_))
+        if (git_revwalk_new(&walker, repo_.get()))
             throw revwalk_new_error();
         else
             return {walker, *this};
@@ -263,7 +250,7 @@ namespace git
     git_oid Repository::merge_base(git_oid const & a, git_oid const & b) const
     {
         git_oid res;
-        if (git_merge_base(&res, repo_, &a, &b))
+        if (git_merge_base(&res, repo_.get(), &a, &b))
             throw merge_base_error(a, b);
         return res;
     }
@@ -276,7 +263,7 @@ namespace git
     Reference Repository::head() const
     {
         git_reference * head;
-        switch (git_repository_head(&head, repo_))
+        switch (git_repository_head(&head, repo_.get()))
         {
         case GIT_OK:
             return Reference(head);
@@ -292,44 +279,44 @@ namespace git
     Reference Repository::ref(const char * name) const
     {
         git_reference * ref;
-        git_reference_lookup(&ref, repo_, name);
+        git_reference_lookup(&ref, repo_.get(), name);
         return Reference(ref);
     }
 
     Status Repository::status(Status::Options const & opts) const
     {
-        return Status(repo_, opts);
+        return Status(repo_.get(), opts);
     }
 
     git_repository_state_t Repository::state() const
     {
-        return static_cast<git_repository_state_t>(git_repository_state(repo_));
+        return static_cast<git_repository_state_t>(git_repository_state(repo_.get()));
     }
 
     StrArray Repository::reference_list() const
     {
         git_strarray str_array;
-        git_reference_list(&str_array, repo_);
+        git_reference_list(&str_array, repo_.get());
         return StrArray(str_array);
     }
 
     Submodule Repository::submodule_lookup(const char * name) const
     {
         git_submodule * sm;
-        if (git_submodule_lookup(&sm, repo_, name))
+        if (git_submodule_lookup(&sm, repo_.get(), name))
             throw submodule_lookup_error(name);
         else
-            return {sm, repo_};
+            return {sm, repo_.get()};
     }
 
     const char * Repository::path() const
     {
-        return git_repository_path(repo_);
+        return git_repository_path(repo_.get());
     }
 
     const char * Repository::workdir() const
     {
-        return git_repository_workdir(repo_);
+        return git_repository_workdir(repo_.get());
     }
 
     git_oid Repository::create_commit(const char * update_ref,
@@ -340,7 +327,7 @@ namespace git
                                       const char * message_encoding)
     {
         git_oid res;
-        if (git_commit_create_v(&res, repo_, update_ref,
+        if (git_commit_create_v(&res, repo_.get(), update_ref,
                                 author.ptr(), commiter.ptr(),
                                 message_encoding, message,
                                 tree.ptr(), 0))
@@ -359,7 +346,7 @@ namespace git
                                       const char * message_encoding)
     {
         git_oid res;
-        if (git_commit_create_v(&res, repo_, update_ref,
+        if (git_commit_create_v(&res, repo_.get(), update_ref,
                                 author.ptr(), commiter.ptr(),
                                 message_encoding, message,
                                 tree.ptr(), 1, parent.ptr()))
@@ -381,12 +368,12 @@ namespace git
 
     Object Repository::entry_to_object(Tree::BorrowedEntry entry) const
     {
-        return tree_entry_to_object(entry.ptr(), *this, repo_);
+        return tree_entry_to_object(entry.ptr(), *this, repo_.get());
     }
 
     Object Repository::entry_to_object(Tree::OwnedEntry entry) const
     {
-        return tree_entry_to_object(entry.ptr(), *this, repo_);
+        return tree_entry_to_object(entry.ptr(), *this, repo_.get());
     }
 
     Object revparse_single(Repository const & repo, const char * spec)
@@ -397,7 +384,7 @@ namespace git
     Diff Repository::diff(Tree & a, Tree & b, git_diff_options const & opts) const
     {
         git_diff * diff;
-        auto op_res = git_diff_tree_to_tree(&diff, repo_, a.ptr(), b.ptr(), &opts);
+        auto op_res = git_diff_tree_to_tree(&diff, repo_.get(), a.ptr(), b.ptr(), &opts);
         assert(op_res == 0);
         return Diff(diff);
     }
@@ -405,7 +392,7 @@ namespace git
     Diff Repository::diff_to_index(Tree & t, git_diff_options const & opts) const
     {
         git_diff * diff;
-        auto op_res = git_diff_tree_to_index(&diff, repo_, t.ptr(), nullptr, &opts);
+        auto op_res = git_diff_tree_to_index(&diff, repo_.get(), t.ptr(), nullptr, &opts);
         assert(op_res == 0);
         return Diff(diff);
     }
@@ -413,7 +400,7 @@ namespace git
     Diff Repository::diff_to_workdir(Tree & t, git_diff_options const & opts) const
     {
         git_diff * diff;
-        auto op_res = git_diff_tree_to_workdir(&diff, repo_, t.ptr(), &opts);
+        auto op_res = git_diff_tree_to_workdir(&diff, repo_.get(), t.ptr(), &opts);
         assert(op_res == 0);
         return Diff(diff);
     }
@@ -421,7 +408,7 @@ namespace git
     Diff Repository::diff_to_workdir_with_index(Tree & t, git_diff_options const & opts) const
     {
         git_diff * diff;
-        auto op_res = git_diff_tree_to_workdir_with_index(&diff, repo_, t.ptr(), &opts);
+        auto op_res = git_diff_tree_to_workdir_with_index(&diff, repo_.get(), t.ptr(), &opts);
         assert(op_res == 0);
         return Diff(diff);
     }
@@ -429,14 +416,14 @@ namespace git
     Diff Repository::diff_index_to_workdir(git_diff_options const & opts) const
     {
         git_diff * diff;
-        auto op_res = git_diff_index_to_workdir(&diff, repo_, nullptr, &opts);
+        auto op_res = git_diff_index_to_workdir(&diff, repo_.get(), nullptr, &opts);
         assert(op_res == 0);
         return Diff(diff);
     }
 
     void Repository::reset_default(Commit const & commit, git_strarray const & pathspecs)
     {
-        auto op_res = git_reset_default(repo_, reinterpret_cast<git_object *>(const_cast<git_commit *>(commit.ptr())), const_cast<git_strarray *>(&pathspecs));
+        auto op_res = git_reset_default(repo_.get(), reinterpret_cast<git_object *>(const_cast<git_commit *>(commit.ptr())), const_cast<git_strarray *>(&pathspecs));
         assert(op_res == GIT_OK);
     }
 
@@ -460,7 +447,7 @@ namespace git
     StrArray Repository::remotes() const
     {
         git_strarray result;
-        auto op_res = git_remote_list(&result, repo_);
+        auto op_res = git_remote_list(&result, repo_.get());
         assert(op_res == GIT_OK);
         return StrArray(result);
     }
@@ -468,7 +455,7 @@ namespace git
     Remote Repository::remote(const char * name) const
     {
         git_remote * remote;
-        if (git_remote_lookup(&remote, repo_, name))
+        if (git_remote_lookup(&remote, repo_.get(), name))
             throw remote_lookup_error(name);
         else
             return Remote(remote);
@@ -477,7 +464,7 @@ namespace git
     Remote Repository::create_remote(const char * name, const char * url)
     {
         git_remote * remote;
-        if (git_remote_create(&remote, repo_, name, url))
+        if (git_remote_create(&remote, repo_.get(), name, url))
             throw remote_create_error(name, url);
         else
             return Remote(remote);
@@ -485,14 +472,14 @@ namespace git
 
     void Repository::delete_remote(const char * name)
     {
-        if (git_remote_delete(repo_, name))
+        if (git_remote_delete(repo_.get(), name))
             throw remote_delete_error(name);
     }
 
     internal::optional<StrArray> Repository::rename_remote(const char * old_name, const char * new_name)
     {
         git_strarray problems {};
-        if (git_remote_rename(&problems, repo_, old_name, new_name))
+        if (git_remote_rename(&problems, repo_.get(), old_name, new_name))
             return StrArray(problems);
         else
             return internal::none;
@@ -500,29 +487,29 @@ namespace git
 
     void Repository::set_url(const char * name, const char * url)
     {
-        if (git_remote_set_url(repo_, name, url))
+        if (git_remote_set_url(repo_.get(), name, url))
             throw remote_set_url_error(name, url);
     }
 
     void Repository::set_pushurl(const char * name, const char * url)
     {
-        if (git_remote_set_pushurl(repo_, name, url))
+        if (git_remote_set_pushurl(repo_.get(), name, url))
             throw remote_set_pushurl_error(name, url);
     }
 
     int Repository::checkout_tree(Commit const& commit, git_checkout_options const& options)
     {
-        return git_checkout_tree(repo_, reinterpret_cast<git_object const *>(commit.ptr()), &options);
+        return git_checkout_tree(repo_.get(), reinterpret_cast<git_object const *>(commit.ptr()), &options);
     }
 
     int Repository::set_head(char const* ref)
     {
-        return git_repository_set_head(repo_, ref);
+        return git_repository_set_head(repo_.get(), ref);
     }
 
     int Repository::set_head_detached(AnnotatedCommit const& commit)
     {
-        return git_repository_set_head_detached_from_annotated(repo_, commit.ptr());
+        return git_repository_set_head_detached_from_annotated(repo_.get(), commit.ptr());
     }
 
     internal::optional<std::string> Repository::discover(const char * start_path)
@@ -531,5 +518,10 @@ namespace git
         if (git_repository_discover(&buf, start_path, 0, nullptr))
             return internal::none;
         return std::string(buf.ptr, buf.size);
+    }
+
+    void Repository::Destroy::operator() (git_repository* repo) const
+    {
+        git_repository_free(repo);
     }
 }

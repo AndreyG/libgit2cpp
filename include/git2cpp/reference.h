@@ -1,6 +1,7 @@
 #pragma once
 
 #include <git2/types.h>
+#include <memory>
 
 struct git_reference;
 struct git_oid;
@@ -14,7 +15,6 @@ namespace git
         {}
 
         explicit Reference(git_reference * ref);
-        ~Reference();
 
         explicit operator bool() const { return ref_ != nullptr; }
 
@@ -23,17 +23,12 @@ namespace git
         git_oid const & target() const;
         const char * symbolic_target() const;
 
-        Reference & operator=(Reference const &) = delete;
-        Reference(Reference const &) = delete;
-
-        Reference(Reference &&) noexcept;
-        Reference & operator=(Reference && other) noexcept;
-
     private:
         friend struct Repository;
-        git_reference * ptr() const { return ref_; }
+        git_reference * ptr() const { return ref_.get(); }
 
     private:
-        git_reference * ref_;
+        struct Destroy { void operator() (git_reference*) const; };
+        std::unique_ptr<git_reference, Destroy> ref_;
     };
 }

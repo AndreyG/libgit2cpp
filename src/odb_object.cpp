@@ -4,24 +4,24 @@
 
 namespace git
 {
-    OdbObject::~OdbObject()
+    void OdbObject::Destroy::operator()(git_odb_object* obj) const
     {
-        if (obj_)
-            git_odb_object_free(obj_);
+        git_odb_object_free(obj);
     }
 
     git_otype OdbObject::type() const
     {
-        return git_odb_object_type(obj_);
+        return git_odb_object_type(obj_.get());
     }
 
     unsigned char const * OdbObject::data() const
     {
-        return reinterpret_cast<unsigned char const *>(git_odb_object_data(obj_));
+        return reinterpret_cast<unsigned char const *>(git_odb_object_data(obj_.get()));
     }
 
     size_t OdbObject::size() const
     {
-        return git_odb_object_size(obj_);
+        return git_odb_object_size(obj_.get());
     }
+
 }

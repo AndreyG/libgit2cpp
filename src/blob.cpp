@@ -9,24 +9,18 @@ namespace git
     {
     }
 
-    Blob::Blob(Blob && other) noexcept
-        : blob_(other.blob_)
-    {
-        other.blob_ = nullptr;
-    }
-
-    Blob::~Blob()
-    {
-        git_blob_free(blob_);
-    }
-
     std::size_t Blob::size() const
     {
-        return static_cast<std::size_t>(git_blob_rawsize(blob_));
+        return static_cast<std::size_t>(git_blob_rawsize(ptr()));
     }
 
     const void * Blob::content() const
     {
-        return git_blob_rawcontent(blob_);
+        return git_blob_rawcontent(ptr());
+    }
+
+    void Blob::Destroy::operator()(git_blob * blob) const
+    {
+        git_blob_free(blob);
     }
 }

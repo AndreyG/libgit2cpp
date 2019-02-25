@@ -67,41 +67,41 @@ namespace git
         }
     }
 
-    Diff::~Diff() { git_diff_free(diff_); }
+    void Diff::Destroy::operator() (git_diff* diff) const { git_diff_free(diff); }
 
     void Diff::find_similar(git_diff_find_options & findopts)
     {
-        git_diff_find_similar(diff_, &findopts);
+        git_diff_find_similar(diff_.get(), &findopts);
     }
 
     size_t Diff::deltas_num() const
     {
-        return git_diff_num_deltas(diff_);
+        return git_diff_num_deltas(diff_.get());
     }
 
     void Diff::print(diff::format f, print_callback_t print_callback) const
     {
-        git_diff_print(diff_, convert(f), &apply_callback, &print_callback);
+        git_diff_print(diff_.get(), convert(f), &apply_callback, &print_callback);
     }
 
     Diff::Stats Diff::stats() const
     {
         git_diff_stats * stats;
-        if (git_diff_get_stats(&stats, diff_))
+        if (git_diff_get_stats(&stats, diff_.get()))
             throw error_t("git_diff_get_stats fail");
         else
             return Stats(stats);
     }
 
-    Diff::Stats::~Stats()
+    void Diff::Stats::Destroy::operator()(git_diff_stats* stats) const
     {
-        git_diff_stats_free(stats_);
+        git_diff_stats_free(stats);
     }
 
     Buffer Diff::Stats::to_buf(diff::stats::format::type format, size_t width) const
     {
         git_buf buf = GIT_BUF_INIT_CONST(nullptr, 0);
-        if (git_diff_stats_to_buf(&buf, stats_, git_diff_stats_format_t(format.value()), width))
+        if (git_diff_stats_to_buf(&buf, stats_.get(), git_diff_stats_format_t(format.value()), width))
             throw error_t("git_diff_stats_to_buf fail");
         else
             return Buffer(buf);

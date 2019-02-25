@@ -31,14 +31,6 @@ namespace git
 
         struct OwnedEntry
         {
-            ~OwnedEntry();
-
-            OwnedEntry(OwnedEntry const &) = delete;
-            OwnedEntry & operator=(OwnedEntry const &) = delete;
-
-            OwnedEntry(OwnedEntry &&) noexcept;
-            OwnedEntry & operator=(OwnedEntry &&) noexcept;
-
             Tree to_tree() /*&&*/;
 
         private:
@@ -47,15 +39,16 @@ namespace git
 
             OwnedEntry(git_tree_entry * entry, Repository const & repo);
 
-            git_tree_entry const * ptr() const { return entry_; }
+            git_tree_entry const * ptr() const { return entry_.get(); }
 
         private:
-            git_tree_entry * entry_;
+            struct Destroy { void operator() (git_tree_entry*) const; };
+            std::unique_ptr<git_tree_entry, Destroy> entry_;
             Repository const * repo_;
         };
 
-        git_tree const * ptr() const { return tree_; }
-        git_tree * ptr() { return tree_; }
+        git_tree const * ptr() const { return tree_.get(); }
+        git_tree * ptr() { return tree_.get(); }
 
         int pathspec_match(uint32_t flags, Pathspec const & ps);
 
@@ -69,19 +62,13 @@ namespace git
 
         Tree(git_tree *, Repository const &);
 
-        Tree();
-        ~Tree();
-
-        Tree(Tree &&) noexcept;
-        Tree & operator=(Tree &&) noexcept;
-
-        Tree(Tree const &) = delete;
-        Tree & operator=(Tree const &) = delete;
+        Tree() = default;
 
         explicit operator bool() const { return tree_ != nullptr; }
 
     private:
-        git_tree * tree_;
-        Repository const * repo_;
+        struct Destroy { void operator() (git_tree*) const; };
+        std::unique_ptr<git_tree, Destroy> tree_;
+        Repository const * repo_ = nullptr;
     };
 }

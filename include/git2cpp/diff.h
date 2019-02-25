@@ -39,13 +39,6 @@ namespace git
     {
         struct Stats
         {
-            ~Stats();
-
-            Stats(Stats const &) = delete;
-            Stats & operator=(Stats const &) = delete;
-
-            Stats(Stats &&) noexcept;
-
             Buffer to_buf(diff::stats::format::type, size_t width) const;
 
         private:
@@ -56,7 +49,8 @@ namespace git
             {}
 
         private:
-            git_diff_stats * stats_;
+            struct Destroy { void operator() (git_diff_stats*) const; };
+            std::unique_ptr<git_diff_stats, Destroy> stats_;
         };
 
         size_t deltas_num() const;
@@ -74,18 +68,8 @@ namespace git
             : diff_(diff)
         {}
 
-        ~Diff();
-
-        Diff(Diff const &) = delete;
-        Diff & operator=(Diff const &) = delete;
-
-        Diff(Diff && other) noexcept
-            : diff_(other.diff_)
-        {
-            other.diff_ = nullptr;
-        }
-
     private:
-        git_diff * diff_;
+        struct Destroy { void operator() (git_diff *) const; };
+        std::unique_ptr<git_diff, Destroy> diff_;
     };
 }

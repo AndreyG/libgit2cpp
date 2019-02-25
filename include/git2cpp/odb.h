@@ -10,18 +10,15 @@ namespace git
 {
     struct Odb
     {
-        explicit Odb(git_repository * repo);
-        ~Odb();
-
         OdbObject read(git_oid const & oid) const;
-        git_oid write(const void * data, size_t len, git_otype type);
-
-        Odb(Odb const &) = delete;
-        Odb & operator=(Odb const &) = delete;
-
-        Odb(Odb && other) noexcept;
+        git_oid write(const void * data, size_t len, git_object_t type);
 
     private:
-        git_odb * odb_;
+        friend struct Repository;
+        explicit Odb(git_repository * repo);
+
+    private:
+        struct Destroy { void operator() (git_odb* odb) const; };
+        std::unique_ptr<git_odb, Destroy> odb_;
     };
 }

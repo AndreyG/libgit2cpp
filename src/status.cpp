@@ -5,12 +5,12 @@ namespace git
 {
     size_t Status::entrycount() const
     {
-        return git_status_list_entrycount(status_);
+        return git_status_list_entrycount(status_.get());
     }
 
     git_status_entry const & Status::operator[](size_t i) const
     {
-        if (auto res = git_status_byindex(status_, i))
+        if (auto res = git_status_byindex(status_.get(), i))
             return *res;
         else
             throw error_t("status entry index out of bounds: " + std::to_string(i));
@@ -92,24 +92,14 @@ namespace git
 
     Status::Status(git_repository * repo, Options const & opts)
     {
-        if (git_status_list_new(&status_, repo, opts.raw()))
+        git_status_list * status;
+        if (git_status_list_new(&status, repo, opts.raw()))
             throw get_status_error();
+        status_.reset(status);
     }
 
-    Status::Status(Status && other) noexcept
-        : status_(other.status_)
+    void Status::Destroy::operator()(git_status_list* status) const
     {
-        other.status_ = nullptr;
-    }
-
-    Status & Status::operator=(Status && other) noexcept
-    {
-        std::swap(status_, other.status_);
-        return *this;
-    }
-
-    Status::~Status()
-    {
-        git_status_list_free(status_);
+        git_status_list_free(status);
     }
 }

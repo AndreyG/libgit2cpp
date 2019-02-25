@@ -1,6 +1,7 @@
 #pragma once
 
 #include <git2/types.h>
+#include <memory>
 
 struct git_object;
 struct git_oid;
@@ -18,12 +19,10 @@ namespace git
 
     struct Object
     {
-        Object() {}
-
+        Object() = default;
         Object(git_object * obj, Repository const &);
-        ~Object();
 
-        explicit operator bool() const { return obj_ != nullptr; }
+        explicit operator bool() const { return obj_.operator bool(); }
 
         git_otype type() const;
         git_oid const & id() const;
@@ -38,13 +37,9 @@ namespace git
         Blob to_blob() /*&&*/;
         Tag  to_tag()  /*&&*/;
 
-        Object(Object const &) = delete;
-        Object & operator=(Object const &) = delete;
-
-        Object(Object && other) noexcept;
-
     private:
-        git_object * obj_ = nullptr;
+        struct Destroy { void operator() (git_object*) const; };
+        std::unique_ptr<git_object, Destroy> obj_;
         Repository const * repo_ = nullptr;
     };
 }
