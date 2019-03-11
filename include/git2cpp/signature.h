@@ -1,5 +1,9 @@
 #pragma once
 
+#include <git2/types.h>
+
+#include <memory>
+
 struct git_signature;
 struct git_repository;
 

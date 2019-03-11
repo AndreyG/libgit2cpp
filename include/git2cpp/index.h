@@ -3,6 +3,7 @@
 #include <git2/oid.h>
 
 #include <functional>
+#include <memory>
 
 struct git_index;
 struct git_repository;

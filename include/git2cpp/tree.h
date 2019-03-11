@@ -2,6 +2,8 @@
 
 #include "pathspec.h"
 
+#include <memory>
+
 namespace git
 {
     struct Repository;

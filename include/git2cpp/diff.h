@@ -1,11 +1,12 @@
 #pragma once
 
-#include <functional>
+#include "buffer.h"
+#include "tagged_mask.h"
 
 #include <git2/diff.h>
 
-#include "buffer.h"
-#include "tagged_mask.h"
+#include <memory>
+#include <functional>
 
 namespace git
 {
