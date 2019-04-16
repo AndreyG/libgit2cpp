@@ -149,6 +149,8 @@ namespace git
         Repository(const char * dir, init_tag, git_repository_init_options opts);
         Repository(std::string const & dir, init_tag);
 
+        git_repository* get() { return repo_.get();}
+
         static internal::optional<std::string> discover(const char * start_path);
 
     private:
