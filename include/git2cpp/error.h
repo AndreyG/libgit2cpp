@@ -193,7 +193,7 @@ namespace git
     struct non_commit_object_error : error_t
     {
         explicit non_commit_object_error(git_oid const & id)
-            : error_t(internal::format("object %s is not a commit", id_to_str(id)))
+            : error_t("object " + id_to_str(id) + " is not a commit")
         {}
     };
 
@@ -243,8 +243,7 @@ namespace git
     struct merge_base_error : error_t
     {
         merge_base_error(git_oid const & c1, git_oid const & c2)
-            : error_t(internal::format(
-                  "Could not find merge base for commits %s and %s", id_to_str(c1, 8), id_to_str(c2, 8)))
+            : error_t("Could not find merge base for commits " + id_to_str(c1, 8) + " and " + id_to_str(c2, 8))
         {}
     };
 
