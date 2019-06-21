@@ -253,4 +253,19 @@ namespace git
             : error_t("Could not open config")
         {}
     };
+
+    struct branch_create_error : error_t
+    {
+        enum reason_t
+        {
+            already_exists,
+            invalid_spec,
+            unknown
+        } reason;
+
+        branch_create_error(reason_t r)
+            : error_t("Could not create branch")
+            , reason(r)
+        {}
+    };
 }

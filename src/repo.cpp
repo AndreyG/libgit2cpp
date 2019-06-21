@@ -213,6 +213,24 @@ namespace git
         return res;
     }
 
+    Reference Repository::create_branch(const char * name, Commit const & target, bool force)
+    {
+        git_reference * ref;
+        const auto err = git_branch_create(&ref, repo_.get(), name, target.ptr(), force);
+        switch (err)
+        {
+        case GIT_OK:
+            return Reference(ref);
+        case GIT_EEXISTS:
+            assert(!force);
+            throw branch_create_error(branch_create_error::already_exists);
+        case GIT_EINVALIDSPEC:
+            throw branch_create_error(branch_create_error::invalid_spec);
+        default:
+            throw branch_create_error(branch_create_error::unknown);
+        }
+    }
+
     Reference Repository::dwim(const char* shorthand) const
     {
         git_reference * ref;

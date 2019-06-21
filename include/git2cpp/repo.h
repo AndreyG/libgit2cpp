@@ -86,6 +86,8 @@ namespace git
 
         std::vector<Reference> branches(branch_type) const;
 
+        Reference create_branch(const char * name, Commit const & target, bool force);
+
         /// @return can be empty
         Reference dwim(const char * shorthand) const;
 
