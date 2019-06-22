@@ -20,6 +20,8 @@ namespace git
         size_t entrycount() const;
         git_index_entry const * operator[](size_t i) const;
 
+        git_index_entry const * get_by_path(const char *path, int stage) const;
+
         typedef std::function<int(const char * path, const char * mathched_pathspec)> matched_path_callback_t;
 
         void update_all(git_strarray const & pathspec, matched_path_callback_t cb);

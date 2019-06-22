@@ -40,6 +40,11 @@ namespace git
         return git_index_get_byindex(index_.get(), i);
     }
 
+    git_index_entry const* Index::get_by_path(const char* path, int stage) const
+    {
+        return git_index_get_bypath(index_.get(), path, stage);
+    }
+
     namespace
     {
         int apply_callback(const char * path, const char * matched_pathspec, void * payload)
