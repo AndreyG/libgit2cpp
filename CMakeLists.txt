@@ -70,6 +70,7 @@ set(examples
   general
   remote
   checkout
+  ls-files
 )
 
 foreach (example ${examples})
