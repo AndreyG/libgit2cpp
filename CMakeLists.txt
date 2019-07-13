@@ -56,29 +56,33 @@ set_target_properties(git2cpp PROPERTIES
   INTERFACE_COMPILE_FEATURES cxx_std_17
 )
 
-set(examples
-  add
-  branch
-  cat-file
-  diff
-  log
-  rev-list
-  showindex
-  status
-  init
-  rev-parse
-  general
-  remote
-  checkout
-  ls-files
-)
+option(BUILD_LIBGIT2CPP_EXAMPLES ON)
 
-foreach (example ${examples})
-  add_executable("${example}-cpp" examples/${example}.cpp)
-  target_link_libraries("${example}-cpp" git2cpp)
-endforeach(example)
-
-add_executable(commit-graph-generator examples/commit-graph-generator.cpp)
-target_link_libraries(commit-graph-generator git2cpp)
-
-file(COPY test.sh DESTINATION . FILE_PERMISSIONS ${EXE_PERM})
+if(BUILD_LIBGIT2CPP_EXAMPLES)
+  set(examples
+    add
+    branch
+    cat-file
+    diff
+    log
+    rev-list
+    showindex
+    status
+    init
+    rev-parse
+    general
+    remote
+    checkout
+    ls-files
+  )
+  
+  foreach (example ${examples})
+    add_executable("${example}-cpp" examples/${example}.cpp)
+    target_link_libraries("${example}-cpp" git2cpp)
+  endforeach(example)
+  
+  add_executable(commit-graph-generator examples/commit-graph-generator.cpp)
+  target_link_libraries(commit-graph-generator git2cpp)
+  
+  file(COPY test.sh DESTINATION . FILE_PERMISSIONS ${EXE_PERM})
+endif()

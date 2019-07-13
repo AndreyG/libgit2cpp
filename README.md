@@ -12,7 +12,7 @@ Building libgit2cpp - Using CMake
     $ cmake ..
     $ make
     
-Supporting CMake options: `USE_BOOST`, `BUNDLE_LIBGIT2`.
+Supporting CMake options: `USE_BOOST`, `BUNDLE_LIBGIT2`, `BUILD_LIBGIT2CPP_EXAMPLES`.
 
 Testing 
 =======
