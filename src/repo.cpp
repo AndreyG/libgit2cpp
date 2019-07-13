@@ -4,6 +4,7 @@
 #include "git2cpp/error.h"
 #include "git2cpp/internal/optional.h"
 
+#include <git2/blame.h>
 #include <git2/blob.h>
 #include <git2/branch.h>
 #include <git2/commit.h>
@@ -528,6 +529,18 @@ namespace git
     int Repository::set_head_detached(AnnotatedCommit const& commit)
     {
         return git_repository_set_head_detached_from_annotated(repo_.get(), commit.ptr());
+    }
+
+    Blame Repository::blame_file(const char* path, git_blame_options const& options)
+    {
+        git_blame * blame;
+        const auto err = git_blame_file(
+            &blame, repo_.get(), path,
+            /*IMO `options` can be const, git_blame_file doesn't change it*/ const_cast<git_blame_options*>(&options)
+            );
+        if (err != GIT_OK)
+            throw blame_file_error(path);
+        return Blame(blame);
     }
 
     internal::optional<std::string> Repository::discover(const char * start_path)

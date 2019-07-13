@@ -268,4 +268,11 @@ namespace git
             , reason(r)
         {}
     };
+
+    struct blame_file_error : error_t
+    {
+        explicit blame_file_error(std::string const & path)
+            : error_t("Could not blame file " + path)
+        {}
+    };
 }

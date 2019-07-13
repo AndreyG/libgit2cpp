@@ -74,6 +74,7 @@ if(BUILD_LIBGIT2CPP_EXAMPLES)
     remote
     checkout
     ls-files
+    blame
   )
   
   foreach (example ${examples})

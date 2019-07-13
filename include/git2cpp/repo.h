@@ -2,6 +2,7 @@
 
 #include "repo_fwd.h"
 
+#include "blame.h"
 #include "blob.h"
 #include "commit.h"
 #include "diff.h"
@@ -22,6 +23,8 @@
 
 #include <string>
 #include <vector>
+
+struct git_blame_options;
 
 namespace git
 {
@@ -138,6 +141,8 @@ namespace git
         /// @return raw error code
         int set_head(char const* ref);
         int set_head_detached(AnnotatedCommit const&);
+
+        Blame blame_file(const char * path, git_blame_options const &);
 
         explicit Repository(const char * dir);
         explicit Repository(std::string const & dir);
