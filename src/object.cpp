@@ -47,7 +47,7 @@ namespace git
 
     Tree Object::to_tree() /*&&*/
     {
-        assert(type() == GIT_OBJ_TREE);
+        assert(type() == GIT_OBJECT_TREE);
         Tree res(reinterpret_cast<git_tree *>(obj_.get()), *repo_);
         obj_ = nullptr;
         return res;
@@ -55,7 +55,7 @@ namespace git
 
     Commit Object::to_commit() /*&&*/
     {
-        assert(type() == GIT_OBJ_COMMIT);
+        assert(type() == GIT_OBJECT_COMMIT);
         Commit res(reinterpret_cast<git_commit *>(obj_.get()), *repo_);
         obj_ = nullptr;
         return res;
@@ -63,7 +63,7 @@ namespace git
 
     Blob Object::to_blob() /*&&*/
     {
-        assert(type() == GIT_OBJ_BLOB);
+        assert(type() == GIT_OBJECT_BLOB);
         Blob res(reinterpret_cast<git_blob *>(obj_.get()));
         obj_ = nullptr;
         return res;
@@ -71,7 +71,7 @@ namespace git
 
     Tag Object::to_tag() /*&&*/
     {
-        assert(type() == GIT_OBJ_TAG);
+        assert(type() == GIT_OBJECT_TAG);
         Tag res(reinterpret_cast<git_tag *>(obj_.get()));
         obj_ = nullptr;
         return res;

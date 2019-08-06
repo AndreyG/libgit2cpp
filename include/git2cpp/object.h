@@ -24,7 +24,7 @@ namespace git
 
         explicit operator bool() const { return obj_.operator bool(); }
 
-        git_otype type() const;
+        git_object_t type() const;
         git_oid const & id() const;
 
         git_blob const * as_blob() const;
