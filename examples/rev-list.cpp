@@ -1,16 +1,13 @@
-#include <stdio.h>
-#include <string.h>
-
-#include <iostream>
-
 #include "git2cpp/initializer.h"
 #include "git2cpp/repo.h"
 #include "git2cpp/revwalker.h"
 
-extern "C" {
 #include <git2/errors.h>
-#include <git2/revwalk.h>
-}
+
+#include <iostream>
+
+#include <stdio.h>
+#include <string.h>
 
 using namespace git;
 
@@ -88,7 +85,7 @@ void revwalk_parseopts(Repository const & repo, RevWalker & walk, int nopts, cha
 
 int main(int argc, char ** argv)
 {
-    git::Initializer threads_initializer;
+    auto_git_initializer;
 
     try
     {
