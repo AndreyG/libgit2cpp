@@ -27,15 +27,16 @@ namespace git
         git_object_t type() const;
         git_oid const & id() const;
 
-        git_blob const * as_blob() const;
-        git_commit const * as_commit() const;
-        git_tree const * as_tree() const;
-        git_tag const * as_tag() const;
-
         Commit to_commit() /*&&*/;
         Tree to_tree() /*&&*/;
         Blob to_blob() /*&&*/;
         Tag  to_tag()  /*&&*/;
+
+    private:
+        git_blob    * as_blob();
+        git_commit  * as_commit();
+        git_tree    * as_tree();
+        git_tag     * as_tag();
 
     private:
         struct Destroy { void operator() (git_object*) const; };

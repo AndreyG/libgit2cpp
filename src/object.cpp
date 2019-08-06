@@ -32,10 +32,10 @@ namespace git
     }
 
 #define DEFINE_METHOD_AS(type_name, enum_element)               \
-    git_##type_name const * Object::as_##type_name() const      \
+    git_##type_name * Object::as_##type_name()                  \
     {                                                           \
         assert(type() == GIT_OBJ_##enum_element);               \
-        return reinterpret_cast<git_##type_name const *>(obj_.get()); \
+        return reinterpret_cast<git_##type_name *>(obj_.get()); \
     }
 
     DEFINE_METHOD_AS(blob, BLOB)
@@ -47,32 +47,28 @@ namespace git
 
     Tree Object::to_tree() /*&&*/
     {
-        assert(type() == GIT_OBJECT_TREE);
-        Tree res(reinterpret_cast<git_tree *>(obj_.get()), *repo_);
+        Tree res(as_tree(), *repo_);
         obj_ = nullptr;
         return res;
     }
 
     Commit Object::to_commit() /*&&*/
     {
-        assert(type() == GIT_OBJECT_COMMIT);
-        Commit res(reinterpret_cast<git_commit *>(obj_.get()), *repo_);
+        Commit res(as_commit(), *repo_);
         obj_ = nullptr;
         return res;
     }
 
     Blob Object::to_blob() /*&&*/
     {
-        assert(type() == GIT_OBJECT_BLOB);
-        Blob res(reinterpret_cast<git_blob *>(obj_.get()));
+        Blob res(as_blob());
         obj_ = nullptr;
         return res;
     }
 
     Tag Object::to_tag() /*&&*/
     {
-        assert(type() == GIT_OBJECT_TAG);
-        Tag res(reinterpret_cast<git_tag *>(obj_.get()));
+        Tag res(as_tag());
         obj_ = nullptr;
         return res;
     }
