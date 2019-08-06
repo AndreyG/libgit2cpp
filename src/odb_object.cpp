@@ -9,7 +9,7 @@ namespace git
         git_odb_object_free(obj);
     }
 
-    git_otype OdbObject::type() const
+    git_object_t OdbObject::type() const
     {
         return git_odb_object_type(obj_.get());
     }

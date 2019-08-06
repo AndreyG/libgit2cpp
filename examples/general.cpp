@@ -122,7 +122,7 @@ int main(int argc, char ** argv)
             // binary data. For a tree it is a special binary format, so it's unlikely
             // to be hugely helpful as a raw object.
             const unsigned char * data = obj.data();
-            git_otype otype = obj.type();
+            git_object_t otype = obj.type();
 
             // We provide methods to convert from the object type which is an enum, to
             // a string representation of that value (and vice-versa).
@@ -141,7 +141,7 @@ int main(int argc, char ** argv)
             // it gives you direct access to the key/value properties of Git.  Here
             // we'll write a new blob object that just contains a simple string.
             // Notice that we have to specify the object type as the `git_otype` enum.
-            git_oid oid = odb.write("test data", sizeof("test data") - 1, GIT_OBJ_BLOB);
+            git_oid oid = odb.write("test data", sizeof("test data") - 1, GIT_OBJECT_BLOB);
 
             // Now that we've written the object, we can check out what SHA1 was
             // generated when the object was written to our database.
@@ -255,7 +255,7 @@ int main(int argc, char ** argv)
             // git_signature - name, email, timestamp), and the tag message.
             Object commit = tag.target(repo);
             const char * tname = tag.name();       // "test"
-            git_otype ttype = tag.target_type();   // GIT_OBJ_COMMIT (otype enum)
+            git_object_t ttype = tag.target_type();   // GIT_OBJ_COMMIT (otype enum)
             const char * tmessage = tag.message(); // "tag message\n"
             std::cout << "Tag Message: " << tmessage << std::endl;
         }
