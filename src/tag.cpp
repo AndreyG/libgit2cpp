@@ -29,7 +29,7 @@ namespace git
         return *git_tag_target_id(tag_.get());
     }
 
-    git_otype Tag::target_type() const
+    git_object_t Tag::target_type() const
     {
         return git_tag_target_type(tag_.get());
     }

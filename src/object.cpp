@@ -21,7 +21,7 @@ namespace git
        git_object_free(obj);
     }
 
-    git_otype Object::type() const
+    git_object_t Object::type() const
     {
         return git_object_type(obj_.get());
     }
@@ -34,7 +34,7 @@ namespace git
 #define DEFINE_METHOD_AS(type_name, enum_element)               \
     git_##type_name * Object::as_##type_name()                  \
     {                                                           \
-        assert(type() == GIT_OBJ_##enum_element);               \
+        assert(type() == GIT_OBJECT_##enum_element);            \
         return reinterpret_cast<git_##type_name *>(obj_.get()); \
     }
 

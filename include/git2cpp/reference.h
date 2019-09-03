@@ -19,7 +19,7 @@ namespace git
         explicit operator bool() const { return ref_ != nullptr; }
 
         const char * name() const;
-        git_ref_t type() const;
+        git_reference_t type() const;
         git_oid const & target() const;
         const char * symbolic_target() const;
 

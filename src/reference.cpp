@@ -22,14 +22,14 @@ namespace git
         return git_reference_name(ptr());
     }
 
-    git_ref_t Reference::type() const
+    git_reference_t Reference::type() const
     {
         return git_reference_type(ptr());
     }
 
     git_oid const & Reference::target() const
     {
-        assert(type() != GIT_REF_SYMBOLIC);
+        assert(type() != GIT_REFERENCE_SYMBOLIC);
         return *git_reference_target(ptr());
     }
 

@@ -107,7 +107,7 @@ int main(int argc, char ** argv)
     catch (std::exception const & e)
     {
         std::cerr << e.what() << std::endl;
-        if (auto err = giterr_last())
+        if (auto err = git_error_last())
         {
             if (err->message)
                 std::cerr << "libgit2 last error: " << err->message << std::endl;

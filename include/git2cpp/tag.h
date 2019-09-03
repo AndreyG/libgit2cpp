@@ -18,7 +18,7 @@ namespace git
         Object target(Repository const &) const;
 
         git_oid const & target_id()     const;
-        git_otype       target_type()   const;
+        git_object_t    target_type()   const;
 
         const char * name() const;
         const char * message() const;

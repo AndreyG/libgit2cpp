@@ -46,7 +46,7 @@ namespace {
 
 [[noreturn]] void report_error(const char *message)
 {
-    const git_error *lg2err = giterr_last();
+    const git_error *lg2err = git_error_last();
     const char *lg2msg = "", *lg2spacer = "";
 
     if (lg2err && lg2err->message)

@@ -82,7 +82,7 @@ namespace git
         return *git_tree_entry_id(entry_);
     }
 
-    git_otype Tree::BorrowedEntry::type() const
+    git_object_t Tree::BorrowedEntry::type() const
     {
         return git_tree_entry_type(entry_);
     }

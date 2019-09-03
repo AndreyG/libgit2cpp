@@ -201,7 +201,7 @@ void perform_checkout_ref(git::Repository & repo, git::AnnotatedCommit const & t
 		checkout_opts.perfdata_cb = print_perf_data;
 
 	/** Grab the commit we're interested to move to */
-    auto target_commit = repo.commit_lookup(target.commit_id());
+        auto target_commit = repo.commit_lookup(target.commit_id());
 	/**
 	 * Perform the checkout so the workdir corresponds to what target_commit
 	 * contains.
@@ -209,10 +209,9 @@ void perform_checkout_ref(git::Repository & repo, git::AnnotatedCommit const & t
 	 * Note that it's okay to pass a git_commit here, because it will be 
 	 * peeled to a tree.
 	 */
-    ;
 	if (repo.checkout_tree(target_commit, checkout_opts))
-    {
-		fprintf(stderr, "failed to checkout tree: %s\n", giterr_last()->message);
+        {
+                fprintf(stderr, "failed to checkout tree: %s\n", git_error_last()->message);
 		return;
 	}
 
@@ -229,7 +228,7 @@ void perform_checkout_ref(git::Repository & repo, git::AnnotatedCommit const & t
 		err = repo.set_head_detached(target);
 	}
 	if (err != 0) {
-		fprintf(stderr, "failed to update HEAD reference: %s\n", giterr_last()->message);
+                fprintf(stderr, "failed to update HEAD reference: %s\n", git_error_last()->message);
 	}
 }
 
