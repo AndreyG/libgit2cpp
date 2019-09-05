@@ -27,21 +27,20 @@
  */
 
 struct opts {
-    char *path;
-    char *commitspec;
-    int C;
-    int M;
+    const char * path;
+    const char * commitspec = nullptr;
     int start_line;
     int end_line;
-    int F;
+    bool C = false;
+    bool M = false;
+    bool F = false;
+
+    opts(int argc, char *argv[]);
 };
-static void parse_opts(struct opts *o, int argc, char *argv[]);
 
 int main(int argc, char *argv[])
 {
-    opts o = {0};
-    parse_opts(&o, argc, argv);
-
+    opts o(argc, argv);
     git_blame_options blameopts = GIT_BLAME_OPTIONS_INIT;
 
     if (o.M) blameopts.flags |= GIT_BLAME_TRACK_COPIES_SAME_COMMIT_MOVES;
@@ -74,26 +73,23 @@ int main(int argc, char *argv[])
     /** Run the blame. */
     auto blame = repo.blame_file(o.path, blameopts);
 
-    char spec[1024] = {0};
-
     /**
      * Get the raw data inside the blob for output. We use the
      * `commitish:path/to/file.txt` format to find it.
      */
-    if (git_oid_iszero(&blameopts.newest_commit))
-        strcpy(spec, "HEAD");
-    else
-        git_oid_tostr(spec, sizeof(spec), &blameopts.newest_commit);
-    strcat(spec, ":");
-    strcat(spec, o.path);
+    std::string spec = git_oid_iszero(&blameopts.newest_commit)
+            ? "HEAD"
+            : git::id_to_str(blameopts.newest_commit);
+    spec += ":";
+    spec += o.path;
 
-    auto blob = repo.blob_lookup(repo.revparse_single(spec).single()->id());
+    auto blob = repo.blob_lookup(repo.revparse_single(spec.c_str()).single()->id());
 
     char const * rawdata = reinterpret_cast<char const *>(blob.content());
     size_t rawsize = blob.size();
 
     /** Produce the output. */
-    int line = 1;
+    size_t line = 1;
     bool break_on_null_hunk = false;
     for (size_t i = 0; i < rawsize; ++line) {
         const git_blame_hunk *hunk = blame.hunk_byline(line);
@@ -113,23 +109,21 @@ int main(int argc, char *argv[])
             printf("%s ( %-30s %3d) %.*s\n",
                     oid,
                     sig,
-                    line,
+                    (int)line,
                     (int)(eol - rawdata - i),
                     rawdata + i);
         }
 
-        i = (int)(eol - rawdata + 1);
+        i = eol - rawdata + 1;
     }
 
     return 0;
 }
 
 /** Tell the user how to make this thing work. */
-static void usage(const char *msg, const char *arg)
+static void usage(const char *msg)
 {
-    if (msg && arg)
-        fprintf(stderr, "%s: %s\n", msg, arg);
-    else if (msg)
+    if (msg)
         fprintf(stderr, "%s\n", msg);
     fprintf(stderr, "usage: blame [options] [<commit range>] <path>\n");
     fprintf(stderr, "\n");
@@ -143,12 +137,12 @@ static void usage(const char *msg, const char *arg)
 }
 
 /** Parse the arguments. */
-static void parse_opts(struct opts *o, int argc, char *argv[])
+opts::opts(int argc, char *argv[])
 {
     int i;
-    char *bare_args[3] = {0};
+    const char * bare_args[3] = {};
 
-    if (argc < 2) usage(NULL, NULL);
+    if (argc < 2) usage(nullptr);
 
     for (i=1; i<argc; i++) {
         char *a = argv[i];
@@ -157,43 +151,46 @@ static void parse_opts(struct opts *o, int argc, char *argv[])
             int i=0;
             while (bare_args[i] && i < 3) ++i;
             if (i >= 3)
-                usage("Invalid argument set", NULL);
+                usage("Invalid argument set");
             bare_args[i] = a;
         }
         else if (!strcmp(a, "--"))
             continue;
         else if (!strcasecmp(a, "-M"))
-            o->M = 1;
+            M = true;
         else if (!strcasecmp(a, "-C"))
-            o->C = 1;
+            C = true;
         else if (!strcasecmp(a, "-F"))
-            o->F = 1;
+            F = true;
         else if (!strcasecmp(a, "-L")) {
             i++; a = argv[i];
             if (i >= argc) throw std::runtime_error("Not enough arguments to -L");
-            if (sscanf(a, "%d,%d", &o->start_line, &o->end_line)-2, "-L format error", NULL)
+            if (sscanf(a, "%d,%d", &start_line, &end_line) != 2)
+            {
+                fprintf(stderr, "-L format error\n");
                 std::abort();
+            }
         }
         else {
             /* commit range */
-            if (o->commitspec) throw std::runtime_error("Only one commit spec allowed");
-            o->commitspec = a;
+            if (commitspec) throw std::runtime_error("Only one commit spec allowed");
+            commitspec = a;
         }
     }
 
     /* Handle the bare arguments */
-    if (!bare_args[0]) usage("Please specify a path", NULL);
-    o->path = bare_args[0];
+    if (!bare_args[0]) usage("Please specify a path");
+    path = bare_args[0];
     if (bare_args[1]) {
         /* <commitspec> <path> */
-        o->path = bare_args[1];
-        o->commitspec = bare_args[0];
+        path = bare_args[1];
+        commitspec = bare_args[0];
     }
     if (bare_args[2]) {
         /* <oldcommit> <newcommit> <path> */
         char spec[128] = {0};
-        o->path = bare_args[2];
+        path = bare_args[2];
         sprintf(spec, "%s..%s", bare_args[0], bare_args[1]);
-        o->commitspec = spec;
+        commitspec = spec;
     }
 }
