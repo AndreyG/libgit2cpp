@@ -156,36 +156,34 @@ static void print_time(const git_time * intime, const char * prefix)
 
 static void print_commit(git::Commit const & commit)
 {
-    int i, count;
-    const git_signature * sig;
-    const char *scan, *eol;
-
     printf("commit %s\n", git::id_to_str(commit.id()).c_str());
 
-    if ((count = (int)commit.parents_num()) > 1)
+    const auto count = commit.parents_num();
+    if (count > 1)
     {
         printf("Merge:");
-        for (i = 0; i < count; ++i)
+        for (size_t i = 0; i < count; ++i)
         {
             printf(" %s", git::id_to_str(commit.parent_id(i), 7).c_str());
         }
         printf("\n");
     }
 
-    if ((sig = commit.author()) != NULL)
+    if (auto sig = commit.author())
     {
         printf("Author: %s <%s>\n", sig->name, sig->email);
         print_time(&sig->when, "Date:   ");
     }
     printf("\n");
 
-    for (scan = commit.message(); scan && *scan;)
+    for (const char* scan = commit.message(); scan && *scan;)
     {
-        for (eol = scan; *eol && *eol != '\n'; ++eol) /* find eol */
+        const char *eol = scan;
+        for (; *eol && *eol != '\n'; ++eol) /* find eol */
             ;
 
         printf("    %.*s\n", (int)(eol - scan), scan);
-        scan = *eol ? eol + 1 : NULL;
+        scan = *eol ? eol + 1 : nullptr;
     }
     printf("\n");
 }
