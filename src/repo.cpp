@@ -521,6 +521,11 @@ namespace git
         return git_checkout_tree(repo_.get(), reinterpret_cast<git_object const *>(commit.ptr()), &options);
     }
 
+    int Repository::checkout_head(git_checkout_options const & options)
+    {
+        return git_checkout_head(repo_.get(), &options);
+    }
+
     int Repository::set_head(char const* ref)
     {
         return git_repository_set_head(repo_.get(), ref);

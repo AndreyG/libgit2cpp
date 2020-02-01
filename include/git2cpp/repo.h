@@ -137,6 +137,7 @@ namespace git
 
         /// @return raw error code
         int checkout_tree(Commit const &, git_checkout_options const &);
+        int checkout_head(git_checkout_options const &);
 
         /// @return raw error code
         int set_head(char const* ref);
