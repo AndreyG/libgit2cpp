@@ -6,11 +6,16 @@ namespace git
 {
     const char * Remote::url() const
     {
-        return git_remote_url(remote_);
+        return git_remote_url(remote_.get());
     }
 
     const char * Remote::pushurl() const
     {
-        return git_remote_pushurl(remote_);
+        return git_remote_pushurl(remote_.get());
+    }
+
+    void Remote::Destroy::operator()(git_remote * remote) const
+    {
+        git_remote_free(remote);
     }
 }

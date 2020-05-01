@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 struct git_remote;
 
 namespace git
@@ -12,10 +14,12 @@ namespace git
     private:
         friend struct Repository;
 
+        struct Destroy { void operator() (git_remote*) const; };
+
         explicit Remote(git_remote * remote)
             : remote_(remote)
         {}
 
-        git_remote * remote_;
+        std::unique_ptr<git_remote, Destroy> remote_;
     };
 }
