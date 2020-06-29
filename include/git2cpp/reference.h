@@ -23,6 +23,8 @@ namespace git
         git_oid const & target() const;
         const char * symbolic_target() const;
 
+        bool has_same_target_as(Reference const & other) const;
+
     private:
         friend struct Repository;
         git_reference * ptr() const { return ref_.get(); }

@@ -37,4 +37,9 @@ namespace git
     {
         return git_reference_symbolic_target(ptr());
     }
+
+    bool Reference::has_same_target_as(Reference const & other) const
+    {
+        return git_oid_equal(&target(), &other.target());
+    }
 }
