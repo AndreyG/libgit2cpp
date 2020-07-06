@@ -29,7 +29,7 @@ namespace git
 
     git_oid const & Reference::target() const
     {
-        assert(type() != GIT_REFERENCE_SYMBOLIC);
+        assert(type() == GIT_REFERENCE_DIRECT);
         return *git_reference_target(ptr());
     }
 
