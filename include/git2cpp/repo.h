@@ -141,6 +141,7 @@ namespace git
 
         /// @return raw error code
         int set_head(char const* ref);
+        int set_head_detached(git_oid const&);
         int set_head_detached(AnnotatedCommit const&);
 
         Blame blame_file(const char * path, git_blame_options const &);

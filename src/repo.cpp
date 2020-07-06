@@ -531,6 +531,11 @@ namespace git
         return git_repository_set_head(repo_.get(), ref);
     }
 
+    int Repository::set_head_detached(git_oid const & commit)
+    {
+        return git_repository_set_head_detached(repo_.get(), &commit);
+    }
+
     int Repository::set_head_detached(AnnotatedCommit const& commit)
     {
         return git_repository_set_head_detached_from_annotated(repo_.get(), commit.ptr());
