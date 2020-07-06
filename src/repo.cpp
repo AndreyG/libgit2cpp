@@ -185,6 +185,11 @@ namespace git
             return *ref_;
         }
 
+        Reference * operator->()
+        {
+            return &*ref_;
+        }
+
     private:
         static git_branch_t convert(branch_type t)
         {
@@ -206,11 +211,14 @@ namespace git
         internal::optional<Reference> ref_;
     };
 
-    std::vector<Reference> Repository::branches(branch_type type) const
+    std::vector<Reference> Repository::branches(branch_type type, git_reference_t ref_kind) const
     {
         std::vector<Reference> res;
         for (branch_iterator it(repo_.get(), type); it; ++it)
-            res.emplace_back(std::move(*it));
+        {
+            if (ref_kind == GIT_REFERENCE_ALL || it->type() == ref_kind)
+                res.emplace_back(std::move(*it));
+        }
         return res;
     }
 

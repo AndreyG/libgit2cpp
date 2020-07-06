@@ -87,7 +87,7 @@ namespace git
 
         StrArray reference_list() const;
 
-        std::vector<Reference> branches(branch_type) const;
+        std::vector<Reference> branches(branch_type, git_reference_t ref_kind = GIT_REFERENCE_ALL) const;
 
         Reference create_branch(const char * name, Commit const & target, bool force);
 
