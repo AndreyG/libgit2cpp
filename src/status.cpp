@@ -25,7 +25,7 @@ namespace git
             case Status::Options::Show::IndexOnly:
                 return GIT_STATUS_SHOW_INDEX_ONLY;
             case Status::Options::Show::WorkdirOnly:
-                return GIT_STATUS_SHOW_INDEX_ONLY;
+                return GIT_STATUS_SHOW_WORKDIR_ONLY;
             default:
                 return GIT_STATUS_SHOW_INDEX_AND_WORKDIR;
             }
