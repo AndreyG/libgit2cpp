@@ -383,6 +383,14 @@ namespace git
         return res;
     }
 
+    git_oid Repository::amend_commit(Commit const & commit_to_amend, const char * update_ref, const char * message, Tree const & tree)
+    {
+        git_oid res;
+        auto op_res = git_commit_amend(&res, commit_to_amend.ptr(), update_ref, nullptr, nullptr, nullptr, message, tree.ptr());
+        assert(op_res == GIT_OK);
+        return res;
+    }
+
     namespace
     {
         Object tree_entry_to_object(git_tree_entry const * entry, Repository const & repo, git_repository * repo_ptr)

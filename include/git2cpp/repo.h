@@ -122,6 +122,8 @@ namespace git
                               Commit const & parent,
                               const char * message_encoding = nullptr);
 
+        git_oid amend_commit(Commit const & commit_to_amend, const char * update_ref, const char * message, Tree const & tree);
+
         void reset_default(Commit const &, git_strarray const & pathspecs);
 
         void file_diff(std::string const & old_path, git_oid const & old_id,
