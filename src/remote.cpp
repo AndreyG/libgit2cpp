@@ -31,13 +31,13 @@ namespace git
             callbacks->sideband_progress(str, len);
             return 0;
         };
-        opts.callbacks.transfer_progress = [] (git_transfer_progress const * stats, void * data)
+        opts.callbacks.transfer_progress = [] (git_indexer_progress const * stats, void * data)
         {
             auto callbacks = static_cast<FetchCallbacks*>(data);
             callbacks->transfer_progress(*stats);
             return 0;
         };
-        opts.callbacks.credentials = [] (git_cred ** out, char const *url, char const * user_from_url, unsigned int allowed_types, void * data)
+        opts.callbacks.credentials = [] (git_credential ** out, char const *url, char const * user_from_url, unsigned int allowed_types, void * data)
         {
             auto callbacks = static_cast<FetchCallbacks*>(data);
             auto cred = callbacks->acquire_cred(url, user_from_url, allowed_types);

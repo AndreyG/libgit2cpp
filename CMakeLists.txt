@@ -1,5 +1,5 @@
 project (libgit2cpp)
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5.1)
 
 # Build options
 OPTION(USE_BOOST "Enable use of boost header libraries" OFF)

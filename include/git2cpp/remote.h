@@ -4,8 +4,8 @@
 
 struct git_remote;
 struct git_oid;
-struct git_transfer_progress;
-struct git_cred;
+struct git_indexer_progress;
+struct git_credential;
 
 namespace git
 {
@@ -18,9 +18,9 @@ namespace git
         {
             virtual void update_tips(char const * refname, git_oid const & a, git_oid const & b) {}
             virtual void sideband_progress(char const * str, int len) {}
-            virtual void transfer_progress(git_transfer_progress const &) {}
+            virtual void transfer_progress(git_indexer_progress const &) {}
 
-            virtual git_cred* acquire_cred(const char * url, const char * username_from_url, unsigned int allowed_types) = 0;
+            virtual git_credential* acquire_cred(const char * url, const char * username_from_url, unsigned int allowed_types) = 0;
         };
 
         void fetch(FetchCallbacks &, char const * reflog_message = nullptr);

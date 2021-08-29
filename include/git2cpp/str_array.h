@@ -36,7 +36,7 @@ namespace git
 
         ~StrArray()
         {
-            git_strarray_free(&str_array_);
+            git_strarray_dispose(&str_array_);
         }
 
     private:
