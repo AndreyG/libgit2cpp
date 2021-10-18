@@ -3,14 +3,14 @@
 namespace git
 {
     Revspec::Revspec(git_object * single, Repository const & repo)
-        : flags_(GIT_REVPARSE_SINGLE)
+        : flags_(GIT_REVSPEC_SINGLE)
         , revspec_(single, repo)
     {
     }
 
     Revspec::Revspec(git_revspec const & revspec, Repository const & repo)
         : flags_(revspec.flags)
-        , revspec_((revspec.flags & GIT_REVPARSE_SINGLE)
+        , revspec_((revspec.flags & GIT_REVSPEC_SINGLE)
                        ? Range(revspec.from, repo)
                        : Range(revspec, repo))
     {
@@ -18,7 +18,7 @@ namespace git
 
     Object * Revspec::single()
     {
-        if (flags_ & GIT_REVPARSE_SINGLE)
+        if (flags_ & GIT_REVSPEC_SINGLE)
             return &revspec_.from;
         else
             return nullptr;
@@ -26,7 +26,7 @@ namespace git
 
     Revspec::Range const * Revspec::range() const
     {
-        if (flags_ & GIT_REVPARSE_SINGLE)
+        if (flags_ & GIT_REVSPEC_SINGLE)
             return nullptr;
         else
             return &revspec_;

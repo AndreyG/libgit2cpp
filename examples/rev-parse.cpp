@@ -43,7 +43,7 @@ void parse_revision(parse_state & ps, const char * revstr)
         auto const & range = *rs.range();
         std::cout << id_to_str(range.to.id()) << std::endl;
 
-        if ((rs.flags() & GIT_REVPARSE_MERGE_BASE) != 0)
+        if ((rs.flags() & GIT_REVSPEC_MERGE_BASE) != 0)
         {
             git_oid base = ps.repo->merge_base(range);
             std::cout << id_to_str(base) << std::endl;

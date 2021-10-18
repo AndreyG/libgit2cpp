@@ -118,7 +118,7 @@ void add_revision(struct log_state * s, const char * revstr)
         git::Revspec::Range const & range = *revs.range();
         push_rev(s, range.to, hide);
 
-        if ((revs.flags() & GIT_REVPARSE_MERGE_BASE) != 0)
+        if ((revs.flags() & GIT_REVSPEC_MERGE_BASE) != 0)
         {
             git_oid base = s->repo->merge_base(range);
             push_rev(s, s->repo->commit_lookup(base), hide);

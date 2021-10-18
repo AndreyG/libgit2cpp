@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     {
         auto revspec = repo.revparse(o.commitspec);
 
-        if (revspec.flags() & GIT_REVPARSE_SINGLE)
+        if (revspec.flags() & GIT_REVSPEC_SINGLE)
         {
             blameopts.newest_commit = revspec.single()->id();
         }

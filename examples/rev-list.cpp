@@ -28,7 +28,7 @@ void push_range(Repository const & repo, RevWalker const & walk, const char * ra
 {
     auto revspec = repo.revparse(range);
 
-    if (revspec.flags() & GIT_REVPARSE_MERGE_BASE)
+    if (revspec.flags() & GIT_REVSPEC_MERGE_BASE)
     {
         /* TODO: support "<commit>...<commit>" */
         throw std::runtime_error("unsupported operation");
