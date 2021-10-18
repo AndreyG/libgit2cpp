@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
      * Get the raw data inside the blob for output. We use the
      * `commitish:path/to/file.txt` format to find it.
      */
-    std::string spec = git_oid_iszero(&blameopts.newest_commit)
+    std::string spec = git_oid_is_zero(&blameopts.newest_commit)
             ? "HEAD"
             : git::id_to_str(blameopts.newest_commit);
     spec += ":";
