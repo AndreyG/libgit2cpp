@@ -16,6 +16,10 @@ namespace git
 
         struct FetchCallbacks
         {
+        protected:
+            ~FetchCallbacks() = default;
+
+        public:
             virtual void update_tips(char const * refname, git_oid const & a, git_oid const & b) {}
             virtual void sideband_progress(char const * str, int len) {}
             virtual void transfer_progress(git_indexer_progress const &) {}

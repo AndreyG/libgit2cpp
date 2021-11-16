@@ -75,6 +75,7 @@ if(BUILD_LIBGIT2CPP_EXAMPLES)
     checkout
     ls-files
     blame
+    clone
   )
   
   foreach (example ${examples})

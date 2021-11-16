@@ -22,6 +22,7 @@
 #include "internal/optional.h"
 
 #include <string>
+#include <variant>
 #include <vector>
 
 struct git_blame_options;
@@ -32,6 +33,16 @@ namespace git
     {};
     struct missing_head_error
     {};
+
+    struct repository_clone_error
+    {
+        struct detailed_info
+        {
+            char const* message;
+            int klass;
+        };
+        std::variant<detailed_info, int> data;
+    };
 
     enum class branch_type
     {
@@ -158,11 +169,15 @@ namespace git
         Repository(const char * dir, init_tag, git_repository_init_options opts);
         Repository(std::string const & dir, init_tag);
 
+        static Repository clone(const char * url, const char* path, git_checkout_options const &, Remote::FetchCallbacks &);
+
         static internal::optional<std::string> discover(const char * start_path);
 
     private:
         struct Destroy { void operator() (git_repository *) const; };
         std::unique_ptr<git_repository, Destroy> repo_;
+
+        explicit Repository(git_repository*);
     };
 
     Object revparse_single(Repository const & repo, const char * spec);

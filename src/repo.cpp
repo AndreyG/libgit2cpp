@@ -1,5 +1,7 @@
 #include "git2cpp/repo.h"
 
+#include "git2/clone.h"
+
 #include "git2cpp/annotated_commit.h"
 #include "git2cpp/error.h"
 #include "git2cpp/internal/optional.h"
@@ -21,6 +23,11 @@
 namespace git
 {
     const Repository::init_tag Repository::init;
+
+    Repository::Repository(git_repository * repo)
+        : repo_(repo)
+    {
+    }
 
     Repository::Repository(const char * dir)
     {
@@ -53,6 +60,22 @@ namespace git
         if (git_repository_init_ext(&repo, dir, &opts) < 0)
             throw repository_init_error(dir);
         repo_.reset(repo);
+    }
+
+    git_fetch_options fetch_options_from_callbacks(Remote::FetchCallbacks &);
+
+    Repository Repository::clone(const char * url, const char* path, git_checkout_options const & checkout_opts, Remote::FetchCallbacks & fetch_callbacks)
+    {
+        const git_clone_options clone_opts = { GIT_CLONE_OPTIONS_VERSION, checkout_opts, fetch_options_from_callbacks(fetch_callbacks) };
+        git_repository *cloned_repo = nullptr;
+        if (auto error = git_clone(&cloned_repo, url, path, &clone_opts))
+        {
+            if (auto err = git_error_last())
+                throw repository_clone_error{ repository_clone_error::detailed_info{ err->message, err->klass } };
+            else
+                throw repository_clone_error{ error };
+        }
+        return Repository(cloned_repo);
     }
 
     bool Repository::is_bare() const

@@ -14,8 +14,10 @@ namespace git
         return git_remote_pushurl(remote_.get());
     }
 
-    void Remote::fetch(FetchCallbacks & callbacks, char const * reflog_message)
+    git_fetch_options fetch_options_from_callbacks(Remote::FetchCallbacks & callbacks)
     {
+        using FetchCallbacks = Remote::FetchCallbacks;
+
         git_fetch_options opts = GIT_FETCH_OPTIONS_INIT;
         opts.callbacks.payload = &callbacks;
 
@@ -46,6 +48,12 @@ namespace git
             *out = cred;
             return 0;
         };
+        return opts;
+    }
+
+    void Remote::fetch(FetchCallbacks & callbacks, char const * reflog_message)
+    {
+        const auto opts = fetch_options_from_callbacks(callbacks);
         git_remote_fetch(remote_.get(), nullptr, &opts, reflog_message);
     }
 
