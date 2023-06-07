@@ -100,7 +100,7 @@ namespace git
 
     Buffer Diff::Stats::to_buf(diff::stats::format::type format, size_t width) const
     {
-        git_buf buf = GIT_BUF_INIT_CONST(nullptr, 0);
+        git_buf buf = GIT_BUF_INIT;
         if (git_diff_stats_to_buf(&buf, stats_.get(), git_diff_stats_format_t(format.value()), width))
             throw error_t("git_diff_stats_to_buf fail");
         else

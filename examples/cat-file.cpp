@@ -64,7 +64,7 @@ void show_blob(git::Blob const & blob)
 
 void show_tree(git::Tree const & tree)
 {
-    char oidstr[GIT_OID_HEXSZ + 1];
+    char oidstr[GIT_OID_SHA1_HEXSIZE + 1];
 
     for (size_t i = 0, n = tree.entrycount(); i < n; ++i)
     {
@@ -81,7 +81,7 @@ void show_tree(git::Tree const & tree)
 
 void show_commit(git::Commit const & commit)
 {
-    char oidstr[GIT_OID_HEXSZ + 1];
+    char oidstr[GIT_OID_SHA1_HEXSIZE + 1];
 
     git_oid_tostr(oidstr, sizeof(oidstr), &commit.tree_id());
     printf("tree %s\n", oidstr);
@@ -127,7 +127,7 @@ int main(int argc, char * argv[])
     const char *dir = ".", *rev = nullptr;
     int i, verbose = 0;
     Action action = Action::NONE;
-    char oidstr[GIT_OID_HEXSZ + 1];
+    char oidstr[GIT_OID_SHA1_HEXSIZE + 1];
 
     for (i = 1; i < argc; ++i)
     {

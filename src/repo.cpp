@@ -594,7 +594,7 @@ namespace git
 
     internal::optional<std::string> Repository::discover(const char * start_path)
     {
-        git_buf buf = GIT_BUF_INIT_CONST(nullptr, 0);
+        git_buf buf = GIT_BUF_INIT;
         if (git_repository_discover(&buf, start_path, 0, nullptr))
             return internal::none;
         return std::string(buf.ptr, buf.size);
