@@ -1,5 +1,6 @@
-project (libgit2cpp)
 cmake_minimum_required(VERSION 3.5.1)
+
+project (libgit2cpp)
 
 # Build options
 OPTION(USE_BOOST "Enable use of boost header libraries" OFF)
@@ -77,14 +78,14 @@ if(BUILD_LIBGIT2CPP_EXAMPLES)
     blame
     clone
   )
-  
+
   foreach (example ${examples})
     add_executable("${example}-cpp" examples/${example}.cpp)
     target_link_libraries("${example}-cpp" git2cpp)
   endforeach(example)
-  
+
   add_executable(commit-graph-generator examples/commit-graph-generator.cpp)
   target_link_libraries(commit-graph-generator git2cpp)
-  
+
   file(COPY test.sh DESTINATION . FILE_PERMISSIONS ${EXE_PERM})
 endif()
