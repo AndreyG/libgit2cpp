@@ -46,9 +46,10 @@ if (BUNDLE_LIBGIT2)
   target_include_directories(git2cpp
     PUBLIC libs/libgit2/include
   )
+  target_link_libraries(git2cpp libgit2package)
+else()
+  target_link_libraries(git2cpp LibGit2::LibGit2)
 endif()
-
-target_link_libraries(git2cpp git2)
 
 set_target_properties(git2cpp PROPERTIES
   CXX_STANDARD 17
