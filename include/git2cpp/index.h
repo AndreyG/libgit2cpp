@@ -4,6 +4,7 @@
 
 #include <functional>
 #include <memory>
+#include <string>
 
 struct git_index;
 struct git_repository;
