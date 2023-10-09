@@ -90,3 +90,5 @@ if(BUILD_LIBGIT2CPP_EXAMPLES)
 
   file(COPY test.sh DESTINATION . FILE_PERMISSIONS ${EXE_PERM})
 endif()
+
+include(cmake/InstallRules.cmake)
