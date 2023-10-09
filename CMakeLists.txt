@@ -49,7 +49,9 @@ if (BUNDLE_LIBGIT2)
   )
   target_link_libraries(git2cpp libgit2package)
 else()
-  target_link_libraries(git2cpp LibGit2::LibGit2)
+  find_package(PkgConfig REQUIRED)
+  pkg_search_module(LibGit2 REQUIRED libgit2)
+  target_link_libraries(git2cpp ${LibGit2_LIBRARIES})
 endif()
 
 set_target_properties(git2cpp PROPERTIES
