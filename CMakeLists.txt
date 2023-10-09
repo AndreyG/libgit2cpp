@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.5.1)
 
+include(cmake/Version.cmake)
+
 project (libgit2cpp)
 
 # Build options
