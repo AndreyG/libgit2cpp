@@ -3,8 +3,6 @@ set(CMAKE_INSTALL_LIBDIR lib CACHE PATH "")
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 
-set(package git2cpp)
-
 install(
         DIRECTORY include/
         DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
@@ -12,14 +10,14 @@ install(
 )
 
 install(
-        TARGETS git2cpp
+        TARGETS ${package}
         EXPORT git2cppTargets
         INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
 )
 
 if (NOT DEFINED VERSION)
     set(VERSION "1.0.0")
-endif()
+endif ()
 
 write_basic_package_version_file(
         "${package}ConfigVersion.cmake"
@@ -55,6 +53,6 @@ install(
         COMPONENT git2cpp_Development
 )
 
-if(PROJECT_IS_TOP_LEVEL)
+if (PROJECT_IS_TOP_LEVEL)
     include(CPack)
-endif()
+endif ()
