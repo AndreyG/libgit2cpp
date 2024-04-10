@@ -23,7 +23,7 @@ function test()
 {
     local test_name="$1"
     echo -e "**** test $test_name *********************************\n\n"
-    local bin="$CWD/$test_name"
+    local bin="$CWD/examples/$test_name"
     
     shift
     
@@ -41,7 +41,7 @@ pushd $REPO
 
 test branch-cpp
 test diff-cpp
-test commit-graph-generator . "$CWD/commit-graph.dot"
+test commit-graph-generator-cpp . "$CWD/commit-graph.dot"
 test log-cpp
 test rev-list-cpp --topo-order HEAD
 test rev-parse-cpp HEAD
