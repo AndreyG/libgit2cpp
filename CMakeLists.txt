@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5.1)
+cmake_minimum_required(VERSION 3.6)
 
 project(libgit2cpp LANGUAGES C CXX)
 set(package git2cpp)
@@ -56,8 +56,8 @@ if (BUNDLE_LIBGIT2)
     target_link_libraries(${package} libgit2package)
 else ()
     find_package(PkgConfig REQUIRED)
-    pkg_search_module(LibGit2 REQUIRED libgit2)
-    target_link_libraries(${package} ${LibGit2_LIBRARIES})
+    pkg_search_module(LibGit2 REQUIRED IMPORTED_TARGET libgit2)
+    target_link_libraries(${package} PkgConfig::LibGit2)
 endif ()
 
 include(InstallRules)
