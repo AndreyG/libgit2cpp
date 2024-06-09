@@ -6,6 +6,8 @@
 #include "git2cpp/initializer.h"
 #include "git2cpp/repo.h"
 
+#include <algorithm>
+
 enum print_options
 {
     SKIP = 1,
